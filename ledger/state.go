@@ -3,7 +3,7 @@ package ledger
 import (
 	"fmt"
 	"github.com/donovanhide/ripple/data"
-	"github.com/donovanhide/ripple/data/storage"
+	"github.com/donovanhide/ripple/storage"
 	"io"
 	"strconv"
 	"strings"

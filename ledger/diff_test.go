@@ -3,7 +3,7 @@ package ledger
 import (
 	"bytes"
 	"github.com/donovanhide/ripple/data"
-	"github.com/donovanhide/ripple/data/storage"
+	"github.com/donovanhide/ripple/storage"
 	"testing"
 )
 
