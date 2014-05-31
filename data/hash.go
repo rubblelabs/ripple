@@ -106,6 +106,11 @@ func (a Account) MarshalText() ([]byte, error) {
 	}
 }
 
+func (a Account) String() string {
+	b, _ := a.MarshalText()
+	return string(b)
+}
+
 func (a Account) IsZero() bool {
 	return a == zeroAccount
 }

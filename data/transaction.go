@@ -79,11 +79,6 @@ type OfferCancel struct {
 	OfferSequence *uint32
 }
 
-type Sign struct {
-	TxBase
-	Approval uint8
-}
-
 type TrustSet struct {
 	TxBase
 	LimitAmount *Amount `json:",omitempty"`

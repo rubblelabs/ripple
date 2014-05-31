@@ -11,6 +11,7 @@ import (
 type Manager struct {
 	missing  chan chan *data.Work
 	incoming chan []data.Hashable
+	current  chan uint32
 	db       storage.DB
 	ledgers  *data.LedgerSet
 	started  time.Time
@@ -27,6 +28,7 @@ func NewManager(db storage.DB) (*Manager, error) {
 	return &Manager{
 		missing:  make(chan chan *data.Work),
 		incoming: make(chan []data.Hashable, 1000),
+		current:  make(chan uint32),
 		db:       db,
 		ledgers:  ledgers,
 		stats:    make(map[string]uint64),
@@ -40,8 +42,14 @@ func (m *Manager) Start() {
 		select {
 		case <-tick.C:
 			glog.Infoln("Manager:", m.String())
+		case current := <-m.current:
+			if current > m.ledgers.Max() {
+				m.ledgers.Extend(current)
+				glog.Infoln(current, m.ledgers.Max())
+			}
 		case in := <-m.incoming:
 			for _, item := range in {
+				fmt.Println(item.String())
 				switch v := item.(type) {
 				case *data.Ledger:
 					m.stats["ledgers"]++
@@ -58,6 +66,7 @@ func (m *Manager) Start() {
 				}
 			}
 		case missing := <-m.missing:
+			continue
 			work := <-missing
 			m.ledgers.Extend(work.End)
 			work.MissingLedgers = m.ledgers.TakeMiddle(work.LedgerRange)
@@ -66,8 +75,14 @@ func (m *Manager) Start() {
 	}
 }
 
-func (m *Manager) Current(uint32)         {}
-func (m *Manager) Submit([]data.Hashable) {}
+func (m *Manager) Current(current uint32) {
+	m.current <- current
+}
+
+func (m *Manager) Submit(items []data.Hashable) {
+	m.incoming <- items
+}
+
 func (m *Manager) Missing(*data.LedgerRange) *data.Work {
 	c := make(chan *data.Work)
 	m.missing <- c

@@ -76,8 +76,7 @@ func (mem *MemoryDB) Insert(item data.Hashable) error {
 }
 
 func (mem *MemoryDB) Ledger() (*data.LedgerSet, error) {
-	//TODO implement
-	return data.NewLedgerSet(32570, 1000000), nil
+	return data.NewLedgerSet(32570, 32570), nil
 }
 
 func (mem *MemoryDB) Stats() string {

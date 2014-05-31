@@ -39,10 +39,7 @@ func servePeers(m *peers.Manager) http.HandlerFunc {
 func main() {
 	flag.Parse()
 	go influxdb.Influxdb(metrics.DefaultRegistry, time.Second*5, &influxdb.Config{
-		Host:     "192.168.0.109:8086",
 		Database: "ripple",
-		Username: "root",
-		Password: "root",
 	})
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	kill := make(chan os.Signal, 1)

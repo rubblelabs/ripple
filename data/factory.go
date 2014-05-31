@@ -25,7 +25,6 @@ const (
 	SET_REGULAR_KEY TransactionType = 5
 	OFFER_CREATE    TransactionType = 7
 	OFFER_CANCEL    TransactionType = 8
-	SIGN            TransactionType = 9
 	TRUST_SET       TransactionType = 20
 	AMENDMENT       TransactionType = 100
 	SET_FEE         TransactionType = 101
@@ -61,7 +60,6 @@ var TxFactory = [...]func() Transaction{
 	SET_REGULAR_KEY: func() Transaction { return &SetRegularKey{TxBase: TxBase{TransactionType: SET_REGULAR_KEY}} },
 	OFFER_CREATE:    func() Transaction { return &OfferCreate{TxBase: TxBase{TransactionType: OFFER_CREATE}} },
 	OFFER_CANCEL:    func() Transaction { return &OfferCancel{TxBase: TxBase{TransactionType: OFFER_CANCEL}} },
-	SIGN:            func() Transaction { return &Sign{TxBase: TxBase{TransactionType: SIGN}} },
 	TRUST_SET:       func() Transaction { return &TrustSet{TxBase: TxBase{TransactionType: TRUST_SET}} },
 	AMENDMENT:       func() Transaction { return &Amendment{TxBase: TxBase{TransactionType: AMENDMENT}} },
 	SET_FEE:         func() Transaction { return &SetFee{TxBase: TxBase{TransactionType: SET_FEE}} },
@@ -93,7 +91,6 @@ var txNames = [...]string{
 	SET_REGULAR_KEY: "SetRegularKey",
 	OFFER_CREATE:    "OfferCreate",
 	OFFER_CANCEL:    "OfferCancel",
-	SIGN:            "Sign",
 	TRUST_SET:       "TrustSet",
 	AMENDMENT:       "Amendment",
 	SET_FEE:         "SetFee",
@@ -105,7 +102,6 @@ var txTypes = map[string]TransactionType{
 	"SetRegularKey": SET_REGULAR_KEY,
 	"OfferCreate":   OFFER_CREATE,
 	"OfferCancel":   OFFER_CANCEL,
-	"Sign":          SIGN,
 	"TrustSet":      TRUST_SET,
 	"Amendment":     AMENDMENT,
 	"SetFee":        SET_FEE,

@@ -106,6 +106,12 @@ func (p *Peer) handle(m *Manager) {
 				ready.Do(func() {
 					go p.fillQueue()
 				})
+			case *protocol.TMProposeSet:
+				go p.handleProposeSet(msg)
+			case *protocol.TMValidation:
+				go p.handleValidation(msg)
+			case *protocol.TMTransaction:
+				go p.handleTransaction(msg)
 			case *protocol.TMLedgerData:
 				go p.handleLedgerData(msg)
 			case *protocol.TMGetObjectByHash:
@@ -201,6 +207,23 @@ func (p *Peer) handleHello(m *Manager, hello *protocol.Hello) {
 	}
 }
 
+func (p *Peer) handleProposeSet(proposeSet *protocol.TMProposeSet) {
+
+}
+
+func (p *Peer) handleValidation(validation *protocol.TMValidation) {
+
+}
+
+func (p *Peer) handleTransaction(tx *protocol.TMTransaction) {
+	node, err := data.NewDecoder(bytes.NewReader(tx.GetRawTransaction())).Transaction()
+	if err != nil {
+		glog.Errorln(err.Error())
+		return
+	}
+	p.sync.Submit([]data.Hashable{node})
+}
+
 func (p *Peer) handleProofOfWork(pow *protocol.TMProofWork) {
 	glog.Infoln("POW!!!", pow)
 	// work := crypto.NewProofOfWork(pow.Challenge, pow.Target, pow.GetIterations())
@@ -212,10 +235,11 @@ func (p *Peer) handleProofOfWork(pow *protocol.TMProofWork) {
 
 func (p *Peer) handleStatusChange(state *protocol.TMStatusChange) {
 	p.UpdateState(state)
+	p.sync.Current(state.GetLedgerSeq())
 }
 
 func (p *Peer) handleGetObjectByHashReply(reply *protocol.TMGetObjectByHash) {
-	// var nodes []*data.InnerNode
+	var nodes []data.Hashable
 	typ := data.NT_ACCOUNT_NODE
 	if reply.GetType() == protocol.TMGetObjectByHash_otTRANSACTION_NODE {
 		typ = data.NT_TRANSACTION_NODE
@@ -228,6 +252,7 @@ func (p *Peer) handleGetObjectByHashReply(reply *protocol.TMGetObjectByHash) {
 			return
 		}
 		glog.Infoln(node)
+		nodes = append(nodes, node)
 		// if tx, ok := node.Value.(data.Transaction); ok {
 		// 	tx.SetLedgerSequence(reply.GetSeq())
 		// 	var hash data.Hash256
@@ -239,6 +264,7 @@ func (p *Peer) handleGetObjectByHashReply(reply *protocol.TMGetObjectByHash) {
 		// 	nodes = append(nodes, node.InnerNode)
 		// }
 	}
+	p.sync.Submit(nodes)
 	// if len(nodes) > 0 {
 	// 	p.synchronous <- protocol.NewGetObjects(reply.GetSeq(), nodes)
 	// }
@@ -256,6 +282,7 @@ func (p *Peer) handleLedgerData(ledgerData *protocol.TMLedgerData) {
 		return
 	}
 	glog.Infoln(ledger)
+	p.sync.Submit([]data.Hashable{ledger})
 	// var hash data.Hash256
 	// copy(hash[:], ledgerData.GetLedgerHash())
 	// ledger.SetHash(&hash)
