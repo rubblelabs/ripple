@@ -8,14 +8,9 @@ import (
 	"time"
 )
 
-type MissingLedgers struct {
-	Request  *data.LedgerRange
-	Response chan data.LedgerSlice
-}
-
 type Manager struct {
-	Missing  chan *MissingLedgers
-	Incoming chan interface{}
+	missing  chan chan *data.Work
+	incoming chan []data.Hashable
 	db       storage.DB
 	ledgers  *data.LedgerSet
 	started  time.Time
@@ -30,8 +25,8 @@ func NewManager(db storage.DB) (*Manager, error) {
 	}
 	glog.Infof("Manager: Created Ledger in %0.4f secs", time.Now().Sub(start).Seconds())
 	return &Manager{
-		Missing:  make(chan *MissingLedgers),
-		Incoming: make(chan interface{}, 1000),
+		missing:  make(chan chan *data.Work),
+		incoming: make(chan []data.Hashable, 1000),
 		db:       db,
 		ledgers:  ledgers,
 		stats:    make(map[string]uint64),
@@ -45,27 +40,40 @@ func (m *Manager) Start() {
 		select {
 		case <-tick.C:
 			glog.Infoln("Manager:", m.String())
-		case in := <-m.Incoming:
-			switch v := in.(type) {
-			case *data.Ledger:
-				m.stats["ledgers"]++
-				wait := m.ledgers.Set(v.LedgerSequence)
-				glog.V(2).Infof("Manager: Received: %d %0.04f/secs ", v.LedgerSequence, wait.Seconds())
-				if err := m.db.Insert(v); err != nil {
-					glog.Errorln("Manager: Ledger Insert:", err.Error())
-				}
-			case data.Transaction:
-				m.stats["transactions"]++
-				if err := m.db.Insert(v); err != nil {
-					glog.Errorln("Manager: Transaction Insert:", err.Error())
+		case in := <-m.incoming:
+			for _, item := range in {
+				switch v := item.(type) {
+				case *data.Ledger:
+					m.stats["ledgers"]++
+					wait := m.ledgers.Set(v.LedgerSequence)
+					glog.V(2).Infof("Manager: Received: %d %0.04f/secs ", v.LedgerSequence, wait.Seconds())
+					if err := m.db.Insert(v); err != nil {
+						glog.Errorln("Manager: Ledger Insert:", err.Error())
+					}
+				case data.Transaction:
+					m.stats["transactions"]++
+					if err := m.db.Insert(v); err != nil {
+						glog.Errorln("Manager: Transaction Insert:", err.Error())
+					}
 				}
 			}
-		case missing := <-m.Missing:
-			m.ledgers.Extend(missing.Request.End)
-			missing.Response <- m.ledgers.TakeMiddle(missing.Request)
+		case missing := <-m.missing:
+			work := <-missing
+			m.ledgers.Extend(work.End)
+			work.MissingLedgers = m.ledgers.TakeMiddle(work.LedgerRange)
+			missing <- work
 		}
 	}
 }
+
+func (m *Manager) Current(uint32)         {}
+func (m *Manager) Submit([]data.Hashable) {}
+func (m *Manager) Missing(*data.LedgerRange) *data.Work {
+	c := make(chan *data.Work)
+	m.missing <- c
+	return <-c
+}
+func (m *Manager) Copy() *RadixMap { return nil }
 
 func (m *Manager) String() string {
 	diff := time.Now().Sub(m.started).Seconds()

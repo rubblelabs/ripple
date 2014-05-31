@@ -4,8 +4,6 @@ import (
 	"code.google.com/p/goprotobuf/proto"
 	"encoding/binary"
 	"fmt"
-	"github.com/conformal/btcec"
-	"github.com/donovanhide/ripple/crypto"
 	"github.com/donovanhide/ripple/data"
 	"net"
 )
@@ -51,8 +49,8 @@ func NewGetLedgerTransactions(sequence uint32, nodeids [][]byte) *TMGetLedger {
 func NewGetObjects(sequence uint32, nodes []*data.InnerNode) *TMGetObjectByHash {
 	var objects []*TMIndexedObject
 	for _, node := range nodes {
-		for _, hash := range node.Hashes() {
-			objects = append(objects, &TMIndexedObject{Hash: hash})
+		for _, hash := range node.Children {
+			objects = append(objects, &TMIndexedObject{Hash: hash.Bytes()})
 		}
 	}
 	return &TMGetObjectByHash{
@@ -92,58 +90,18 @@ type Hello struct {
 	*TMHello
 	Version    string
 	MinVersion string
-	PublicKey  []byte
-	Signature  []byte
 }
 
 func (m *TMHello) Extend() (ExtendedMessage, error) {
-	key, err := crypto.ParsePublicKeyFromHash(m.NodePublic)
-	if err != nil {
-		return nil, err
-	}
-	sig, err := crypto.ParseSignature(m.NodeProof)
-	if err != nil {
-		return nil, err
-	}
 	return &Hello{
 		TMHello:    m,
 		Version:    fmt.Sprintf("%d.%d", m.GetProtoVersion()>>16, m.GetProtoVersion()&0xFFFF),
 		MinVersion: fmt.Sprintf("%d.%d", m.GetProtoVersionMin()>>16, m.GetProtoVersionMin()&0xFFFF),
-		PublicKey:  key,
-		Signature:  sig,
 	}, nil
 }
 
-// TMProposeSet extension
-type ProposeSet struct {
-	*TMProposeSet
-	PublicKey  *btcec.PublicKey
-	Signature  *crypto.Signature
-	NodePublic crypto.Hash
-}
-
-func (m *TMProposeSet) Extend() (ExtendedMessage, error) {
-	key, err := crypto.ParsePublicKey(m.NodePubKey)
-	if err != nil {
-		return nil, err
-	}
-	public, err := crypto.NewRipplePublicNode(key.SerializeCompressed())
-	if err != nil {
-		return nil, err
-	}
-	sig, err := crypto.ParseSignature(m.Signature)
-	if err != nil {
-		return nil, err
-	}
-	return &ProposeSet{
-		TMProposeSet: m,
-		PublicKey:    key,
-		Signature:    sig,
-		NodePublic:   public,
-	}, nil
-}
-
-//
+// Untouched
+func (m *TMProposeSet) Extend() (ExtendedMessage, error)         { return m, nil }
 func (m *TMProofWork) Extend() (ExtendedMessage, error)          { return m, nil }
 func (m *TMCluster) Extend() (ExtendedMessage, error)            { return m, nil }
 func (m *TMPeers) Extend() (ExtendedMessage, error)              { return m, nil }

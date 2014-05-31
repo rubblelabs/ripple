@@ -24,12 +24,12 @@ func (m *Ping) Log() string {
 	return fmt.Sprintf("Ping: %s Seq: %d Time: %s/%s ", m.GetType(), m.GetSeq(), netTime, pingTime)
 }
 
-func (m *ProposeSet) Log() string {
+func (m *TMProposeSet) Log() string {
 	buf := new(bytes.Buffer)
 	closeTime := data.NewRippleTime(m.GetCloseTime())
 	fmt.Fprintf(buf, "Proposal: %d Closed: %s Hash: %s ", m.GetProposeSeq(), closeTime.Short(), short(b2h(m.GetCurrentTxHash())))
-	fmt.Fprintf(buf, "Sig: %s ", short(b2h(m.Signature.Serialize())))
-	fmt.Fprintf(buf, "Node: %v ", short(m.NodePublic.ToJSON()))
+	fmt.Fprintf(buf, "Sig: %s ", short(b2h(m.GetSignature())))
+	// fmt.Fprintf(buf, "Node: %v ", short(crypto.new m.NodePublic.ToJSON()))
 	// fmt.Fprintf(buf, "Checked: %t", m.GetCheckedSignature())
 	for _, tx := range m.GetAddedTransactions() {
 		fmt.Fprintf(buf, "\nAdded: %s", short(b2h(tx)))

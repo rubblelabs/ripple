@@ -2,41 +2,57 @@ package peers
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/donovanhide/ripple/crypto"
 	"github.com/donovanhide/ripple/ledger"
 	"github.com/golang/glog"
 	"net"
+	"strings"
 )
 
+type Config struct {
+	Key      crypto.Key
+	Name     string
+	Port     string
+	Sync     ledger.Sync
+	MaxPeers int
+	Trusted  string
+}
+
 type Manager struct {
-	Name      string
+	*Config
 	PublicKey crypto.Hash
-	Port      string
 	Quit      chan bool
 	Status    chan chan []byte
 	peers     chan *PeerConnection
 	connected chan *Peer
-	key       *crypto.RootDeterministicKey
 }
 
-func NewManager(key *crypto.RootDeterministicKey, name string, port string) (*Manager, error) {
-	public, err := key.PublicNodeKey()
-	if err != nil {
-		return nil, err
-	}
-	return &Manager{
-		Name:      name,
-		Port:      port,
-		PublicKey: public,
+func NewManager(config *Config) (*Manager, error) {
+	mgr := &Manager{
+		Config:    config,
 		Status:    make(chan chan []byte),
 		Quit:      make(chan bool),
 		peers:     make(chan *PeerConnection, 10),
 		connected: make(chan *Peer, 10),
-		key:       key,
-	}, nil
+	}
+	var err error
+	mgr.PublicKey, err = crypto.NewRipplePublicNode(mgr.Key.PublicCompressed())
+	if err != nil {
+		return nil, err
+	}
+	go mgr.run()
+	for _, address := range strings.Split(mgr.Trusted, ",") {
+		host, port, err := net.SplitHostPort(address)
+		if err != nil {
+			return nil, fmt.Errorf("Bad trusted peer: %s Part: %s", config.Trusted, address)
+		}
+		mgr.AddPeer(host, port, true, nil)
+	}
+	return mgr, nil
 }
 
-func (m *Manager) Start(l *ledger.Manager) {
+func (m *Manager) run() {
 	seen := make(map[string]struct{})
 	peers := make([]*Peer, 0)
 	go Listen(m, m.Port)
@@ -57,7 +73,9 @@ func (m *Manager) Start(l *ledger.Manager) {
 		case c := <-m.peers:
 			if _, ok := seen[c.String()]; !ok {
 				seen[c.String()] = struct{}{}
-				go m.connectPeer(c, l)
+				if len(peers) < m.MaxPeers {
+					go m.connectPeer(c)
+				}
 			}
 		case peer := <-m.connected:
 			peers = append(peers, peer)
@@ -67,11 +85,11 @@ func (m *Manager) Start(l *ledger.Manager) {
 	}
 }
 
-func (m *Manager) connectPeer(c *PeerConnection, l *ledger.Manager) {
+func (m *Manager) connectPeer(c *PeerConnection) {
 	glog.Infof("Peer Manager: New Peer: %s ", c.String())
-	peer, err := NewPeer(c)
+	peer, err := NewPeer(c, m.Sync)
 	if err == nil {
-		go peer.handle(m, l)
+		go peer.handle(m)
 		glog.Infof("Peer Manager: New Peer: %s successful connection", c.String())
 	} else {
 		glog.Infof("Peer Manager: New Peer Error: %s", err.Error())

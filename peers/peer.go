@@ -32,14 +32,16 @@ type Peer struct {
 	*PeerStats
 	Outgoing    chan proto.Message
 	synchronous chan proto.Message
+	sync        ledger.Sync
 }
 
-func NewPeer(c *PeerConnection) (*Peer, error) {
+func NewPeer(c *PeerConnection, sync ledger.Sync) (*Peer, error) {
 	peer := &Peer{
 		PeerState:   NewPeerState(c),
 		PeerStats:   NewPeerStats(),
 		Outgoing:    make(chan proto.Message, 10),
 		synchronous: make(chan proto.Message, 100),
+		sync:        sync,
 	}
 	var err error
 	peer.Conn, err = NewConn(c)
@@ -56,7 +58,7 @@ func (p *Peer) GetDump() *Dump {
 	}
 }
 
-func (p *Peer) handle(m *Manager, l *ledger.Manager) {
+func (p *Peer) handle(m *Manager) {
 	var ready sync.Once
 	incoming := make(chan protocol.ExtendedMessage, 10)
 	outgoing := make(chan proto.Message, 10)
@@ -102,13 +104,13 @@ func (p *Peer) handle(m *Manager, l *ledger.Manager) {
 			case *protocol.TMStatusChange:
 				p.handleStatusChange(msg)
 				ready.Do(func() {
-					go p.fillQueue(l)
+					go p.fillQueue()
 				})
 			case *protocol.TMLedgerData:
-				go p.handleLedgerData(msg, l)
+				go p.handleLedgerData(msg)
 			case *protocol.TMGetObjectByHash:
 				if !msg.GetQuery() {
-					go p.handleGetObjectByHashReply(msg, l)
+					go p.handleGetObjectByHashReply(msg)
 				}
 			case *protocol.Ping:
 				if msg.IsPing {
@@ -128,25 +130,21 @@ func (p *Peer) takeSynchronous() proto.Message {
 	}
 }
 
-func (p *Peer) fillQueue(l *ledger.Manager) {
+func (p *Peer) fillQueue() {
 	for {
 		start, end := p.GetLedgerRange()
-		request := &ledger.MissingLedgers{
-			Request: &data.LedgerRange{
-				Start: start,
-				End:   end,
-				Max:   20,
-			},
-			Response: make(chan data.LedgerSlice),
+		r := &data.LedgerRange{
+			Start: start,
+			End:   end,
+			Max:   20,
 		}
-		l.Missing <- request
-		missing := <-request.Response
-		glog.V(1).Infof("%s:Queueing %d-%d %+v", p.String(), start, end, missing)
-		if len(missing) < 2 {
+		work := p.sync.Missing(r)
+		glog.V(1).Infof("%s:Queueing %d-%d %+v", p.String(), start, end, work.MissingLedgers)
+		if len(work.MissingLedgers) < 2 {
 			time.Sleep(5 * time.Second)
 			continue
 		}
-		for _, ledger := range missing {
+		for _, ledger := range work.MissingLedgers {
 			p.synchronous <- protocol.NewGetLedger(ledger)
 		}
 	}
@@ -159,12 +157,24 @@ func (p *Peer) handleHello(m *Manager, hello *protocol.Hello) {
 		p.UpdateStatus(HelloFailed)
 		return
 	}
-	if !hello.Signature.Verify(hello.PublicKey, cookie) {
-		glog.Errorf("%s:Bad signature verification: %X", p.String(), hello.Signature.DER())
+	pubKey, err := crypto.ParsePublicKeyFromHash(hello.GetNodePublic())
+	if err != nil {
+		glog.Errorf("Bad public key: %X", hello.GetNodePublic())
 		p.UpdateStatus(HelloFailed)
 		return
 	}
-	proof, err := crypto.NewSignature(&m.key.PrivateKey, cookie)
+	ok, err := crypto.Verify(pubKey.SerializeUncompressed(), hello.GetNodeProof(), cookie)
+	if !ok {
+		glog.Errorf("%s:Bad signature: %X public key: %X hash: %X", p.String(), hello.GetNodeProof(), hello.GetNodePublic(), cookie)
+		p.UpdateStatus(HelloFailed)
+		return
+	}
+	if err != nil {
+		glog.Errorf("%s:Bad signature verification: %s", p.String(), err.Error())
+		p.UpdateStatus(HelloFailed)
+		return
+	}
+	proof, err := m.Key.Sign(cookie)
 	if err != nil {
 		glog.Errorf("%s:Bad signature creation: %X", p.String(), cookie)
 		p.UpdateStatus(HelloFailed)
@@ -180,7 +190,7 @@ func (p *Peer) handleHello(m *Manager, hello *protocol.Hello) {
 		ProtoVersion:    proto.Uint32(MAJOR_VERSION),
 		ProtoVersionMin: proto.Uint32(MINOR_VERSION),
 		NodePublic:      []byte(m.PublicKey.ToJSON()),
-		NodeProof:       proof.DER(),
+		NodeProof:       proof,
 		Ipv4Port:        proto.Uint32(uint32(port)),
 		NetTime:         proto.Uint64(uint64(data.Now())),
 		NodePrivate:     proto.Bool(true),
@@ -204,46 +214,52 @@ func (p *Peer) handleStatusChange(state *protocol.TMStatusChange) {
 	p.UpdateState(state)
 }
 
-func (p *Peer) handleGetObjectByHashReply(reply *protocol.TMGetObjectByHash, l *ledger.Manager) {
-	var nodes []*encoding.InnerNode
+func (p *Peer) handleGetObjectByHashReply(reply *protocol.TMGetObjectByHash) {
+	// var nodes []*data.InnerNode
+	typ := data.NT_ACCOUNT_NODE
+	if reply.GetType() == protocol.TMGetObjectByHash_otTRANSACTION_NODE {
+		typ = data.NT_TRANSACTION_NODE
+	}
 	for _, obj := range reply.GetObjects() {
 		blob := append(obj.GetData(), obj.GetHash()...)
-		node, err := encoding.ParseWire(blob)
+		node, err := data.NewDecoder(bytes.NewReader(blob)).Wire(typ)
 		if err != nil {
 			glog.Errorf("%s: %s Ledger: %d Blob: %X", p.String(), err.Error(), reply.GetSeq(), blob)
 			return
 		}
-		if tx, ok := node.Value.(data.Transaction); ok {
-			tx.SetLedgerSequence(reply.GetSeq())
-			var hash data.Hash256
-			copy(hash[:], obj.GetData()[len(obj.GetData())-32:])
-			tx.SetHash(&hash)
-			l.Incoming <- tx
-		}
-		if node.InnerNode != nil {
-			nodes = append(nodes, node.InnerNode)
-		}
+		glog.Infoln(node)
+		// if tx, ok := node.Value.(data.Transaction); ok {
+		// 	tx.SetLedgerSequence(reply.GetSeq())
+		// 	var hash data.Hash256
+		// 	copy(hash[:], obj.GetData()[len(obj.GetData())-32:])
+		// 	tx.SetHash(&hash)
+		// 	l.Incoming <- tx
+		// }
+		// if node.InnerNode != nil {
+		// 	nodes = append(nodes, node.InnerNode)
+		// }
 	}
-	if len(nodes) > 0 {
-		p.synchronous <- protocol.NewGetObjects(reply.GetSeq(), nodes)
-	}
+	// if len(nodes) > 0 {
+	// 	p.synchronous <- protocol.NewGetObjects(reply.GetSeq(), nodes)
+	// }
 }
 
-func (p *Peer) handleLedgerData(ledgerData *protocol.TMLedgerData, l *ledger.Manager) {
+func (p *Peer) handleLedgerData(ledgerData *protocol.TMLedgerData) {
 	//msg.AverageLatency = ((msg.AverageLatency * Latency(msg.Successful)) + Latency(m.Time.Sub(msg.Inflight[i].Sent))) / Latency(msg.Successful+1)
 	if ledgerData.GetType() != protocol.TMLedgerInfoType_liBASE {
 		glog.Infof("%s: Ignoring: %s", ledgerData.Log())
 		return
 	}
-	ledger, err := encoding.ParseLedger(bytes.NewReader(ledgerData.Nodes[0].Nodedata))
+	ledger, err := data.NewDecoder(bytes.NewReader(ledgerData.Nodes[0].Nodedata)).Ledger()
 	if err != nil {
 		glog.Errorf("%s: %s", p.String(), err.Error())
 		return
 	}
-	var hash data.Hash256
-	copy(hash[:], ledgerData.GetLedgerHash())
-	ledger.SetHash(&hash)
-	l.Incoming <- ledger
+	glog.Infoln(ledger)
+	// var hash data.Hash256
+	// copy(hash[:], ledgerData.GetLedgerHash())
+	// ledger.SetHash(&hash)
+	// l.Incoming <- ledger
 	// if ledger.TransactionHash.IsZero() {
 	// 	return
 	// }

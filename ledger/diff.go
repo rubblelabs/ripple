@@ -73,7 +73,7 @@ func (ro RadixOperations) Dump(sequence uint32, w io.Writer) error {
 	return nil
 }
 
-func Diff(left, right data.Hash256, db storage.NodeDB) (RadixOperations, error) {
+func Diff(left, right data.Hash256, db storage.DB) (RadixOperations, error) {
 	var ops RadixOperations
 	if err := diff(left, right, db, &ops, 0); err != nil {
 		return nil, err
@@ -81,7 +81,7 @@ func Diff(left, right data.Hash256, db storage.NodeDB) (RadixOperations, error) 
 	return ops, nil
 }
 
-func visitChildren(node data.Hashable, db storage.NodeDB, ops *RadixOperations, depth uint8, action RadixAction) error {
+func visitChildren(node data.Hashable, db storage.DB, ops *RadixOperations, depth uint8, action RadixAction) error {
 	inner, ok := node.(*data.InnerNode)
 	if !ok {
 		return nil
@@ -96,7 +96,7 @@ func visitChildren(node data.Hashable, db storage.NodeDB, ops *RadixOperations, 
 	})
 }
 
-func diff(left, right data.Hash256, db storage.NodeDB, ops *RadixOperations, depth uint8) error {
+func diff(left, right data.Hash256, db storage.DB, ops *RadixOperations, depth uint8) error {
 	var l, r data.Hashable
 	var err error
 	switch {

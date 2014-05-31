@@ -41,7 +41,7 @@ func NewEmptyLedgerState(sequence uint32) *LedgerState {
 	}
 }
 
-func NewLedgerStateFromDB(hash data.Hash256, db storage.NodeDB) (*LedgerState, error) {
+func NewLedgerStateFromDB(hash data.Hash256, db storage.DB) (*LedgerState, error) {
 	node, err := db.Get(hash)
 	if err != nil {
 		return nil, err

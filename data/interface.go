@@ -31,11 +31,3 @@ type Transaction interface {
 	// GetAffectedNodes() []NodeEffect
 	GetBase() *TxBase
 }
-
-type LedgerSync interface {
-	GetMissingLedgers(*LedgerRange) []uint32
-	GetMissingTransactions(*LedgerRange) []Hash256
-	GetMissingTransactionStates(*LedgerRange) []Hash256
-	SubmitLedger(*Ledger)
-	SubmitTransaction(Transaction)
-}

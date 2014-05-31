@@ -14,7 +14,7 @@ type RadixNode struct {
 
 type RadixMap struct {
 	root  data.Hash256
-	db    storage.NodeDB
+	db    storage.DB
 	nodes map[data.Hash256]*RadixNode
 	full  bool
 }
@@ -27,7 +27,7 @@ func NewEmptyRadixMap() *RadixMap {
 	}
 }
 
-func NewRadixMap(root data.Hash256, db storage.NodeDB) *RadixMap {
+func NewRadixMap(root data.Hash256, db storage.DB) *RadixMap {
 	return &RadixMap{
 		root:  root,
 		db:    db,

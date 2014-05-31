@@ -11,7 +11,7 @@ type lookup struct {
 	m      map[interface{}]uint32
 	r      map[uint32]interface{}
 	mu     sync.RWMutex
-	db     DB
+	db     IndexedDB
 	insert string
 }
 
@@ -21,7 +21,7 @@ type LookupItem struct {
 	Human string
 }
 
-func newLookup(get, insert string, db DB, typ reflect.Type) (*lookup, error) {
+func newLookup(get, insert string, db IndexedDB, typ reflect.Type) (*lookup, error) {
 	items, err := db.GetLookups(get)
 	if err != nil {
 		return nil, err
@@ -90,7 +90,7 @@ type AccountLookup struct {
 	*lookup
 }
 
-func NewAddressLookup(db DB) (*AccountLookup, error) {
+func NewAddressLookup(db IndexedDB) (*AccountLookup, error) {
 	lookup, err := newLookup("GetAccounts", "InsertAccount", db, reflect.TypeOf(data.Account{}))
 	if err != nil {
 		return nil, err
@@ -115,7 +115,7 @@ type RegularKeyLookup struct {
 	*lookup
 }
 
-func NewRegularKeyLookup(db DB) (*RegularKeyLookup, error) {
+func NewRegularKeyLookup(db IndexedDB) (*RegularKeyLookup, error) {
 	lookup, err := newLookup("GetRegularKeys", "InsertRegularKey", db, reflect.TypeOf(data.RegularKey{}))
 	if err != nil {
 		return nil, err
@@ -135,7 +135,7 @@ type PublicKeyLookup struct {
 	*lookup
 }
 
-func NewPublicKeyLookup(db DB) (*PublicKeyLookup, error) {
+func NewPublicKeyLookup(db IndexedDB) (*PublicKeyLookup, error) {
 	lookup, err := newLookup("GetPublicKeys", "InsertPublicKey", db, reflect.TypeOf(data.PublicKey{}))
 	if err != nil {
 		return nil, err
@@ -155,7 +155,7 @@ type CurrencyLookup struct {
 	*lookup
 }
 
-func NewCurrencyLookup(db DB) (*CurrencyLookup, error) {
+func NewCurrencyLookup(db IndexedDB) (*CurrencyLookup, error) {
 	lookup, err := newLookup("GetCurrencies", "InsertCurrency", db, reflect.TypeOf(data.Currency{}))
 	if err != nil {
 		return nil, err

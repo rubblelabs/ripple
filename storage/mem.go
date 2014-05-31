@@ -17,10 +17,14 @@ type MemoryDB struct {
 	mu    sync.RWMutex
 }
 
-func NewMemoryDB(path string) (*MemoryDB, error) {
-	mem := &MemoryDB{
+func NewEmptyMemoryDB() *MemoryDB {
+	return &MemoryDB{
 		nodes: make(map[data.Hash256]data.Hashable),
 	}
+}
+
+func NewMemoryDB(path string) (*MemoryDB, error) {
+	mem := NewEmptyMemoryDB()
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -62,6 +66,18 @@ func (mem *MemoryDB) Get(hash data.Hash256) (data.Hashable, error) {
 		return nil, ErrNotFound
 	}
 	return node, nil
+}
+
+func (mem *MemoryDB) Insert(item data.Hashable) error {
+	mem.mu.Lock()
+	mem.nodes[item.Hash()] = item
+	mem.mu.Unlock()
+	return nil
+}
+
+func (mem *MemoryDB) Ledger() (*data.LedgerSet, error) {
+	//TODO implement
+	return data.NewLedgerSet(32570, 1000000), nil
 }
 
 func (mem *MemoryDB) Stats() string {

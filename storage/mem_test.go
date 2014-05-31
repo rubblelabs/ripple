@@ -18,7 +18,7 @@ func TestMemStore(t *testing.T) {
 	checkErr(t, err)
 	n1, err := mem.Get(h1)
 	checkErr(t, err)
-	if n1.InnerNode != nil {
-		t.Log("Expected Inner Node")
+	if _, ok := n1.(data.LedgerEntry); !ok {
+		t.Fatalf("Expected LedgerEntry Got:%+v", n1)
 	}
 }

@@ -20,6 +20,12 @@ type LedgerRange struct {
 	Max   uint32
 }
 
+type Work struct {
+	*LedgerRange
+	MissingLedgers LedgerSlice
+	MissingNodes   []Hash256
+}
+
 type LedgerSet struct {
 	ledgers  *bitset.BitSet
 	start    uint32
