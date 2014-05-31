@@ -13,7 +13,7 @@ func (l *Ledger) String() string {
 }
 
 func (v *Validation) String() string {
-	return format(v, "%d", v.LedgerSequence)
+	return format(v, "%d %d %s %d %s", v.LedgerSequence, v.BaseFee, v.LedgerHash.String(), v.SigningTime, v.SigningPubKey.String())
 }
 
 func (p *Proposal) String() string {

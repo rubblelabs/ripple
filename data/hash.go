@@ -88,6 +88,11 @@ func (p PublicKey) MarshalText() ([]byte, error) {
 	}
 }
 
+func (p PublicKey) String() string {
+	b, _ := p.MarshalText()
+	return string(b)
+}
+
 func (p *PublicKey) Bytes() []byte {
 	if p != nil {
 		return p[:]

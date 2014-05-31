@@ -212,7 +212,12 @@ func (p *Peer) handleProposeSet(proposeSet *protocol.TMProposeSet) {
 }
 
 func (p *Peer) handleValidation(validation *protocol.TMValidation) {
-
+	v, err := data.NewDecoder(bytes.NewReader(validation.GetValidation())).Validation()
+	if err != nil {
+		glog.Errorln(err.Error())
+		return
+	}
+	p.sync.Submit([]data.Hashable{v})
 }
 
 func (p *Peer) handleTransaction(tx *protocol.TMTransaction) {

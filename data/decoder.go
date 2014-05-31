@@ -62,6 +62,15 @@ func (dec *Decoder) Ledger() (*Ledger, error) {
 	return ledger, dec.read(&ledger.LedgerHeader)
 }
 
+func (dec *Decoder) Validation() (*Validation, error) {
+	validation := new(Validation)
+	v := reflect.ValueOf(validation)
+	if err := dec.readObject(&v); err != nil {
+		return nil, err
+	}
+	return validation, nil
+}
+
 func (dec *Decoder) HashPrefix() (HashPrefix, error) {
 	var version HashPrefix
 	return version, dec.read(&version)

@@ -51,6 +51,10 @@ func (m *Manager) Start() {
 			for _, item := range in {
 				fmt.Println(item.String())
 				switch v := item.(type) {
+				case *data.Validation:
+					continue
+				case *data.Proposal:
+					continue
 				case *data.Ledger:
 					m.stats["ledgers"]++
 					wait := m.ledgers.Set(v.LedgerSequence)
