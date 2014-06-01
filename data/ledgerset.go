@@ -63,11 +63,8 @@ func (l *LedgerSet) Count() uint32 {
 }
 
 func (l *LedgerSet) Extend(i uint32) {
-	length := l.ledgers.Len()
-	if uint(i) > length {
-		for j := uint(i); j >= length; j-- {
-			l.ledgers.Set(j)
-		}
+	for j, length := uint(i-1), l.ledgers.Len(); j > length; j-- {
+		l.ledgers.Set(j)
 	}
 }
 
