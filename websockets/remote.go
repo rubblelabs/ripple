@@ -77,7 +77,7 @@ func (r *Remote) Run() {
 					continue
 				}
 				r.Incoming <- cmd
-				return
+				continue
 			}
 			switch response.Type {
 			case "ledgerClosed":
