@@ -69,9 +69,11 @@ func (r *Remote) Run() {
 				glog.Errorln(err.Error())
 				continue
 			}
-			cmd, ok := pending[response.Id]
+
+			// Stream message
+			factory, ok := streamMessageFactory[response.Type]
 			if ok {
-				delete(pending, response.Id)
+				cmd := factory()
 				if err := json.Unmarshal(in, &cmd); err != nil {
 					glog.Errorln(err.Error())
 					continue
@@ -79,10 +81,14 @@ func (r *Remote) Run() {
 				r.Incoming <- cmd
 				continue
 			}
-			switch response.Type {
-			case "ledgerClosed":
-				cmd = &LedgerStream{}
+
+			// Command response message
+			cmd, ok := pending[response.Id]
+			if !ok {
+				glog.Errorf("Unexpected message: %+v", response)
+				continue
 			}
+			delete(pending, response.Id)
 			if err := json.Unmarshal(in, &cmd); err != nil {
 				glog.Errorln(err.Error())
 				continue

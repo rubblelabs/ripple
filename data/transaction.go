@@ -79,6 +79,13 @@ func (t TransactionType) MarshalText() ([]byte, error) {
 	return []byte(txNames[t]), nil
 }
 
+func (v *TransactionType) UnmarshalText(text []byte) (err error) {
+	//FIXME: Currently a NoOp because TransactionType is already correctly
+	//set if unmarshaling into a transaction created with GetTxFactoryByType
+
+	return nil
+}
+
 func (t *TxBase) GetBase() *TxBase {
 	return t
 }

@@ -1,7 +1,6 @@
 package data
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/donovanhide/ripple/crypto"
 	"math/big"
@@ -421,13 +420,6 @@ func (v *Value) String() string {
 	return strings.TrimRight(rat.FloatString(32-length), "0")
 }
 
-func (v *Value) MarshalText() ([]byte, error) {
-	if v.Native {
-		return []byte(strconv.FormatUint(v.Num, 10)), nil
-	}
-	return []byte(v.String()), nil
-}
-
 func (a *Amount) String() string {
 	switch {
 	case a.Native:
@@ -443,16 +435,4 @@ func (a *Amount) String() string {
 func (a *Amount) JSON() string {
 	b, _ := a.MarshalText()
 	return string(b)
-}
-
-func (a *Amount) MarshalJSON() ([]byte, error) {
-	if a.Native {
-		return a.Value.MarshalText()
-	}
-	return json.Marshal(
-		struct {
-			Value    *Value   `json:"value"`
-			Currency Currency `json:"currency"`
-			Issuer   Account  `json:"issuer"`
-		}{a.Value, a.Currency, a.Issuer})
 }

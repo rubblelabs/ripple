@@ -3,7 +3,6 @@ package data
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/donovanhide/ripple/crypto"
 )
 
 type Hash128 [16]byte
@@ -19,16 +18,8 @@ var zero256 Hash256
 var zeroAccount Account
 var zeroPublicKey PublicKey
 
-func (h Hash128) MarshalText() ([]byte, error) {
-	return b2h(h[:]), nil
-}
-
 func (h Hash128) Bytes() []byte {
 	return h[:]
-}
-
-func (h Hash160) MarshalText() ([]byte, error) {
-	return b2h(h[:]), nil
 }
 
 func (h Hash160) Bytes() []byte {
@@ -46,11 +37,6 @@ func NewHash256(s string) (Hash256, error) {
 	}
 	return h, nil
 }
-
-func (h Hash256) MarshalText() ([]byte, error) {
-	return b2h(h[:]), nil
-}
-
 func (h Hash256) IsZero() bool {
 	return h == zero256
 }
@@ -67,10 +53,6 @@ func (h Hash256) TruncatedString(length int) string {
 	return string(b2h(h[:length]))
 }
 
-func (v VariableLength) MarshalText() ([]byte, error) {
-	return b2h(v), nil
-}
-
 func (v *VariableLength) String() string {
 	if v != nil {
 		b, _ := v.MarshalText()
@@ -84,17 +66,6 @@ func (v *VariableLength) Bytes() []byte {
 		return []byte(*v)
 	}
 	return []byte(nil)
-}
-
-func (p PublicKey) MarshalText() ([]byte, error) {
-	if len(p) == 0 {
-		return nil, nil
-	}
-	if pubKey, err := crypto.NewRipplePublicAccount(p[:]); err != nil {
-		return nil, err
-	} else {
-		return []byte(pubKey.ToJSON()), nil
-	}
 }
 
 func (p PublicKey) String() string {
@@ -113,17 +84,6 @@ func (p *PublicKey) Bytes() []byte {
 	return []byte(nil)
 }
 
-func (a Account) MarshalText() ([]byte, error) {
-	if len(a) == 0 {
-		return nil, nil
-	}
-	if address, err := crypto.NewRippleAccount(a[:]); err != nil {
-		return nil, err
-	} else {
-		return []byte(address.ToJSON()), nil
-	}
-}
-
 func (a Account) String() string {
 	b, _ := a.MarshalText()
 	return string(b)
@@ -138,17 +98,6 @@ func (a *Account) Bytes() []byte {
 		return a[:]
 	}
 	return []byte(nil)
-}
-
-func (r RegularKey) MarshalText() ([]byte, error) {
-	if len(r) == 0 {
-		return nil, nil
-	}
-	if address, err := crypto.NewRippleAccount(r[:]); err != nil {
-		return nil, err
-	} else {
-		return []byte(address.ToJSON()), nil
-	}
 }
 
 func (r RegularKey) String() string {
