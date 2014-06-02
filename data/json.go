@@ -90,8 +90,8 @@ func (h Hash256) MarshalText() ([]byte, error) {
 }
 
 // Expects variable length hex
-func (v *VariableLength) UnmarshalText(b []byte) error {
-	_, err := hex.Decode(v.Bytes(), b)
+func (v *VariableLength) UnmarshalText(b []byte) (err error) {
+	*v, err = hex.DecodeString(string(b))
 	return err
 }
 
@@ -148,13 +148,6 @@ func (p PublicKey) MarshalText() ([]byte, error) {
 
 // Expects public key hex
 func (p *PublicKey) UnmarshalText(text []byte) (err error) {
-
-	var b []byte
-
-	if b, err = hex.DecodeString(string(text)); err != nil {
-		return err
-	}
-
-	copy(p[:], b)
-	return nil
+	_, err = hex.Decode((*p)[:], text)
+	return
 }
