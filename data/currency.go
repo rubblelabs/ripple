@@ -47,7 +47,3 @@ func (c Currency) String() string {
 	}
 	return string(c[12:15])
 }
-
-func (c Currency) MarshalText() ([]byte, error) {
-	return []byte(c.String()), nil
-}

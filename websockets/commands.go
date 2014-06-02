@@ -1,7 +1,6 @@
 package websockets
 
 import (
-	"github.com/donovanhide/ripple/data"
 	"sync/atomic"
 )
 
@@ -13,6 +12,7 @@ type Command struct {
 	Response
 }
 
+// Fields that are in every json response
 type Response struct {
 	Id           uint64
 	Type         string
@@ -20,6 +20,13 @@ type Response struct {
 	Error        string
 	ErrorCode    int    `json:"error_code"`
 	ErrorMessage string `json:"error_message"`
+}
+
+func newCommand(command string) Command {
+	return Command{
+		Id:      atomic.AddUint64(&counter, 1),
+		Command: command,
+	}
 }
 
 type LedgerCommand struct {
@@ -42,60 +49,7 @@ type LedgerCommand struct {
 	} `json:"result,omitempty"`
 }
 
-type TransactionCommand struct {
-	Command
-	Transaction string `json:"transaction"`
-	Binary      bool   `json:"binary"`
-	Result      *struct {
-		Response
-		Hash           string `json:"hash"`
-		LedgerSequence uint32 `json:"ledger_index"`
-		Meta           string `json:"meta"`
-		Transaction    string `json:"tx"`
-		Validated      bool   `json:"validated"`
-	} `json:"result,omitempty"`
-}
-
-type StreamCommand struct {
-	Command
-	Streams []string `json:"streams"`
-}
-
-type LedgerStreamCommand struct {
-	StreamCommand
-	Result *struct {
-		Response
-		LedgerStream
-	} `json:"result,omitempty"`
-}
-
-type LedgerStream struct {
-	FeeBase          uint64          `json:"fee_base"`
-	FeeRef           uint64          `json:"fee_ref"`
-	LedgerSequence   uint32          `json:"ledger_index"`
-	LedgerHash       string          `json:"ledger_hash"`
-	LedgerTime       data.RippleTime `json:"ledger_time"`
-	ReserveBase      uint64          `json:"reserve_base"`
-	ReserveIncrement uint64          `json:"reserve_inc"`
-	ValidatedLedgers string          `json:"validated_ledgers"`
-}
-
-func newCommand(command string) Command {
-	return Command{
-		Id:      atomic.AddUint64(&counter, 1),
-		Command: command,
-	}
-}
-
-func GetLedgerStream() *LedgerStreamCommand {
-	return &LedgerStreamCommand{
-		StreamCommand: StreamCommand{
-			Command: newCommand("subscribe"),
-			Streams: []string{"ledger"},
-		},
-	}
-}
-
+// Creates new `ledger` command to request a ledger by index
 func GetLedger(ledger uint32) *LedgerCommand {
 	return &LedgerCommand{
 		Command:      newCommand("ledger"),
@@ -104,6 +58,20 @@ func GetLedger(ledger uint32) *LedgerCommand {
 	}
 }
 
+type TransactionCommand struct {
+	Command
+	Transaction string `json:"transaction"`
+	Binary      bool   `json:"binary"`
+	Result      *struct {
+		Hash           string `json:"hash"`
+		LedgerSequence uint32 `json:"ledger_index"`
+		Meta           string `json:"meta"`
+		Transaction    string `json:"tx"`
+		Validated      bool   `json:"validated"`
+	} `json:"result,omitempty"`
+}
+
+// Creates new `tx` command to request a transaction by hash
 func GetTransaction(hash string) *TransactionCommand {
 	return &TransactionCommand{
 		Command:     newCommand("tx"),
