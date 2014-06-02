@@ -48,3 +48,13 @@ func (c Currency) String() string {
 func (c Currency) MarshalText() ([]byte, error) {
 	return []byte(c.String()), nil
 }
+
+func (c *Currency) UnmarshalText(text []byte) error {
+	tmp, err := NewCurrency(string(text))
+	if err != nil {
+		return err
+	}
+
+	copy(c[:], tmp.Bytes())
+	return nil
+}

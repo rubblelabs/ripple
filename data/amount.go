@@ -428,6 +428,18 @@ func (v *Value) MarshalText() ([]byte, error) {
 	return []byte(v.String()), nil
 }
 
+// Interpret as XRP in drips
+func (v *Value) UnmarshalText(b []byte) (err error) {
+	v.Native = true
+	if err = v.Parse(string(b)); err != nil {
+		return
+	}
+	if err := v.canonicalise(); err != nil {
+		return err
+	}
+	return
+}
+
 func (a *Amount) String() string {
 	switch {
 	case a.Native:
@@ -455,4 +467,34 @@ func (a *Amount) MarshalJSON() ([]byte, error) {
 			Currency Currency `json:"currency"`
 			Issuer   Account  `json:"issuer"`
 		}{a.Value, a.Currency, a.Issuer})
+}
+
+func (a *Amount) UnmarshalJSON(b []byte) (err error) {
+	a.Value = &Value{}
+
+	// Try interpret as IOU
+	var m map[string]string
+	err = json.Unmarshal(b, &m)
+	if err == nil {
+		if err = a.Currency.UnmarshalText([]byte(m["currency"])); err != nil {
+			return
+		}
+
+		a.Value.Native = false
+		if err = a.Value.Parse(m["value"]); err != nil {
+			return
+		}
+
+		if err = a.Issuer.UnmarshalText([]byte(m["issuer"])); err != nil {
+			return
+		}
+		return
+	}
+
+	// Interpret as XRP in drips
+	if err = a.Value.UnmarshalText(b[1 : len(b)-1]); err != nil {
+		return
+	}
+
+	return
 }

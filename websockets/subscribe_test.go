@@ -2,6 +2,7 @@ package websockets
 
 import (
 	"encoding/json"
+	"github.com/donovanhide/ripple/data"
 	"io/ioutil"
 	. "launchpad.net/gocheck"
 	"testing"
@@ -81,6 +82,19 @@ func (s *MessagesSuite) TestTransactionStreamMsg(c *C) {
 	c.Assert(msg.LedgerSequence, Equals, uint32(6959249))
 	c.Assert(msg.Status, Equals, "closed")
 	c.Assert(msg.Validated, Equals, true)
+
+	c.Assert(msg.Transaction.(*data.OfferCreate).GetType(), Equals, "OfferCreate")
+	c.Assert(msg.Transaction.(*data.OfferCreate).GetAccount(), Equals, "rPEZyTnSyQyXBCwMVYyaafSVPL8oMtfG6a")
+	c.Assert(msg.Transaction.(*data.OfferCreate).Fee.String(), Equals, "0.00005")
+	//FIXME(luke): Hash is not unmarshaled from json
+	//c.Assert(msg.Transaction.(*data.OfferCreate).Hash().String(), Equals, "25174B56C40B090D4AFCDAC3F07DCCF8A49A096D62CE1CE6864A8624F790F980")
+	c.Assert(msg.Transaction.(*data.OfferCreate).SigningPubKey.String(), Equals, "aBPyWVvQjo6d9JApk3cjMMw2CVMbnjJAxsZdmMxo6RyHFmNZxFJn")
+	c.Assert(msg.Transaction.(*data.OfferCreate).TxnSignature.String(), Equals, "304402201480DBC8253B2E5CCB24001C6E6A0AE73C8FC8D6237B0AA1A5B1CADA92306070022013B02C3CE6E7AFD5F8F348BC40975D15056D414BBC11AD2EA04A65496482212E")
+	c.Assert(msg.Transaction.(*data.OfferCreate).Sequence, Equals, uint32(753273))
+
+	c.Assert(*msg.Transaction.(*data.OfferCreate).OfferSequence, Equals, uint32(753240))
+	c.Assert(msg.Transaction.(*data.OfferCreate).TakerGets.String(), Equals, "6400.064/XRP")
+	c.Assert(msg.Transaction.(*data.OfferCreate).TakerPays.String(), Equals, "174.72/CNY/razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA")
 }
 
 func (s *MessagesSuite) TestServerSubscribeResponse(c *C) {

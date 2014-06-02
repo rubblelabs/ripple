@@ -70,6 +70,19 @@ func (v VariableLength) MarshalText() ([]byte, error) {
 	return b2h(v), nil
 }
 
+func (v VariableLength) String() string {
+	return string(b2h(v))
+}
+
+// Expects variable length hex
+func (v *VariableLength) UnmarshalText(text []byte) (err error) {
+	if *v, err = hex.DecodeString(string(text)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (v *VariableLength) Bytes() []byte {
 	if v != nil {
 		return []byte(*v)
@@ -86,6 +99,18 @@ func (p PublicKey) MarshalText() ([]byte, error) {
 	} else {
 		return []byte(pubKey.ToJSON()), nil
 	}
+}
+
+// Expects public key hex
+func (p *PublicKey) UnmarshalText(text []byte) (err error) {
+	var b []byte
+
+	if b, err = hex.DecodeString(string(text)); err != nil {
+		return err
+	}
+
+	copy(p[:], b)
+	return nil
 }
 
 func (p PublicKey) String() string {
@@ -109,6 +134,20 @@ func (a Account) MarshalText() ([]byte, error) {
 	} else {
 		return []byte(address.ToJSON()), nil
 	}
+}
+
+// Expects base58-encoded account id
+func (a *Account) UnmarshalText(text []byte) error {
+	tmp, err := crypto.NewRippleHash(string(text))
+	if err != nil {
+		return err
+	}
+	if tmp.Version() != crypto.RIPPLE_ACCOUNT_ID {
+		return fmt.Errorf("Incorrect version for Account: %d", tmp.Version())
+	}
+
+	copy(a[:], tmp.Payload())
+	return nil
 }
 
 func (a Account) String() string {

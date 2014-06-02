@@ -1,6 +1,7 @@
 package websockets
 
 import (
+	"encoding/json"
 	"github.com/donovanhide/ripple/data"
 )
 
@@ -46,9 +47,54 @@ func SubscribeLedgers() *SubscribeLedgerCommand {
 	}
 }
 
+func (msg *TransactionStreamMsg) UnmarshalJSON(b []byte) (err error) {
+	var tmp map[string]json.RawMessage
+	err = json.Unmarshal(b, &tmp)
+	if err != nil {
+		return
+	}
+
+	// Basic fields
+	if err = json.Unmarshal(tmp["engine_result"], &msg.EngineResult); err != nil {
+		return
+	}
+	if err = json.Unmarshal(tmp["engine_result_code"], &msg.EngineResultCode); err != nil {
+		return
+	}
+	if err = json.Unmarshal(tmp["engine_result_message"], &msg.EngineResultMessage); err != nil {
+		return
+	}
+	if err = json.Unmarshal(tmp["ledger_hash"], &msg.LedgerHash); err != nil {
+		return
+	}
+	if err = json.Unmarshal(tmp["ledger_index"], &msg.LedgerSequence); err != nil {
+		return
+	}
+	if err = json.Unmarshal(tmp["status"], &msg.Status); err != nil {
+		return
+	}
+	if err = json.Unmarshal(tmp["validated"], &msg.Validated); err != nil {
+		return
+	}
+
+	// Sniff the transaction type
+	tmpTx := &struct{ TransactionType string }{}
+	if err = json.Unmarshal(tmp["transaction"], tmpTx); err != nil {
+		return
+	}
+
+	// Unmarshal the transaction
+	msg.Transaction = data.GetTxFactoryByType(tmpTx.TransactionType)()
+	if err = json.Unmarshal(tmp["transaction"], msg.Transaction); err != nil {
+		return
+	}
+
+	return
+}
+
 // Fields from subscribed transaction stream messages
 type TransactionStreamMsg struct {
-	//Transaction         data.Transaction
+	Transaction         data.Transaction
 	EngineResult        string `json:"engine_result"`
 	EngineResultCode    int    `json:"engine_result_code"`
 	EngineResultMessage string `json:"engine_result_message"`
