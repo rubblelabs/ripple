@@ -5,6 +5,7 @@ import (
 	"crypto/sha512"
 	"encoding/binary"
 	"fmt"
+	"github.com/donovanhide/ripple/crypto"
 	"hash"
 	"io"
 	"reflect"
@@ -18,24 +19,32 @@ type Encoder struct {
 	multi io.Writer
 }
 
+func CheckSignature(h Hashable) (bool, error) {
+	switch v := h.(type) {
+	case *Validation:
+		if err := NewEncoder().Validation(v, true); err != nil {
+			return false, err
+		}
+		return crypto.Verify(v.SigningPubKey.Bytes(), v.Signature.Bytes(), v.Hash().Bytes())
+	case *SetFee, *Amendment:
+		return true, nil
+	case Transaction:
+		if err := NewEncoder().Transaction(v, true); err != nil {
+			return false, err
+		}
+		base := v.GetBase()
+		return crypto.Verify(base.SigningPubKey.Bytes(), base.TxnSignature.Bytes(), v.Hash().Bytes())
+	default:
+		return false, fmt.Errorf("Not a signed type")
+	}
+}
+
 func NewEncoder() *Encoder {
 	enc := &Encoder{
 		hash: sha512.New(),
 	}
 	enc.multi = io.MultiWriter(&enc.buf, enc.hash)
 	return enc
-}
-
-var nodeEncoding = []struct {
-	f    func(*Encoder, io.Writer, Hashable) error
-	both bool
-}{
-	{(*Encoder).Ledger, false},
-	{(*Encoder).Ledger, false},
-	{(*Encoder).NodeType, false},
-	{(*Encoder).HashPrefix, true},
-	{(*Encoder).Raw, true},
-	{(*Encoder).Hash, false},
 }
 
 func (enc *Encoder) Hex(w io.Writer, h Hashable) error {
@@ -46,21 +55,95 @@ func (enc *Encoder) Hex(w io.Writer, h Hashable) error {
 	return err
 }
 
+func (enc *Encoder) Transaction(tx Transaction, ignoreSigningFields bool) error {
+	enc.reset()
+	if err := enc.HashPrefix(enc.hash, tx); err != nil {
+		return err
+	}
+	if err := enc.raw(enc.multi, tx, ignoreSigningFields); err != nil {
+		return err
+	}
+	tx.SetHash(enc.hash.Sum(nil))
+	tx.SetRaw(enc.buf.Bytes())
+	return nil
+}
+
+func (enc *Encoder) Validation(v *Validation, ignoreSigningFields bool) error {
+	enc.reset()
+	if err := enc.HashPrefix(enc.hash, v); err != nil {
+		return err
+	}
+	if err := enc.raw(enc.multi, v, ignoreSigningFields); err != nil {
+		return err
+	}
+	v.SetHash(enc.hash.Sum(nil))
+	v.SetRaw(enc.buf.Bytes())
+	return nil
+}
+
 func (enc *Encoder) Node(h Hashable) error {
-	enc.buf.Reset()
-	enc.hash.Reset()
-	for _, step := range nodeEncoding {
-		w := io.Writer(&enc.buf)
-		if step.both {
-			w = enc.multi
-		}
-		if err := step.f(enc, w, h); err != nil {
+	enc.reset()
+	if err := enc.Ledger(&enc.buf, h); err != nil {
+		return err
+	}
+	if err := enc.Ledger(&enc.buf, h); err != nil {
+		return err
+	}
+	if err := enc.NodeType(&enc.buf, h); err != nil {
+		return err
+	}
+	if err := enc.HashPrefix(enc.multi, h); err != nil {
+		return err
+	}
+	switch v := h.(type) {
+	case *Ledger:
+		if err := write(enc.multi, v.LedgerHeader); err != nil {
 			return err
 		}
+	case *InnerNode:
+		if err := write(enc.multi, v.Children); err != nil {
+			return err
+		}
+	case *TransactionWithMetaData:
+		var tx, meta bytes.Buffer
+		txid := sha512.New()
+		if err := write(txid, HP_TRANSACTION_ID); err != nil {
+			return err
+		}
+		multi := io.MultiWriter(txid, &tx)
+		if err := enc.raw(multi, v.Transaction, false); err != nil {
+			return err
+		}
+		if err := enc.raw(&meta, &v.MetaData, false); err != nil {
+			return err
+		}
+		if err := writeVariableLength(enc.multi, tx.Bytes()); err != nil {
+			return err
+		}
+		if err := writeVariableLength(enc.multi, meta.Bytes()); err != nil {
+			return nil
+		}
+		if err := write(enc.multi, txid.Sum(nil)[:32]); err != nil {
+			return err
+		}
+	case LedgerEntry:
+		if err := enc.raw(enc.multi, v, false); err != nil {
+			return err
+		}
+		if err := write(enc.multi, enc.hash.Sum(nil)[:32]); err != nil {
+			return err
+		}
+	default:
+		return fmt.Errorf("Unknown type")
 	}
-	h.SetHash(enc.hash.Sum(nil)[:32])
-	h.SetRaw(enc.buf.Bytes()[13:])
+	h.SetHash(enc.hash.Sum(nil))
+	h.SetRaw(enc.buf.Bytes())
 	return nil
+}
+
+func (enc *Encoder) reset() {
+	enc.buf.Reset()
+	enc.hash.Reset()
 }
 
 func write(w io.Writer, v interface{}) error {
@@ -106,7 +189,7 @@ func (enc *Encoder) HashPrefix(w io.Writer, h Hashable) error {
 	case *TransactionWithMetaData:
 		return write(w, HP_TRANSACTION_NODE)
 	case Transaction:
-		return write(w, HP_TRANSACTION_ID)
+		return write(w, HP_TRANSACTION_SIGN)
 	case LedgerEntry:
 		return write(w, HP_LEAF_NODE)
 	case *Proposal:
@@ -115,51 +198,6 @@ func (enc *Encoder) HashPrefix(w io.Writer, h Hashable) error {
 		return write(w, HP_VALIDATION)
 	default:
 		return fmt.Errorf("Unknown type")
-	}
-}
-
-func (enc *Encoder) Raw(w io.Writer, h Hashable) error {
-	switch v := h.(type) {
-	case *Ledger:
-		return write(w, v.LedgerHeader)
-	case *InnerNode:
-		return write(w, v.Children)
-	case *Proposal, *Validation:
-		return write(w, v)
-	case *TransactionWithMetaData:
-		var tx, meta bytes.Buffer
-		txid := sha512.New()
-		if err := write(txid, HP_TRANSACTION_ID); err != nil {
-			return err
-		}
-		multi := io.MultiWriter(txid, &tx)
-		if err := enc.raw(multi, v.Transaction); err != nil {
-			return err
-		}
-		if err := enc.raw(&meta, &v.MetaData); err != nil {
-			return err
-		}
-		if err := writeVariableLength(w, tx.Bytes()); err != nil {
-			return err
-		}
-		if err := writeVariableLength(w, meta.Bytes()); err != nil {
-			return nil
-		}
-		h.SetHash(txid.Sum(nil))
-		return nil
-	case LedgerEntry, Transaction, *MetaData:
-		return enc.raw(w, v)
-	default:
-		return fmt.Errorf("Unknown type")
-	}
-}
-
-func (enc *Encoder) Hash(w io.Writer, h Hashable) error {
-	switch h.(type) {
-	case Transaction, LedgerEntry:
-		return write(w, enc.hash.Sum(nil)[:32])
-	default:
-		return nil
 	}
 }
 
@@ -203,7 +241,7 @@ func (f fieldSlice) String() string {
 }
 
 func getFields(v *reflect.Value) fieldSlice {
-	// fmt.Println(v, v.Kind())
+	// fmt.Println(v, v.Kind(), v.Type().Name())
 	var fields fieldSlice
 	for i, length := 0, v.NumField(); i < length; i++ {
 		f := v.Field(i)
@@ -244,11 +282,14 @@ func getFields(v *reflect.Value) fieldSlice {
 	return fields
 }
 
-func (encoder *Encoder) raw(w io.Writer, value interface{}) error {
+func (encoder *Encoder) raw(w io.Writer, value interface{}, ignoreSigningFields bool) error {
 	v := reflect.Indirect(reflect.ValueOf(value))
 	fields := getFields(&v)
 	// fmt.Println(fields.String())
 	return fields.Each(func(e enc, v interface{}) error {
+		if ignoreSigningFields && e.SigningField() {
+			return nil
+		}
 		if err := encoder.writeEncoding(w, e); err != nil {
 			return err
 		}

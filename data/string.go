@@ -37,7 +37,7 @@ func (o *OfferCancel) String() string {
 }
 
 func (a *AccountSet) String() string {
-	return format(a, "%s", a.Account)
+	return format(a, "%s %d", a.Account, a.Sequence)
 }
 
 func (t *TrustSet) String() string {
@@ -45,7 +45,7 @@ func (t *TrustSet) String() string {
 }
 
 func (f *SetFee) String() string {
-	return format(f, "%s", f.BaseFee)
+	return format(f, "%d", f.BaseFee)
 }
 
 func (a *Amendment) String() string {

@@ -34,8 +34,11 @@ func (c Currency) Clone() Currency {
 	return n
 }
 
-func (c Currency) Bytes() []byte {
-	return c[:]
+func (c *Currency) Bytes() []byte {
+	if c != nil {
+		return c[:]
+	}
+	return []byte(nil)
 }
 
 func (c Currency) String() string {

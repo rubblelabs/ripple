@@ -17,6 +17,7 @@ type RegularKey [20]byte
 
 var zero256 Hash256
 var zeroAccount Account
+var zeroPublicKey PublicKey
 
 func (h Hash128) MarshalText() ([]byte, error) {
 	return b2h(h[:]), nil
@@ -70,6 +71,14 @@ func (v VariableLength) MarshalText() ([]byte, error) {
 	return b2h(v), nil
 }
 
+func (v *VariableLength) String() string {
+	if v != nil {
+		b, _ := v.MarshalText()
+		return string(b)
+	}
+	return ""
+}
+
 func (v *VariableLength) Bytes() []byte {
 	if v != nil {
 		return []byte(*v)
@@ -91,6 +100,10 @@ func (p PublicKey) MarshalText() ([]byte, error) {
 func (p PublicKey) String() string {
 	b, _ := p.MarshalText()
 	return string(b)
+}
+
+func (p PublicKey) IsZero() bool {
+	return p == zeroPublicKey
 }
 
 func (p *PublicKey) Bytes() []byte {
@@ -136,6 +149,11 @@ func (r RegularKey) MarshalText() ([]byte, error) {
 	} else {
 		return []byte(address.ToJSON()), nil
 	}
+}
+
+func (r RegularKey) String() string {
+	b, _ := r.MarshalText()
+	return string(b)
 }
 
 func (r *RegularKey) Bytes() []byte {

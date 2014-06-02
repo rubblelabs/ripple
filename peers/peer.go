@@ -212,6 +212,7 @@ func (p *Peer) handleProposeSet(proposeSet *protocol.TMProposeSet) {
 }
 
 func (p *Peer) handleValidation(validation *protocol.TMValidation) {
+	glog.Infof("%X", validation.GetValidation())
 	v, err := data.NewDecoder(bytes.NewReader(validation.GetValidation())).Validation()
 	if err != nil {
 		glog.Errorln(err.Error())

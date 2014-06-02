@@ -20,15 +20,15 @@ type NodeEffects []NodeEffect
 
 type MetaData struct {
 	hashable
-	TransactionResult TransactionResult
-	TransactionIndex  uint32
-	DeliveredAmount   *Amount `json:",omitempty"`
 	AffectedNodes     NodeEffects
+	TransactionIndex  uint32
+	TransactionResult TransactionResult
+	DeliveredAmount   *Amount `json:",omitempty"`
 }
 
 type TransactionWithMetaData struct {
 	Transaction
-	MetaData       MetaData `json:"meta"`
+	MetaData       MetaData `json:"metaData"`
 	LedgerSequence uint32   `json:"ledger_index,omitempty"`
 }
 

@@ -1,29 +1,5 @@
 package data
 
-type TransactionResult uint8
-
-const (
-	tesSUCCESS               TransactionResult = 0
-	tecCLAIM                 TransactionResult = 100
-	tecPATH_PARTIAL          TransactionResult = 101
-	tecUNFUNDED_ADD          TransactionResult = 102
-	tecUNFUNDED_OFFER        TransactionResult = 103
-	tecUNFUNDED_PAYMENT      TransactionResult = 104
-	tecFAILED_PROCESSING     TransactionResult = 105
-	tecDIR_FULL              TransactionResult = 121
-	tecINSUF_RESERVE_LINE    TransactionResult = 122
-	tecINSUF_RESERVE_OFFER   TransactionResult = 123
-	tecNO_DST                TransactionResult = 124
-	tecNO_DST_INSUF_XRP      TransactionResult = 125
-	tecNO_LINE_INSUF_RESERVE TransactionResult = 126
-	tecNO_LINE_REDUNDANT     TransactionResult = 127
-	tecPATH_DRY              TransactionResult = 128
-	tecUNFUNDED              TransactionResult = 129
-	tecMASTER_DISABLED       TransactionResult = 130
-	tecNO_REGULAR_KEY        TransactionResult = 131
-	tecOWNERS                TransactionResult = 132
-)
-
 type TxBase struct {
 	hashable
 	TransactionType    TransactionType
@@ -32,11 +8,11 @@ type TxBase struct {
 	Account            Account
 	Sequence           uint32
 	Fee                Value
-	SigningPubKey      PublicKey
-	TxnSignature       VariableLength `json:",omitempty"`
-	Memos              Memos          `json:",omitempty"`
-	PreviousTxnID      *Hash256       `json:",omitempty"`
-	LastLedgerSequence *uint32        `json:",omitempty"`
+	SigningPubKey      *PublicKey      `json:",omitempty"`
+	TxnSignature       *VariableLength `json:",omitempty"`
+	Memos              Memos           `json:",omitempty"`
+	PreviousTxnID      *Hash256        `json:",omitempty"`
+	LastLedgerSequence *uint32         `json:",omitempty"`
 }
 
 type Payment struct {

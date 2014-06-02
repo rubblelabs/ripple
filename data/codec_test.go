@@ -1,9 +1,7 @@
 package data
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
 	internal "github.com/donovanhide/ripple/testing"
 	. "launchpad.net/gocheck"
 )
@@ -12,32 +10,53 @@ type CodecSuite struct{}
 
 var _ = Suite(&CodecSuite{})
 
-// func (s *CodecSuite) TestParseLedgerHeaders(c *C) {
-// 	for _, test := range internal.LedgerHeaders {
-// 		ledger, err := NewDecoder(test.Reader()).Ledger()
-// 		c.Check(err, IsNil)
-// 		out, _ := json.Marshal(ledger)
-// 		fmt.Println(test.Description, string(out))
-// 	}
-// }
+func dump(test internal.TestData, v interface{}) CommentInterface {
+	out, _ := json.Marshal(v)
+	return Commentf("Test: %s\nJSON:%s\n", test.Description, string(out))
+}
 
-// func (s *CodecSuite) TestParseTransactions(c *C) {
-// 	for _, test := range internal.Transactions {
-// 		tx, err := NewDecoder(test.Reader()).Transaction()
-// 		c.Check(err, IsNil, Commentf(test.Description))
-// 		out, _ := json.Marshal(tx)
-// 		fmt.Println(test.Description, string(out))
-// 	}
-// }
+func (s *CodecSuite) TestParseLedgerHeaders(c *C) {
+	for _, test := range internal.LedgerHeaders {
+		ledger, err := NewDecoder(test.Reader()).Ledger()
+		c.Assert(err, IsNil)
+		msg := dump(test, ledger)
+		c.Assert(NewEncoder().Node(ledger), IsNil, msg)
+		c.Assert(string(b2h(ledger.Raw())[26:]), Equals, test.Encoded, msg)
+	}
+}
+
+func (s *CodecSuite) TestParseTransactions(c *C) {
+	for _, test := range internal.Transactions {
+		tx, err := NewDecoder(test.Reader()).Transaction()
+		c.Assert(err, IsNil)
+		msg := dump(test, tx)
+		ok, err := CheckSignature(tx)
+		c.Assert(ok, Equals, true, msg)
+		c.Assert(err, IsNil, msg)
+		c.Assert(NewEncoder().Transaction(tx, false), IsNil, msg)
+		c.Assert(string(b2h(tx.Raw())), Equals, test.Encoded, msg)
+	}
+}
+
+func (s *CodecSuite) TestValidations(c *C) {
+	for _, test := range internal.Validations {
+		v, err := NewDecoder(test.Reader()).Validation()
+		c.Assert(err, IsNil)
+		msg := dump(test, v)
+		ok, err := CheckSignature(v)
+		c.Assert(ok, Equals, true, msg)
+		c.Assert(err, IsNil, msg)
+		c.Assert(NewEncoder().Validation(v, false), IsNil, msg)
+		c.Assert(string(b2h(v.Raw())), Equals, test.Encoded, msg)
+	}
+}
 
 func (s *CodecSuite) TestParseNodes(c *C) {
 	for _, test := range internal.Nodes {
-		var buf bytes.Buffer
 		n, err := NewDecoder(test.Reader()).Prefix()
-		c.Check(err, IsNil, Commentf(test.Description))
-		out, _ := json.MarshalIndent(n, "", "    ")
-		fmt.Println(test.Description, string(out))
-		c.Check(NewEncoder().Hex(&buf, n), IsNil)
-		fmt.Printf("Hash: %s\nG: %s\nW: %s\n", buf.String()[:64], buf.String()[65:], test.Encoded)
+		msg := dump(test, n)
+		c.Assert(err, IsNil, msg)
+		c.Assert(NewEncoder().Node(n), IsNil, msg)
+		c.Assert(string(b2h(n.Raw()))[16:], Equals, test.Encoded[16:], msg)
 	}
 }

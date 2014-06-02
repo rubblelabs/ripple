@@ -6,6 +6,11 @@ import (
 	"io"
 )
 
+const (
+	PATH_BOUNDARY uint8 = 0xFF
+	PATH_END      uint8 = 0x00
+)
+
 func NewVariableByteReader(r Reader) (Reader, error) {
 	if length, err := readVariableLength(r); err != nil {
 		return nil, err
@@ -43,6 +48,9 @@ func (v *Value) Bytes() []byte {
 }
 
 func (a *Amount) Bytes() []byte {
+	if a.Native {
+		return a.Value.Bytes()
+	}
 	return append(a.Value.Bytes(), append(a.Currency.Bytes(), a.Issuer.Bytes()...)...)
 }
 
@@ -52,7 +60,7 @@ func (v *Value) Unmarshal(r Reader) error {
 		return err
 	}
 	v.Native = (u >> 63) == 0
-	v.Negative = (u >> 62) == 0
+	v.Negative = (u>>62)&1 == 0
 	if v.Native {
 		v.Num = u & ((1 << 62) - 1)
 		v.Offset = 0
@@ -231,6 +239,9 @@ func (k *PublicKey) Unmarshal(r Reader) error {
 }
 
 func (k *PublicKey) Marshal(w io.Writer) error {
+	if k.IsZero() {
+		return writeVariableLength(w, []byte(nil))
+	}
 	return writeVariableLength(w, k.Bytes())
 }
 
@@ -245,29 +256,29 @@ func (k *RegularKey) Marshal(w io.Writer) error {
 func (p *Paths) Unmarshal(r Reader) error {
 	for i := 0; ; i++ {
 		*p = append(*p, []Path{})
-		for entry, err := r.ReadByte(); entry != 0xFF; entry, err = r.ReadByte() {
+		for entry, err := r.ReadByte(); entry != PATH_BOUNDARY; entry, err = r.ReadByte() {
 			if err != nil {
 				return err
 			}
-			if entry == 0x00 {
+			if entry == PATH_END {
 				return nil
 			}
 			var path Path
 			if entry&0x01 > 0 {
 				path.Account = new(Account)
-				if _, err := r.Read(path.Account[:]); err != nil {
+				if _, err := r.Read(path.Account.Bytes()); err != nil {
 					return err
 				}
 			}
 			if entry&0x10 > 0 {
 				path.Currency = new(Currency)
-				if _, err := r.Read(path.Currency[:]); err != nil {
+				if _, err := r.Read(path.Currency.Bytes()); err != nil {
 					return err
 				}
 			}
 			if entry&0x20 > 0 {
 				path.Issuer = new(Account)
-				if _, err := r.Read(path.Issuer[:]); err != nil {
+				if _, err := r.Read(path.Issuer.Bytes()); err != nil {
 					return err
 				}
 			}
@@ -277,6 +288,31 @@ func (p *Paths) Unmarshal(r Reader) error {
 }
 
 func (p *Paths) Marshal(w io.Writer) error {
+	for i, path := range *p {
+		for _, entry := range path {
+			if err := write(w, entry.PathEntry()); err != nil {
+				return err
+			}
+			if err := write(w, entry.Account.Bytes()); err != nil {
+				return err
+			}
+			if err := write(w, entry.Currency.Bytes()); err != nil {
+				return err
+			}
+			if err := write(w, entry.Issuer.Bytes()); err != nil {
+				return err
+			}
+		}
+		var err error
+		if i < len(*p)-1 {
+			err = write(w, PATH_BOUNDARY)
+		} else {
+			err = write(w, PATH_END)
+		}
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

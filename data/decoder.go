@@ -210,8 +210,10 @@ func (dec *Decoder) readObject(v *reflect.Value) error {
 	for name, err := dec.next(); err == nil; name, err = dec.next() {
 		// fmt.Println(name, v, v.IsValid())
 		switch name {
-		case "EndOfObject", "EndOfArray":
+		case "EndOfObject":
 			return nil
+		case "EndOfArray":
+			continue
 		case "PreviousFields", "NewFields", "FinalFields":
 			ledgerEntryType := uint16(v.Elem().FieldByName("LedgerEntryType").Uint())
 			le := fieldsFactory[ledgerEntryType]()
@@ -233,12 +235,12 @@ func (dec *Decoder) readObject(v *reflect.Value) error {
 			affected.Set(reflect.Append(affected, e.Elem()))
 		case "Memo":
 			var memo Memo
-			m := reflect.ValueOf(&memo)
+			m := reflect.ValueOf(&memo.Memo)
 			if err := dec.readObject(&m); err != nil {
 				return err
 			}
 			memos := v.Elem().FieldByName("Memos")
-			memos.Set(reflect.Append(memos, m.Elem()))
+			memos.Set(reflect.Append(memos, reflect.ValueOf(memo)))
 		default:
 			// fmt.Println(v, name)
 			field := v.Elem().FieldByName(name)

@@ -2,6 +2,7 @@ package data
 
 import (
 	"encoding/binary"
+	"strings"
 )
 
 type NodeType uint8
@@ -204,16 +205,26 @@ var encodings = map[enc]string{
 }
 
 var reverseEncodings map[string]enc
+var signingFields map[enc]struct{}
 
 func init() {
 	reverseEncodings = make(map[string]enc)
+	signingFields = make(map[enc]struct{})
 	for e, name := range encodings {
 		reverseEncodings[name] = e
+		if strings.Contains(name, "Signature") {
+			signingFields[e] = struct{}{}
+		}
 	}
 }
 
 func (e enc) Priority() uint32 {
 	return uint32(e.typ)<<16 | uint32(e.field)
+}
+
+func (e enc) SigningField() bool {
+	_, ok := signingFields[e]
+	return ok
 }
 
 func (h HashPrefix) String() string {
