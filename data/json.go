@@ -148,6 +148,6 @@ func (p PublicKey) MarshalText() ([]byte, error) {
 
 // Expects public key hex
 func (p *PublicKey) UnmarshalText(text []byte) (err error) {
-	_, err = hex.Decode((*p)[:], text)
+	_, err = hex.Decode(p.Bytes(), text)
 	return
 }
