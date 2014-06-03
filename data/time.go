@@ -20,9 +20,9 @@ func Now() int64 {
 }
 
 func (t *RippleTime) String() string {
-	return time.Time(*t).Format("2006-01-02 15:04:05")
+	return time.Time(*t).UTC().Format("2006-01-02 15:04:05")
 }
 
 func (t *RippleTime) Short() string {
-	return time.Time(*t).Format("15:04:05")
+	return time.Time(*t).UTC().Format("15:04:05")
 }
