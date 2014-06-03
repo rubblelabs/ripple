@@ -21,8 +21,6 @@ type Wire interface {
 type LedgerEntry interface {
 	Hashable
 	GetLedgerEntryType() LedgerEntryType
-	// SetLedgerSequence(uint32)
-	// SetTransactionIndex(uint32)
 }
 
 type Transaction interface {

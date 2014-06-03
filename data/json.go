@@ -5,8 +5,94 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/donovanhide/ripple/crypto"
+	"regexp"
 	"strconv"
+	"time"
 )
+
+// wrapper type to enable second level of marshalling
+type txmJSON TransactionWithMetaData
+
+var txmRegex = regexp.MustCompile(`"TransactionType":.*"(.*)"(?s:.*)"hash":.*"(.*)"`)
+
+func (txm *TransactionWithMetaData) UnmarshalJSON(b []byte) error {
+	matches := txmRegex.FindAllStringSubmatch(string(b), 1)
+	if matches == nil {
+		return fmt.Errorf("Not a valid transaction with metadata")
+	}
+	txType, hash := matches[0][1], matches[0][2]
+	txm.Transaction = GetTxFactoryByType(txType)()
+	h, err := hex.DecodeString(hash)
+	if err != nil {
+		return fmt.Errorf("Bad hash: %s", hash)
+	}
+	txm.SetHash(h)
+	if err := json.Unmarshal(b, txm.Transaction); err != nil {
+		return err
+	}
+	return json.Unmarshal(b, (*txmJSON)(txm))
+}
+
+const txmFormat = `%s,"hash":"%s","inLedger":%d,"ledger_index":%d,"meta":%s}`
+
+func (txm TransactionWithMetaData) MarshalJSON() ([]byte, error) {
+	// This is an evil hack to be revisited
+	tx, err := json.Marshal(txm.Transaction)
+	if err != nil {
+		return nil, err
+	}
+	meta, err := json.Marshal(txm.MetaData)
+	if err != nil {
+		return nil, err
+	}
+	out := fmt.Sprintf(txmFormat, string(tx[:len(tx)-1]), txm.Hash().String(), txm.LedgerSequence, txm.LedgerSequence, string(meta))
+	return []byte(out), nil
+}
+
+func (r TransactionResult) MarshalText() ([]byte, error) {
+	return []byte(resultNames[r]), nil
+}
+
+func (r *TransactionResult) UnmarshalText(b []byte) error {
+	if result, ok := reverseResults[string(b)]; ok {
+		*r = result
+		return nil
+	}
+	return fmt.Errorf("Unknown TransactionResult: %s", string(b))
+}
+
+func (l LedgerEntryType) MarshalText() ([]byte, error) {
+	return []byte(ledgerEntryNames[l]), nil
+}
+
+func (l *LedgerEntryType) UnmarshalText(b []byte) error {
+	if leType, ok := ledgerEntryTypes[string(b)]; ok {
+		*l = leType
+		return nil
+	}
+	return fmt.Errorf("Unknown LedgerEntryType: %s", string(b))
+}
+
+func (t TransactionType) MarshalText() ([]byte, error) {
+	return []byte(txNames[t]), nil
+}
+
+func (t *TransactionType) UnmarshalText(b []byte) error {
+	if txType, ok := txTypes[string(b)]; ok {
+		*t = txType
+		return nil
+	}
+	return fmt.Errorf("Unknown TransactionType: %s", string(b))
+}
+
+func (t *RippleTime) UnmarshalJSON(b []byte) error {
+	if unix, err := strconv.ParseInt(string(b), 10, 64); err != nil {
+		return fmt.Errorf("Bad RippleTime:%s", string(b))
+	} else {
+		*t = RippleTime(time.Unix(unix+rippleEpoch, 0))
+	}
+	return nil
+}
 
 func (v *Value) MarshalText() ([]byte, error) {
 	if v.Native {
@@ -21,16 +107,17 @@ func (v *Value) UnmarshalText(b []byte) (err error) {
 	return v.Parse(string(b))
 }
 
+type amountJSON struct {
+	Value    *Value   `json:"value"`
+	Currency Currency `json:"currency"`
+	Issuer   Account  `json:"issuer"`
+}
+
 func (a *Amount) MarshalJSON() ([]byte, error) {
 	if a.Native {
-		return a.Value.MarshalText()
+		return []byte(`"` + strconv.FormatUint(a.Num, 10) + `"`), nil
 	}
-	return json.Marshal(
-		struct {
-			Value    *Value   `json:"value"`
-			Currency Currency `json:"currency"`
-			Issuer   Account  `json:"issuer"`
-		}{a.Value, a.Currency, a.Issuer})
+	return json.Marshal(amountJSON{a.Value, a.Currency, a.Issuer})
 }
 
 func (a *Amount) UnmarshalJSON(b []byte) (err error) {
@@ -68,35 +155,36 @@ func (c Currency) MarshalText() ([]byte, error) {
 }
 
 func (c *Currency) UnmarshalText(text []byte) error {
-	tmp, err := NewCurrency(string(text))
-	if err != nil {
-		return err
-	}
-
-	copy(c[:], tmp.Bytes())
-	return nil
+	var err error
+	*c, err = NewCurrency(string(text))
+	return err
 }
 
 func (h Hash128) MarshalText() ([]byte, error) {
 	return b2h(h[:]), nil
 }
 
+func (h Hash128) UnmarshalText(b []byte) error {
+	_, err := hex.Decode(h[:], b)
+	return err
+}
+
 func (h Hash160) MarshalText() ([]byte, error) {
 	return b2h(h[:]), nil
+}
+
+func (h Hash160) UnmarshalText(b []byte) error {
+	_, err := hex.Decode(h[:], b)
+	return err
 }
 
 func (h Hash256) MarshalText() ([]byte, error) {
 	return b2h(h[:]), nil
 }
 
-// Expects variable length hex
-func (v *VariableLength) UnmarshalText(b []byte) error {
-	_, err := hex.Decode(v.Bytes(), b)
+func (h *Hash256) UnmarshalText(b []byte) error {
+	_, err := hex.Decode(h[:], b)
 	return err
-}
-
-func (v VariableLength) MarshalText() ([]byte, error) {
-	return b2h(v), nil
 }
 
 func (a Account) MarshalText() ([]byte, error) {
@@ -135,26 +223,23 @@ func (r RegularKey) MarshalText() ([]byte, error) {
 	}
 }
 
+// Expects variable length hex
+func (v *VariableLength) UnmarshalText(b []byte) error {
+	var err error
+	*v, err = hex.DecodeString(string(b))
+	return err
+}
+
+func (v VariableLength) MarshalText() ([]byte, error) {
+	return b2h(v), nil
+}
+
 func (p PublicKey) MarshalText() ([]byte, error) {
-	if len(p) == 0 {
-		return nil, nil
-	}
-	if pubKey, err := crypto.NewRipplePublicAccount(p[:]); err != nil {
-		return nil, err
-	} else {
-		return []byte(pubKey.ToJSON()), nil
-	}
+	return b2h(p[:]), nil
 }
 
 // Expects public key hex
-func (p *PublicKey) UnmarshalText(text []byte) (err error) {
-
-	var b []byte
-
-	if b, err = hex.DecodeString(string(text)); err != nil {
-		return err
-	}
-
-	copy(p[:], b)
-	return nil
+func (p *PublicKey) UnmarshalText(b []byte) error {
+	_, err := hex.Decode(p[:], b)
+	return err
 }

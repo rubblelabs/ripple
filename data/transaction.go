@@ -32,7 +32,7 @@ type AccountSet struct {
 	WalletSize    *uint32         `json:",omitempty"`
 	MessageKey    *PublicKey      `json:",omitempty"`
 	Domain        *VariableLength `json:",omitempty"`
-	TransferRate  *uint32         `json:",omitempty"`
+	TransferRate  *uint32         `json:",string"`
 	SetFlag       *uint32         `json:",omitempty"`
 	ClearFlag     *uint32         `json:",omitempty"`
 }
@@ -73,17 +73,6 @@ type SetFee struct {
 type Amendment struct {
 	TxBase
 	Amendment Hash256
-}
-
-func (t TransactionType) MarshalText() ([]byte, error) {
-	return []byte(txNames[t]), nil
-}
-
-func (v *TransactionType) UnmarshalText(text []byte) (err error) {
-	//FIXME: Currently a NoOp because TransactionType is already correctly
-	//set if unmarshaling into a transaction created with GetTxFactoryByType
-
-	return nil
 }
 
 func (t *TxBase) GetBase() *TxBase {

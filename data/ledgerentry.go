@@ -10,8 +10,6 @@ type LeCommon struct {
 type LeBase struct {
 	hashable
 	LedgerEntryType LedgerEntryType `json:",omitempty"`
-	// LedgerSequence    uint32   `json:"-"`
-	// TransactionIndex  uint32   `json:"-"`
 }
 
 type AccountRootFields struct {
@@ -129,18 +127,6 @@ func (le *LeBase) GetType() string {
 	return ledgerEntryNames[le.LedgerEntryType]
 }
 
-// func (le *LeBase) SetLedgerSequence(seq uint32) {
-// 	le.LedgerSequence = seq
-// }
-
-// func (le *LeBase) SetTransactionIndex(i uint32) {
-// 	le.TransactionIndex = i
-// }
-
 func (le *LeBase) GetLedgerEntryType() LedgerEntryType {
 	return le.LedgerEntryType
-}
-
-func (t LedgerEntryType) MarshalText() ([]byte, error) {
-	return []byte(ledgerEntryNames[t]), nil
 }

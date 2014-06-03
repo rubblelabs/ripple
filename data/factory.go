@@ -71,7 +71,7 @@ func GetTxFactoryByType(txType string) func() Transaction {
 
 var ledgerEntryNames = [...]string{
 	ACCOUNT_ROOT:  "AccountRoot",
-	DIRECTORY:     "Directory",
+	DIRECTORY:     "DirectoryNode",
 	AMENDMENTS:    "Amendments",
 	LEDGER_HASHES: "LedgerHashes",
 	OFFER:         "Offer",
@@ -80,13 +80,13 @@ var ledgerEntryNames = [...]string{
 }
 
 var ledgerEntryTypes = map[string]LedgerEntryType{
-	"AccountRoot":  ACCOUNT_ROOT,
-	"Directory":    DIRECTORY,
-	"Amendments":   AMENDMENTS,
-	"LedgerHashes": LEDGER_HASHES,
-	"Offer":        OFFER,
-	"RippleState":  RIPPLE_STATE,
-	"Fee":          FEE_SETTING,
+	"AccountRoot":   ACCOUNT_ROOT,
+	"DirectoryNode": DIRECTORY,
+	"Amendments":    AMENDMENTS,
+	"LedgerHashes":  LEDGER_HASHES,
+	"Offer":         OFFER,
+	"RippleState":   RIPPLE_STATE,
+	"Fee":           FEE_SETTING,
 }
 
 var txNames = [...]string{

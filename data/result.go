@@ -1,9 +1,5 @@
 package data
 
-import (
-	"fmt"
-)
-
 type TransactionResult uint8
 
 const (
@@ -57,16 +53,4 @@ func init() {
 	for result, name := range resultNames {
 		reverseResults[name] = result
 	}
-}
-
-func (r TransactionResult) MarshalText() ([]byte, error) {
-	return []byte(resultNames[r]), nil
-}
-
-func (r *TransactionResult) UnmarshalText(b []byte) error {
-	if result, ok := reverseResults[string(b)]; ok {
-		*r = result
-		return nil
-	}
-	return fmt.Errorf("Unknown TransactionResult: %s", string(b))
 }

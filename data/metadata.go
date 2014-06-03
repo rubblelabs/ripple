@@ -28,8 +28,8 @@ type MetaData struct {
 
 type TransactionWithMetaData struct {
 	Transaction
-	MetaData       MetaData `json:"metaData"`
-	LedgerSequence uint32   `json:"ledger_index,omitempty"`
+	MetaData       MetaData `json:"meta"`
+	LedgerSequence uint32   `json:"ledger_index"`
 }
 
 func (m *MetaData) GetType() string { return "Metadata" }
