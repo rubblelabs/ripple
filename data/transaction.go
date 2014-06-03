@@ -75,6 +75,10 @@ type Amendment struct {
 	Amendment Hash256
 }
 
+func (t TransactionType) String() string {
+	return txNames[t]
+}
+
 func (t *TxBase) GetBase() *TxBase {
 	return t
 }
