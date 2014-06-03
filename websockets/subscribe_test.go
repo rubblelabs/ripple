@@ -75,26 +75,31 @@ func (s *MessagesSuite) TestTransactionStreamMsg(c *C) {
 	msg := streamMessageFactory["transaction"]().(*TransactionStreamMsg)
 	readResponseFile(c, msg, "testdata/transactions_stream.json")
 
-	c.Assert(msg.EngineResult, Equals, "tesSUCCESS")
+	c.Assert(msg.EngineResult.String(), Equals, "tesSUCCESS")
 	c.Assert(msg.EngineResultCode, Equals, 0)
 	c.Assert(msg.EngineResultMessage, Equals, "The transaction was applied.")
-	c.Assert(msg.LedgerHash, Equals, "9B0E9D19E8246BA9B224078B73158ED8970B90DBFAAA68D73A2E0E2899B5AF5A")
+	c.Assert(msg.LedgerHash.String(), Equals, "9B0E9D19E8246BA9B224078B73158ED8970B90DBFAAA68D73A2E0E2899B5AF5A")
 	c.Assert(msg.LedgerSequence, Equals, uint32(6959249))
 	c.Assert(msg.Status, Equals, "closed")
 	c.Assert(msg.Validated, Equals, true)
 
-	c.Assert(msg.Transaction.(*data.OfferCreate).GetType(), Equals, "OfferCreate")
-	c.Assert(msg.Transaction.(*data.OfferCreate).GetAccount(), Equals, "rPEZyTnSyQyXBCwMVYyaafSVPL8oMtfG6a")
-	c.Assert(msg.Transaction.(*data.OfferCreate).Fee.String(), Equals, "0.00005")
-	//FIXME(luke): Hash is not unmarshaled from json
-	//c.Assert(msg.Transaction.(*data.OfferCreate).Hash().String(), Equals, "25174B56C40B090D4AFCDAC3F07DCCF8A49A096D62CE1CE6864A8624F790F980")
-	c.Assert(msg.Transaction.(*data.OfferCreate).SigningPubKey.String(), Equals, "0309AEAA170F651170F85C85237CD25CD4200CF91C1C05A9B8A19E72912C2254DF")
-	c.Assert(msg.Transaction.(*data.OfferCreate).TxnSignature.String(), Equals, "304402201480DBC8253B2E5CCB24001C6E6A0AE73C8FC8D6237B0AA1A5B1CADA92306070022013B02C3CE6E7AFD5F8F348BC40975D15056D414BBC11AD2EA04A65496482212E")
-	c.Assert(msg.Transaction.(*data.OfferCreate).Sequence, Equals, uint32(753273))
+	offer := msg.Transaction.(*data.OfferCreate)
 
-	c.Assert(*msg.Transaction.(*data.OfferCreate).OfferSequence, Equals, uint32(753240))
-	c.Assert(msg.Transaction.(*data.OfferCreate).TakerGets.String(), Equals, "6400.064/XRP")
-	c.Assert(msg.Transaction.(*data.OfferCreate).TakerPays.String(), Equals, "174.72/CNY/razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA")
+	c.Assert(offer.GetType(), Equals, "OfferCreate")
+	c.Assert(offer.GetAccount(), Equals, "rPEZyTnSyQyXBCwMVYyaafSVPL8oMtfG6a")
+	c.Assert(offer.Fee.String(), Equals, "0.00005")
+	//c.Assert(offer.Hash().String(), Equals, "25174B56C40B090D4AFCDAC3F07DCCF8A49A096D62CE1CE6864A8624F790F980")
+	c.Assert(offer.SigningPubKey.String(), Equals, "0309AEAA170F651170F85C85237CD25CD4200CF91C1C05A9B8A19E72912C2254DF")
+	c.Assert(offer.TxnSignature.String(), Equals, "304402201480DBC8253B2E5CCB24001C6E6A0AE73C8FC8D6237B0AA1A5B1CADA92306070022013B02C3CE6E7AFD5F8F348BC40975D15056D414BBC11AD2EA04A65496482212E")
+	c.Assert(offer.Sequence, Equals, uint32(753273))
+
+	c.Assert(msg.MetaData.TransactionResult.String(), Equals, "tesSUCCESS")
+	c.Assert(msg.MetaData.TransactionIndex, Equals, uint32(0))
+	c.Assert(msg.MetaData.AffectedNodes, HasLen, 7)
+
+	c.Assert(*offer.OfferSequence, Equals, uint32(753240))
+	c.Assert(offer.TakerGets.String(), Equals, "6400.064/XRP")
+	c.Assert(offer.TakerPays.String(), Equals, "174.72/CNY/razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA")
 }
 
 func (s *MessagesSuite) TestServerSubscribeResponse(c *C) {

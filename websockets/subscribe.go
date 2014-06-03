@@ -76,6 +76,9 @@ func (msg *TransactionStreamMsg) UnmarshalJSON(b []byte) (err error) {
 	if err = json.Unmarshal(tmp["validated"], &msg.Validated); err != nil {
 		return
 	}
+	if err = json.Unmarshal(tmp["meta"], &msg.MetaData); err != nil {
+		return
+	}
 
 	// Sniff the transaction type
 	tmpTx := &struct{ TransactionType string }{}
@@ -95,14 +98,14 @@ func (msg *TransactionStreamMsg) UnmarshalJSON(b []byte) (err error) {
 // Fields from subscribed transaction stream messages
 type TransactionStreamMsg struct {
 	Transaction         data.Transaction
-	EngineResult        string `json:"engine_result"`
-	EngineResultCode    int    `json:"engine_result_code"`
-	EngineResultMessage string `json:"engine_result_message"`
-	LedgerHash          string `json:"ledger_hash"`
-	LedgerSequence      uint32 `json:"ledger_index"`
-	//Meta                interface{} `json:"meta_data"`
-	Status    string
-	Validated bool
+	EngineResult        data.TransactionResult `json:"engine_result"`
+	EngineResultCode    int                    `json:"engine_result_code"`
+	EngineResultMessage string                 `json:"engine_result_message"`
+	LedgerHash          data.Hash256           `json:"ledger_hash"`
+	LedgerSequence      uint32                 `json:"ledger_index"`
+	MetaData            data.MetaData          `json:"meta"`
+	Status              string
+	Validated           bool
 }
 type SubscribeTransactionCommand struct {
 	subscribeCommand
