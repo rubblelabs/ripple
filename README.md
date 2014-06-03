@@ -4,6 +4,7 @@ ripple
 Go packages to interact with the Ripple protocol.
 
 [![GoDoc](https://godoc.org/github.com/donovanhide/ripple?status.png)](https://godoc.org/github.com/donovanhide/ripple)
+[![Build Status](https://travis-ci.org/donovanhide/ripple.svg?branch=master)](https://travis-ci.org/donovanhide/ripple)
 
 Documentation is very much non-existent currently.
 
