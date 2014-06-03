@@ -13,14 +13,20 @@ import (
 // wrapper type to enable second level of marshalling
 type txmJSON TransactionWithMetaData
 
-var txmRegex = regexp.MustCompile(`"TransactionType":.*"(.*)"(?s:.*)"hash":.*"(.*)"`)
+var txmTransactionTypeRegex = regexp.MustCompile(`"TransactionType":.*"(.*)"`)
+var txmHashRegex = regexp.MustCompile(`"hash":.*"(.*)"`)
 
 func (txm *TransactionWithMetaData) UnmarshalJSON(b []byte) error {
-	matches := txmRegex.FindAllStringSubmatch(string(b), 1)
+	matches := txmTransactionTypeRegex.FindAllStringSubmatch(string(b), 1)
 	if matches == nil {
-		return fmt.Errorf("Not a valid transaction with metadata")
+		return fmt.Errorf("Not a valid transaction with metadata: Missing TransactionType")
 	}
-	txType, hash := matches[0][1], matches[0][2]
+	txType := matches[0][1]
+	matches = txmHashRegex.FindAllStringSubmatch(string(b), 1)
+	if matches == nil {
+		return fmt.Errorf("Not a valid transaction with metadata: Missing hash")
+	}
+	hash := matches[0][1]
 	txm.Transaction = GetTxFactoryByType(txType)()
 	h, err := hex.DecodeString(hash)
 	if err != nil {

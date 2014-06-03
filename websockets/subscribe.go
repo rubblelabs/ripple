@@ -76,19 +76,18 @@ func (msg *TransactionStreamMsg) UnmarshalJSON(b []byte) (err error) {
 	if err = json.Unmarshal(tmp["validated"], &msg.Validated); err != nil {
 		return
 	}
-	if err = json.Unmarshal(tmp["meta"], &msg.MetaData); err != nil {
+	if err = json.Unmarshal(tmp["transaction"], &msg.Transaction); err != nil {
 		return
 	}
 
-	// Sniff the transaction type
-	tmpTx := &struct{ TransactionType string }{}
-	if err = json.Unmarshal(tmp["transaction"], tmpTx); err != nil {
+	// Transaction stream places the metadata *outside* of the transaction object.
+	// We'll put it into the TransactionWithMetaData struct
+	if err = json.Unmarshal(tmp["meta"], &msg.Transaction.MetaData); err != nil {
 		return
 	}
 
-	// Unmarshal the transaction
-	msg.Transaction = data.GetTxFactoryByType(tmpTx.TransactionType)()
-	if err = json.Unmarshal(tmp["transaction"], msg.Transaction); err != nil {
+	// TransactionWithMetaData has a field for LedgerSequence too...
+	if err = json.Unmarshal(tmp["ledger_index"], &msg.Transaction.LedgerSequence); err != nil {
 		return
 	}
 
@@ -97,13 +96,12 @@ func (msg *TransactionStreamMsg) UnmarshalJSON(b []byte) (err error) {
 
 // Fields from subscribed transaction stream messages
 type TransactionStreamMsg struct {
-	Transaction         data.Transaction
+	Transaction         data.TransactionWithMetaData
 	EngineResult        data.TransactionResult `json:"engine_result"`
 	EngineResultCode    int                    `json:"engine_result_code"`
 	EngineResultMessage string                 `json:"engine_result_message"`
 	LedgerHash          data.Hash256           `json:"ledger_hash"`
 	LedgerSequence      uint32                 `json:"ledger_index"`
-	MetaData            data.MetaData          `json:"meta"`
 	Status              string
 	Validated           bool
 }

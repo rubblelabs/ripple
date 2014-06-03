@@ -83,7 +83,7 @@ func (s *MessagesSuite) TestTransactionStreamMsg(c *C) {
 	c.Assert(msg.Status, Equals, "closed")
 	c.Assert(msg.Validated, Equals, true)
 
-	offer := msg.Transaction.(*data.OfferCreate)
+	offer := msg.Transaction.Transaction.(*data.OfferCreate)
 
 	c.Assert(offer.GetType(), Equals, "OfferCreate")
 	c.Assert(offer.GetAccount(), Equals, "rPEZyTnSyQyXBCwMVYyaafSVPL8oMtfG6a")
@@ -93,9 +93,9 @@ func (s *MessagesSuite) TestTransactionStreamMsg(c *C) {
 	c.Assert(offer.TxnSignature.String(), Equals, "304402201480DBC8253B2E5CCB24001C6E6A0AE73C8FC8D6237B0AA1A5B1CADA92306070022013B02C3CE6E7AFD5F8F348BC40975D15056D414BBC11AD2EA04A65496482212E")
 	c.Assert(offer.Sequence, Equals, uint32(753273))
 
-	c.Assert(msg.MetaData.TransactionResult.String(), Equals, "tesSUCCESS")
-	c.Assert(msg.MetaData.TransactionIndex, Equals, uint32(0))
-	c.Assert(msg.MetaData.AffectedNodes, HasLen, 7)
+	c.Assert(msg.Transaction.MetaData.TransactionResult.String(), Equals, "tesSUCCESS")
+	c.Assert(msg.Transaction.MetaData.TransactionIndex, Equals, uint32(0))
+	c.Assert(msg.Transaction.MetaData.AffectedNodes, HasLen, 7)
 
 	c.Assert(*offer.OfferSequence, Equals, uint32(753240))
 	c.Assert(offer.TakerGets.String(), Equals, "6400.064/XRP")
