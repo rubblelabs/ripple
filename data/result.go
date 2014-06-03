@@ -54,3 +54,6 @@ func init() {
 		reverseResults[name] = result
 	}
 }
+func (r TransactionResult) String() string {
+	return resultNames[r]
+}

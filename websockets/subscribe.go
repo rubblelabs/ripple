@@ -76,16 +76,18 @@ func (msg *TransactionStreamMsg) UnmarshalJSON(b []byte) (err error) {
 	if err = json.Unmarshal(tmp["validated"], &msg.Validated); err != nil {
 		return
 	}
-
-	// Sniff the transaction type
-	tmpTx := &struct{ TransactionType string }{}
-	if err = json.Unmarshal(tmp["transaction"], tmpTx); err != nil {
+	if err = json.Unmarshal(tmp["transaction"], &msg.Transaction); err != nil {
 		return
 	}
 
-	// Unmarshal the transaction
-	msg.Transaction = data.GetTxFactoryByType(tmpTx.TransactionType)()
-	if err = json.Unmarshal(tmp["transaction"], msg.Transaction); err != nil {
+	// Transaction stream places the metadata *outside* of the transaction object.
+	// We'll put it into the TransactionWithMetaData struct
+	if err = json.Unmarshal(tmp["meta"], &msg.Transaction.MetaData); err != nil {
+		return
+	}
+
+	// TransactionWithMetaData has a field for LedgerSequence too...
+	if err = json.Unmarshal(tmp["ledger_index"], &msg.Transaction.LedgerSequence); err != nil {
 		return
 	}
 
@@ -94,15 +96,14 @@ func (msg *TransactionStreamMsg) UnmarshalJSON(b []byte) (err error) {
 
 // Fields from subscribed transaction stream messages
 type TransactionStreamMsg struct {
-	Transaction         data.Transaction
-	EngineResult        string `json:"engine_result"`
-	EngineResultCode    int    `json:"engine_result_code"`
-	EngineResultMessage string `json:"engine_result_message"`
-	LedgerHash          string `json:"ledger_hash"`
-	LedgerSequence      uint32 `json:"ledger_index"`
-	//Meta                interface{} `json:"meta_data"`
-	Status    string
-	Validated bool
+	Transaction         data.TransactionWithMetaData
+	EngineResult        data.TransactionResult `json:"engine_result"`
+	EngineResultCode    int                    `json:"engine_result_code"`
+	EngineResultMessage string                 `json:"engine_result_message"`
+	LedgerHash          data.Hash256           `json:"ledger_hash"`
+	LedgerSequence      uint32                 `json:"ledger_index"`
+	Status              string
+	Validated           bool
 }
 type SubscribeTransactionCommand struct {
 	subscribeCommand
