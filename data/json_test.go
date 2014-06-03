@@ -13,27 +13,49 @@ type JSONSuite struct{}
 
 var _ = Suite(&JSONSuite{})
 
+func compare(c *C, expected, obtained string) {
+	want := strings.Split(expected, "\n")
+	got := strings.Split(obtained, "\n")
+	// c.Check(len(got), Equals, len(want))
+	sort.StringSlice(want).Sort()
+	sort.StringSlice(got).Sort()
+	max := len(want)
+	if len(got) < max {
+		max = len(got)
+	}
+	for i := 0; i < max; i++ {
+		w, g := strings.TrimSuffix(strings.TrimSpace(want[i]), ","), strings.TrimSuffix(strings.TrimSpace(got[i]), ",")
+		if g != w {
+			c.Logf("Want: %s Got: %s", w, g)
+		}
+		// c.Check(g, Equals, w)
+	}
+}
+
 func (s *JSONSuite) TestTransactionsJSON(c *C) {
-	files, err := filepath.Glob("testdata/*.json")
+	files, err := filepath.Glob("testdata/transaction_*.json")
 	c.Assert(err, IsNil)
 	for _, f := range files {
 		b, err := ioutil.ReadFile(f)
 		c.Assert(err, IsNil)
 		var txm TransactionWithMetaData
-		c.Check(json.Unmarshal(b, &txm), IsNil)
+		c.Assert(json.Unmarshal(b, &txm), IsNil)
 		out, err := json.MarshalIndent(txm, "", "  ")
-		c.Check(err, IsNil)
-		want := strings.Split(string(b), "\n")
-		got := strings.Split(string(out), "\n")
-		c.Check(len(got), Equals, len(want))
-		sort.StringSlice(want).Sort()
-		sort.StringSlice(got).Sort()
-		for i := range want {
-			w, g := strings.TrimSuffix(strings.TrimSpace(want[i]), ","), strings.TrimSuffix(strings.TrimSpace(got[i]), ",")
-			if g != w {
-				c.Logf("Want: %s Got: %s", w, g)
-			}
-			// c.Check(g, Equals, w)
-		}
+		c.Assert(err, IsNil)
+		compare(c, string(b), string(out))
+	}
+}
+
+func (s *JSONSuite) TestLedgersJSON(c *C) {
+	files, err := filepath.Glob("testdata/ledger_*.json")
+	c.Assert(err, IsNil)
+	for _, f := range files {
+		b, err := ioutil.ReadFile(f)
+		c.Assert(err, IsNil)
+		var ledger Ledger
+		c.Assert(json.Unmarshal(b, &ledger), IsNil)
+		out, err := json.MarshalIndent(ledger, "", "  ")
+		c.Assert(err, IsNil)
+		compare(c, string(b), string(out))
 	}
 }

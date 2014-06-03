@@ -10,17 +10,24 @@ import (
 	"time"
 )
 
-// wrapper type to enable second level of marshalling
-type txmJSON TransactionWithMetaData
+// Wrapper types to enable second level of marshalling
+// when found in ledger API call
+type txmLedger struct {
+	MetaData MetaData `json:"metaData"`
+}
 
-var txmRegex = regexp.MustCompile(`"TransactionType":.*"(.*)"(?s:.*)"hash":.*"(.*)"`)
+type txmNormal TransactionWithMetaData
+
+var txmRegex = regexp.MustCompile(`"TransactionType":.*"(.*)"(?s:.*)"hash":.*"(.*)"(?s:.*)"(meta|metaData)"`)
 
 func (txm *TransactionWithMetaData) UnmarshalJSON(b []byte) error {
+	// Apologies for all this
+	// Ripple JSON responses are horribly inconsistent
 	matches := txmRegex.FindAllStringSubmatch(string(b), 1)
 	if matches == nil {
 		return fmt.Errorf("Not a valid transaction with metadata")
 	}
-	txType, hash := matches[0][1], matches[0][2]
+	txType, hash, metaType := matches[0][1], matches[0][2], matches[0][3]
 	txm.Transaction = GetTxFactoryByType(txType)()
 	h, err := hex.DecodeString(hash)
 	if err != nil {
@@ -30,7 +37,15 @@ func (txm *TransactionWithMetaData) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, txm.Transaction); err != nil {
 		return err
 	}
-	return json.Unmarshal(b, (*txmJSON)(txm))
+	if metaType == "meta" {
+		return json.Unmarshal(b, (*txmNormal)(txm))
+	}
+	var meta txmLedger
+	if err := json.Unmarshal(b, &meta); err != nil {
+		return err
+	}
+	txm.MetaData = meta.MetaData
+	return nil
 }
 
 const txmFormat = `%s,"hash":"%s","inLedger":%d,"ledger_index":%d,"meta":%s}`
