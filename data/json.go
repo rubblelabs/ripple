@@ -118,7 +118,7 @@ type extractTxm struct {
 
 const extractTxmFormat = `%s,"meta":%s}`
 
-func MarshalTransactionWithMetadata(b []byte, txm *TransactionWithMetaData) error {
+func UnmarshalTransactionWithMetadata(b []byte, txm *TransactionWithMetaData) error {
 	var extract extractTxm
 	if err := json.Unmarshal(b, &extract); err != nil {
 		return err

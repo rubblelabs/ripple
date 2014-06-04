@@ -78,5 +78,5 @@ func (msg *TransactionStreamMsg) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, (*txStreamJSON)(msg)); err != nil {
 		return err
 	}
-	return data.MarshalTransactionWithMetadata(b, &msg.Transaction)
+	return data.UnmarshalTransactionWithMetadata(b, &msg.Transaction)
 }
