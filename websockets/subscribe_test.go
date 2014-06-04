@@ -26,7 +26,7 @@ func readResponseFile(c *C, msg interface{}, path string) {
 }
 
 func (s *MessagesSuite) TestLedgerSubscribeResponse(c *C) {
-	msg := SubscribeLedgers()
+	msg := Subscribe(true, false, false)
 	readResponseFile(c, msg, "testdata/subscribe_ledger.json")
 
 	// Response fields
@@ -62,7 +62,7 @@ func (s *MessagesSuite) TestLedgerStreamMsg(c *C) {
 }
 
 func (s *MessagesSuite) TestTransactionSubscribeResponse(c *C) {
-	msg := SubscribeTransactions()
+	msg := Subscribe(false, true, false)
 	readResponseFile(c, msg, "testdata/subscribe_transactions.json")
 
 	// Response fields
@@ -103,7 +103,7 @@ func (s *MessagesSuite) TestTransactionStreamMsg(c *C) {
 }
 
 func (s *MessagesSuite) TestServerSubscribeResponse(c *C) {
-	msg := SubscribeServer()
+	msg := Subscribe(false, false, true)
 	readResponseFile(c, msg, "testdata/subscribe_server.json")
 
 	// Response fields

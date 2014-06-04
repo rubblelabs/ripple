@@ -5,18 +5,6 @@ import (
 	"github.com/donovanhide/ripple/data"
 )
 
-// Map message types to the appropriate data structure
-var streamMessageFactory = map[string]func() interface{}{
-	"ledgerClosed": func() interface{} { return &LedgerStreamMsg{} },
-	"transaction":  func() interface{} { return &TransactionStreamMsg{} },
-	"serverStatus": func() interface{} { return &ServerStreamMsg{} },
-}
-
-type subscribeCommand struct {
-	Command
-	Streams []string `json:"streams"`
-}
-
 // Fields from subscribed ledger stream messages
 type LedgerStreamMsg struct {
 	FeeBase          uint64          `json:"fee_base"`
@@ -30,20 +18,56 @@ type LedgerStreamMsg struct {
 	TxnCount         uint32          `json:"txn_count"` // Only streamed, not in the subscribe result.
 }
 
-type SubscribeLedgerCommand struct {
-	subscribeCommand
-	Result *struct {
-		LedgerStreamMsg
+// Fields from subscribed transaction stream messages
+type TransactionStreamMsg struct {
+	Transaction         data.TransactionWithMetaData
+	EngineResult        data.TransactionResult `json:"engine_result"`
+	EngineResultCode    int                    `json:"engine_result_code"`
+	EngineResultMessage string                 `json:"engine_result_message"`
+	LedgerHash          data.Hash256           `json:"ledger_hash"`
+	LedgerSequence      uint32                 `json:"ledger_index"`
+	Status              string
+	Validated           bool
+}
+
+// Fields from subscribed server status stream messages
+type ServerStreamMsg struct {
+	Status     string `json:"server_status"`
+	LoadBase   int    `json:"load_base"`
+	LoadFactor int    `json:"load_factor"`
+}
+
+// Map message types to the appropriate data structure
+var streamMessageFactory = map[string]func() interface{}{
+	"ledgerClosed": func() interface{} { return &LedgerStreamMsg{} },
+	"transaction":  func() interface{} { return &TransactionStreamMsg{} },
+	"serverStatus": func() interface{} { return &ServerStreamMsg{} },
+}
+
+type SubscribeCommand struct {
+	Command
+	Streams []string `json:"streams"`
+	Result  *struct {
+		// Contains one or both of these, depending what streams were subscribed
+		*LedgerStreamMsg
+		*ServerStreamMsg
 	} `json:"result,omitempty"`
 }
 
-// Creates new `subscribe` command to subscribe to ledgers
-func SubscribeLedgers() *SubscribeLedgerCommand {
-	return &SubscribeLedgerCommand{
-		subscribeCommand: subscribeCommand{
-			Command: newCommand("subscribe"),
-			Streams: []string{"ledger"},
-		},
+func Subscribe(ledger, transactions, server bool) *SubscribeCommand {
+	streams := []string{}
+	if ledger {
+		streams = append(streams, "ledger")
+	}
+	if transactions {
+		streams = append(streams, "transactions")
+	}
+	if server {
+		streams = append(streams, "server")
+	}
+	return &SubscribeCommand{
+		Command: newCommand("subscribe"),
+		Streams: streams,
 	}
 }
 
@@ -92,55 +116,4 @@ func (msg *TransactionStreamMsg) UnmarshalJSON(b []byte) (err error) {
 	}
 
 	return
-}
-
-// Fields from subscribed transaction stream messages
-type TransactionStreamMsg struct {
-	Transaction         data.TransactionWithMetaData
-	EngineResult        data.TransactionResult `json:"engine_result"`
-	EngineResultCode    int                    `json:"engine_result_code"`
-	EngineResultMessage string                 `json:"engine_result_message"`
-	LedgerHash          data.Hash256           `json:"ledger_hash"`
-	LedgerSequence      uint32                 `json:"ledger_index"`
-	Status              string
-	Validated           bool
-}
-type SubscribeTransactionCommand struct {
-	subscribeCommand
-
-	// Result object is empty in response
-}
-
-// Creates new `subscribe` command to subscribe to transactions
-func SubscribeTransactions() *SubscribeTransactionCommand {
-	return &SubscribeTransactionCommand{
-		subscribeCommand: subscribeCommand{
-			Command: newCommand("subscribe"),
-			Streams: []string{"transactions"},
-		},
-	}
-}
-
-// Fields from subscribed server status stream messages
-type ServerStreamMsg struct {
-	Status     string `json:"server_status"`
-	LoadBase   int    `json:"load_base"`
-	LoadFactor int    `json:"load_factor"`
-}
-
-type SubscribeServerCommand struct {
-	subscribeCommand
-	Result *struct {
-		ServerStreamMsg
-	} `json:"result,omitempty"`
-}
-
-// Creates new `subscribe` command to subscribe to server status
-func SubscribeServer() *SubscribeServerCommand {
-	return &SubscribeServerCommand{
-		subscribeCommand: subscribeCommand{
-			Command: newCommand("subscribe"),
-			Streams: []string{"server"},
-		},
-	}
 }
