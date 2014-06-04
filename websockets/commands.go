@@ -1,6 +1,7 @@
 package websockets
 
 import (
+	"github.com/donovanhide/ripple/data"
 	"sync/atomic"
 )
 
@@ -35,16 +36,16 @@ type LedgerCommand struct {
 	Transactions bool   `json:"transactions"`
 	Result       *struct {
 		Ledger struct {
-			LedgerSequence  string   `json:"ledger_index"`
-			Accepted        bool     `json:"accepted"`
-			CloseTime       uint64   `json:"close_time"`
-			Closed          bool     `json:"closed"`
-			Hash            string   `json:"ledger_hash"`
-			PreviousLedger  string   `json:"parent_hash"`
-			TotalXRP        string   `json:"total_coins"`
-			AccountHash     string   `json:"account_hash"`
-			TransactionHash string   `json:"transaction_hash"`
-			Transactions    []string `json:"transactions"`
+			LedgerSequence  uint32                `json:"ledger_index,string"`
+			Accepted        bool                  `json:"accepted"`
+			CloseTime       data.RippleTime       `json:"close_time"`
+			Closed          bool                  `json:"closed"`
+			Hash            data.Hash256          `json:"ledger_hash"`
+			PreviousLedger  data.Hash256          `json:"parent_hash"`
+			TotalXRP        uint64                `json:"total_coins,string"`
+			AccountHash     data.Hash256          `json:"account_hash"`
+			TransactionHash data.Hash256          `json:"transaction_hash"`
+			Transactions    data.TransactionSlice `json:"transactions"`
 		}
 	} `json:"result,omitempty"`
 }

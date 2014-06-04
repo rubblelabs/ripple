@@ -1,11 +1,13 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/donovanhide/ripple/websockets"
 )
 
 func main() {
+	flag.Parse()
 	r, err := websockets.NewRemote("wss://s-east.ripple.com:443")
 	if err != nil {
 		panic(err)

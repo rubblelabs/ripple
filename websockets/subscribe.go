@@ -20,12 +20,12 @@ type LedgerStreamMsg struct {
 
 // Fields from subscribed transaction stream messages
 type TransactionStreamMsg struct {
-	Transaction         data.TransactionWithMetaData
-	EngineResult        data.TransactionResult `json:"engine_result"`
-	EngineResultCode    int                    `json:"engine_result_code"`
-	EngineResultMessage string                 `json:"engine_result_message"`
-	LedgerHash          data.Hash256           `json:"ledger_hash"`
-	LedgerSequence      uint32                 `json:"ledger_index"`
+	Transaction         data.TransactionWithMetaData `json:"-"`
+	EngineResult        data.TransactionResult       `json:"engine_result"`
+	EngineResultCode    int                          `json:"engine_result_code"`
+	EngineResultMessage string                       `json:"engine_result_message"`
+	LedgerHash          data.Hash256                 `json:"ledger_hash"`
+	LedgerSequence      uint32                       `json:"ledger_index"`
 	Status              string
 	Validated           bool
 }
@@ -71,49 +71,12 @@ func Subscribe(ledger, transactions, server bool) *SubscribeCommand {
 	}
 }
 
-func (msg *TransactionStreamMsg) UnmarshalJSON(b []byte) (err error) {
-	var tmp map[string]json.RawMessage
-	err = json.Unmarshal(b, &tmp)
-	if err != nil {
-		return
-	}
+// Wrapper to stop recursive unmarshalling
+type txStreamJSON TransactionStreamMsg
 
-	// Basic fields
-	if err = json.Unmarshal(tmp["engine_result"], &msg.EngineResult); err != nil {
-		return
+func (msg *TransactionStreamMsg) UnmarshalJSON(b []byte) error {
+	if err := json.Unmarshal(b, (*txStreamJSON)(msg)); err != nil {
+		return err
 	}
-	if err = json.Unmarshal(tmp["engine_result_code"], &msg.EngineResultCode); err != nil {
-		return
-	}
-	if err = json.Unmarshal(tmp["engine_result_message"], &msg.EngineResultMessage); err != nil {
-		return
-	}
-	if err = json.Unmarshal(tmp["ledger_hash"], &msg.LedgerHash); err != nil {
-		return
-	}
-	if err = json.Unmarshal(tmp["ledger_index"], &msg.LedgerSequence); err != nil {
-		return
-	}
-	if err = json.Unmarshal(tmp["status"], &msg.Status); err != nil {
-		return
-	}
-	if err = json.Unmarshal(tmp["validated"], &msg.Validated); err != nil {
-		return
-	}
-	if err = json.Unmarshal(tmp["transaction"], &msg.Transaction); err != nil {
-		return
-	}
-
-	// Transaction stream places the metadata *outside* of the transaction object.
-	// We'll put it into the TransactionWithMetaData struct
-	if err = json.Unmarshal(tmp["meta"], &msg.Transaction.MetaData); err != nil {
-		return
-	}
-
-	// TransactionWithMetaData has a field for LedgerSequence too...
-	if err = json.Unmarshal(tmp["ledger_index"], &msg.Transaction.LedgerSequence); err != nil {
-		return
-	}
-
-	return
+	return data.MarshalTransactionWithMetadata(b, &msg.Transaction)
 }

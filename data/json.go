@@ -54,28 +54,27 @@ type txmLedger struct {
 type txmNormal TransactionWithMetaData
 
 var (
-	txmTransactionTypeRegex = regexp.MustCompile(`"TransactionType":.*"(.*)"`)
-	txmHashRegex            = regexp.MustCompile(`"hash":.*"(.*)"`)
+	txmTransactionTypeRegex = regexp.MustCompile(`"TransactionType":.*?"(.*?)"`)
+	txmHashRegex            = regexp.MustCompile(`"hash":.*?"(.*?)"`)
 	txmMetaTypeRegex        = regexp.MustCompile(`"(meta|metaData)"`)
 )
 
 func (txm *TransactionWithMetaData) UnmarshalJSON(b []byte) error {
-	txTypeMatch := txmTransactionTypeRegex.FindAllStringSubmatch(string(b), 1)
-	hashMatch := txmHashRegex.FindAllStringSubmatch(string(b), 1)
-	metaTypeMatch := txmMetaTypeRegex.FindAllStringSubmatch(string(b), 1)
+	txTypeMatch := txmTransactionTypeRegex.FindStringSubmatch(string(b))
+	hashMatch := txmHashRegex.FindStringSubmatch(string(b))
+	metaTypeMatch := txmMetaTypeRegex.FindStringSubmatch(string(b))
 	var txType, hash, metaType string
 	if txTypeMatch == nil {
 		return fmt.Errorf("Not a valid transaction with metadata: Missing TransactionType")
 	}
-	txType = txTypeMatch[0][1]
+	txType = txTypeMatch[1]
 	if hashMatch == nil {
 		return fmt.Errorf("Not a valid transaction with metadata: Missing Hash")
 	}
-	hash = hashMatch[0][1]
+	hash = hashMatch[1]
 	if metaTypeMatch != nil {
-		metaType = metaTypeMatch[0][1]
+		metaType = metaTypeMatch[1]
 	}
-
 	txm.Transaction = GetTxFactoryByType(txType)()
 	h, err := hex.DecodeString(hash)
 	if err != nil {
@@ -110,6 +109,22 @@ func (txm TransactionWithMetaData) marshalJSON() ([]byte, []byte, error) {
 		return nil, nil, err
 	}
 	return tx, meta, nil
+}
+
+type extractTxm struct {
+	Tx   json.RawMessage `json:"transaction"`
+	Meta json.RawMessage `json:"meta"`
+}
+
+const extractTxmFormat = `%s,"meta":%s}`
+
+func MarshalTransactionWithMetadata(b []byte, txm *TransactionWithMetaData) error {
+	var extract extractTxm
+	if err := json.Unmarshal(b, &extract); err != nil {
+		return err
+	}
+	raw := fmt.Sprintf(extractTxmFormat, extract.Tx[:len(extract.Tx)-1], extract.Meta)
+	return json.Unmarshal([]byte(raw), txm)
 }
 
 const txmFormat = `%s,"hash":"%s","inLedger":%d,"ledger_index":%d,"meta":%s}`
