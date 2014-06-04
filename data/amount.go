@@ -108,10 +108,7 @@ func (v *Value) Parse(s string) error {
 			v.Offset += 6
 		}
 	}
-	if err := v.canonicalise(); err != nil {
-		return err
-	}
-	return err
+	return v.canonicalise()
 }
 
 func (v *Value) canonicalise() error {

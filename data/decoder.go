@@ -208,7 +208,7 @@ func (dec *Decoder) read(dest interface{}) error {
 func (dec *Decoder) readObject(v *reflect.Value) error {
 	var err error
 	for name, err := dec.next(); err == nil; name, err = dec.next() {
-		// fmt.Println(name, v, v.IsValid())
+		fmt.Println(name, v, v.IsValid())
 		switch name {
 		case "EndOfObject":
 			return nil
@@ -256,7 +256,7 @@ func (dec *Decoder) readObject(v *reflect.Value) error {
 				if err := f.Unmarshal(dec.r); err != nil {
 					return err
 				}
-			case *uint64, *uint32, *uint16, *uint8, *TransactionResult, *LedgerEntryType, *TransactionType:
+			case *uint64, *uint32, *uint16, *uint8, *TransactionResult, *LedgerEntryType, *TransactionType, *Index:
 				if err := dec.read(f); err != nil {
 					return err
 				}

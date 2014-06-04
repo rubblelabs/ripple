@@ -15,10 +15,10 @@ type LedgerHeader struct {
 type Ledger struct {
 	hashable
 	LedgerHeader
-	Closed       bool                       `json:"closed"`
-	Accepted     bool                       `json:"accepted"`
-	Transactions []*TransactionWithMetaData `json:"transactions"`
-	// AccountState []LedgerEntry              `json:"accountState"`
+	Closed       bool             `json:"closed"`
+	Accepted     bool             `json:"accepted"`
+	Transactions TransactionSlice `json:"transactions"`
+	AccountState LedgerEntrySlice `json:"accountState"`
 }
 
 func NewEmptyLedger(sequence uint32) *Ledger {

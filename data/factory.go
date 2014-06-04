@@ -65,10 +65,6 @@ var TxFactory = [...]func() Transaction{
 	SET_FEE:         func() Transaction { return &SetFee{TxBase: TxBase{TransactionType: SET_FEE}} },
 }
 
-func GetTxFactoryByType(txType string) func() Transaction {
-	return TxFactory[txTypes[txType]]
-}
-
 var ledgerEntryNames = [...]string{
 	ACCOUNT_ROOT:  "AccountRoot",
 	DIRECTORY:     "DirectoryNode",
@@ -125,6 +121,14 @@ func init() {
 			HashableTypes = append(HashableTypes, typ)
 		}
 	}
+}
+
+func GetTxFactoryByType(txType string) func() Transaction {
+	return TxFactory[txTypes[txType]]
+}
+
+func GetLedgerEntryFactoryByType(leType string) func() LedgerEntry {
+	return LedgerEntryFactory[ledgerEntryTypes[leType]]
 }
 
 func NewHashable(typ reflect.Type) (Hashable, error) {

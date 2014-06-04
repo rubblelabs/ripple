@@ -1,3 +1,4 @@
+// Evil things happen here. Rippled needs a V2 API...
 package data
 
 import (
@@ -7,8 +8,40 @@ import (
 	"github.com/donovanhide/ripple/crypto"
 	"regexp"
 	"strconv"
-	"time"
 )
+
+type ledgerJSON Ledger
+
+// adds all the legacy fields
+type ledgerExtraJSON struct {
+	ledgerJSON
+	HumanCloseTime *RippleTime `json:"close_time_human"`
+	Hash           Hash256     `json:"hash"`
+	LedgerHash     Hash256     `json:"ledger_hash"`
+	TotalCoins     uint64      `json:"totalCoins,string"`
+	SequenceNumber uint32      `json:"seqNum,string"`
+}
+
+func (l Ledger) MarshalJSON() ([]byte, error) {
+	return json.Marshal(ledgerExtraJSON{
+		ledgerJSON:     ledgerJSON(l),
+		HumanCloseTime: NewRippleTime(l.CloseTime),
+		Hash:           l.Hash(),
+		LedgerHash:     l.Hash(),
+		TotalCoins:     l.TotalXRP,
+		SequenceNumber: l.LedgerSequence,
+	})
+}
+
+func (l *Ledger) UnmarshalJSON(b []byte) error {
+	var ledger ledgerExtraJSON
+	if err := json.Unmarshal(b, &ledger); err != nil {
+		return err
+	}
+	*l = Ledger(ledger.ledgerJSON)
+	l.SetHash(ledger.Hash[:])
+	return nil
+}
 
 // Wrapper types to enable second level of marshalling
 // when found in ledger API call
@@ -20,13 +53,13 @@ type txmLedger struct {
 // when found in tx API call
 type txmNormal TransactionWithMetaData
 
-var txmTransactionTypeRegex = regexp.MustCompile(`"TransactionType":.*"(.*)"`)
-var txmHashRegex = regexp.MustCompile(`"hash":.*"(.*)"`)
-var txmMetaTypeRegex = regexp.MustCompile(`"(meta|metaData)"`)
+var (
+	txmTransactionTypeRegex = regexp.MustCompile(`"TransactionType":.*"(.*)"`)
+	txmHashRegex            = regexp.MustCompile(`"hash":.*"(.*)"`)
+	txmMetaTypeRegex        = regexp.MustCompile(`"(meta|metaData)"`)
+)
 
 func (txm *TransactionWithMetaData) UnmarshalJSON(b []byte) error {
-	// Apologies for all this
-	// Ripple JSON responses are horribly inconsistent
 	txTypeMatch := txmTransactionTypeRegex.FindAllStringSubmatch(string(b), 1)
 	hashMatch := txmHashRegex.FindAllStringSubmatch(string(b), 1)
 	metaTypeMatch := txmMetaTypeRegex.FindAllStringSubmatch(string(b), 1)
@@ -67,20 +100,101 @@ func (txm *TransactionWithMetaData) UnmarshalJSON(b []byte) error {
 	}
 }
 
+func (txm TransactionWithMetaData) marshalJSON() ([]byte, []byte, error) {
+	tx, err := json.Marshal(txm.Transaction)
+	if err != nil {
+		return nil, nil, err
+	}
+	meta, err := json.Marshal(txm.MetaData)
+	if err != nil {
+		return nil, nil, err
+	}
+	return tx, meta, nil
+}
+
 const txmFormat = `%s,"hash":"%s","inLedger":%d,"ledger_index":%d,"meta":%s}`
 
 func (txm TransactionWithMetaData) MarshalJSON() ([]byte, error) {
-	// This is an evil hack to be revisited
-	tx, err := json.Marshal(txm.Transaction)
-	if err != nil {
-		return nil, err
-	}
-	meta, err := json.Marshal(txm.MetaData)
+	tx, meta, err := txm.marshalJSON()
 	if err != nil {
 		return nil, err
 	}
 	out := fmt.Sprintf(txmFormat, string(tx[:len(tx)-1]), txm.Hash().String(), txm.LedgerSequence, txm.LedgerSequence, string(meta))
 	return []byte(out), nil
+}
+
+const txmSliceFormat = `%s,"hash":"%s","metaData":%s}`
+
+func (s TransactionSlice) MarshalJSON() ([]byte, error) {
+	raw := make([]json.RawMessage, len(s))
+	var err error
+	var tx, meta []byte
+	for i, txm := range s {
+		if tx, meta, err = txm.marshalJSON(); err != nil {
+			return nil, err
+		}
+		extra := fmt.Sprintf(txmSliceFormat, string(tx[:len(tx)-1]), txm.Hash().String(), meta)
+		raw[i] = json.RawMessage(extra)
+	}
+	return json.Marshal(raw)
+}
+
+var (
+	leTypeRegex  = regexp.MustCompile(`"LedgerEntryType":.*"(.*)"`)
+	leIndexRegex = regexp.MustCompile(`"index":.*"(.*)"`)
+)
+
+func (l *LedgerEntrySlice) UnmarshalJSON(b []byte) error {
+	var s []json.RawMessage
+	if err := json.Unmarshal(b, &s); err != nil {
+		return err
+	}
+	for _, raw := range s {
+		leTypeMatch := leTypeRegex.FindStringSubmatch(string(raw))
+		indexMatch := leIndexRegex.FindStringSubmatch(string(raw))
+		if leTypeMatch == nil {
+			return fmt.Errorf("Bad LedgerEntryType")
+		}
+		if indexMatch == nil {
+			return fmt.Errorf("Missing LedgerEntry index")
+		}
+		le := GetLedgerEntryFactoryByType(leTypeMatch[1])()
+		index, err := hex.DecodeString(indexMatch[1])
+		if err != nil {
+			return fmt.Errorf("Bad index: %s", index)
+		}
+		le.SetHash(index)
+		if err := json.Unmarshal(raw, &le); err != nil {
+			return err
+		}
+		*l = append(*l, le)
+	}
+	return nil
+}
+
+const leSliceFormat = `%s,"index":"%s"}`
+
+func (s LedgerEntrySlice) MarshalJSON() ([]byte, error) {
+	raw := make([]json.RawMessage, len(s))
+	var err error
+	for i, le := range s {
+		if raw[i], err = json.Marshal(le); err != nil {
+			return nil, err
+		}
+		extra := fmt.Sprintf(leSliceFormat, string(raw[i][:len(raw[i])-1]), le.Hash().String())
+		raw[i] = json.RawMessage(extra)
+	}
+	return json.Marshal(raw)
+}
+
+func (i Index) MarshalText() ([]byte, error) {
+	return []byte(fmt.Sprintf("%016X", i)), nil
+}
+
+func (i *Index) UnmarshalText(b []byte) error {
+	n, err := strconv.ParseUint(string(b), 16, 64)
+	*i = Index(n)
+	return err
 }
 
 func (r TransactionResult) MarshalText() ([]byte, error) {
@@ -119,13 +233,12 @@ func (t *TransactionType) UnmarshalText(b []byte) error {
 	return fmt.Errorf("Unknown TransactionType: %s", string(b))
 }
 
-func (t *RippleTime) UnmarshalJSON(b []byte) error {
-	if unix, err := strconv.ParseInt(string(b), 10, 64); err != nil {
-		return fmt.Errorf("Bad RippleTime:%s", string(b))
-	} else {
-		*t = RippleTime(time.Unix(unix+rippleEpoch, 0))
-	}
-	return nil
+func (t *RippleTime) MarshalText() ([]byte, error) {
+	return []byte(t.String()), nil
+}
+
+func (t *RippleTime) UnmarshalText(b []byte) error {
+	return t.Parse(string(b))
 }
 
 func (v *Value) MarshalText() ([]byte, error) {
@@ -135,53 +248,46 @@ func (v *Value) MarshalText() ([]byte, error) {
 	return []byte(v.String()), nil
 }
 
-// Interpret as XRP in drips
-func (v *Value) UnmarshalText(b []byte) (err error) {
+func (v *Value) UnmarshalText(b []byte) error {
 	v.Native = true
 	return v.Parse(string(b))
 }
 
+type nonNativeValue Value
+
+func (v *nonNativeValue) UnmarshalText(b []byte) error {
+	v.Native = false
+	return (*Value)(v).Parse(string(b))
+}
+
+func (v *nonNativeValue) MarshalText() ([]byte, error) {
+	return (*Value)(v).MarshalText()
+}
+
 type amountJSON struct {
-	Value    *Value   `json:"value"`
-	Currency Currency `json:"currency"`
-	Issuer   Account  `json:"issuer"`
+	Value    *nonNativeValue `json:"value"`
+	Currency Currency        `json:"currency"`
+	Issuer   Account         `json:"issuer"`
 }
 
 func (a *Amount) MarshalJSON() ([]byte, error) {
 	if a.Native {
 		return []byte(`"` + strconv.FormatUint(a.Num, 10) + `"`), nil
 	}
-	return json.Marshal(amountJSON{a.Value, a.Currency, a.Issuer})
+	return json.Marshal(amountJSON{(*nonNativeValue)(a.Value), a.Currency, a.Issuer})
 }
 
 func (a *Amount) UnmarshalJSON(b []byte) (err error) {
-	a.Value = &Value{}
-
-	// Try interpret as IOU
-	var m map[string]string
-	err = json.Unmarshal(b, &m)
-	if err == nil {
-		if err = a.Currency.UnmarshalText([]byte(m["currency"])); err != nil {
-			return
-		}
-
-		a.Value.Native = false
-		if err = a.Value.Parse(m["value"]); err != nil {
-			return
-		}
-
-		if err = a.Issuer.UnmarshalText([]byte(m["issuer"])); err != nil {
-			return
-		}
-		return
+	if b[0] != '{' {
+		a.Value = new(Value)
+		return json.Unmarshal(b, a.Value)
 	}
-
-	// Interpret as XRP in drips
-	if err = a.Value.UnmarshalText(b[1 : len(b)-1]); err != nil {
-		return
+	var dummy amountJSON
+	if err := json.Unmarshal(b, &dummy); err != nil {
+		return err
 	}
-
-	return
+	a.Value, a.Currency, a.Issuer = (*Value)(dummy.Value), dummy.Currency, dummy.Issuer
+	return nil
 }
 
 func (c Currency) MarshalText() ([]byte, error) {
@@ -198,7 +304,7 @@ func (h Hash128) MarshalText() ([]byte, error) {
 	return b2h(h[:]), nil
 }
 
-func (h Hash128) UnmarshalText(b []byte) error {
+func (h *Hash128) UnmarshalText(b []byte) error {
 	_, err := hex.Decode(h[:], b)
 	return err
 }
@@ -207,7 +313,7 @@ func (h Hash160) MarshalText() ([]byte, error) {
 	return b2h(h[:]), nil
 }
 
-func (h Hash160) UnmarshalText(b []byte) error {
+func (h *Hash160) UnmarshalText(b []byte) error {
 	_, err := hex.Decode(h[:], b)
 	return err
 }
@@ -232,6 +338,17 @@ func (a Account) MarshalText() ([]byte, error) {
 	}
 }
 
+func (r RegularKey) MarshalText() ([]byte, error) {
+	if len(r) == 0 {
+		return nil, nil
+	}
+	if address, err := crypto.NewRippleAccount(r[:]); err != nil {
+		return nil, err
+	} else {
+		return []byte(address.ToJSON()), nil
+	}
+}
+
 // Expects base58-encoded account id
 func (a *Account) UnmarshalText(text []byte) error {
 	tmp, err := crypto.NewRippleHash(string(text))
@@ -246,15 +363,8 @@ func (a *Account) UnmarshalText(text []byte) error {
 	return nil
 }
 
-func (r RegularKey) MarshalText() ([]byte, error) {
-	if len(r) == 0 {
-		return nil, nil
-	}
-	if address, err := crypto.NewRippleAccount(r[:]); err != nil {
-		return nil, err
-	} else {
-		return []byte(address.ToJSON()), nil
-	}
+func (v VariableLength) MarshalText() ([]byte, error) {
+	return b2h(v), nil
 }
 
 // Expects variable length hex
@@ -262,10 +372,6 @@ func (v *VariableLength) UnmarshalText(b []byte) error {
 	var err error
 	*v, err = hex.DecodeString(string(b))
 	return err
-}
-
-func (v VariableLength) MarshalText() ([]byte, error) {
-	return b2h(v), nil
 }
 
 func (p PublicKey) MarshalText() ([]byte, error) {
