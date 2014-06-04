@@ -233,12 +233,12 @@ func (t *TransactionType) UnmarshalText(b []byte) error {
 	return fmt.Errorf("Unknown TransactionType: %s", string(b))
 }
 
-func (t *RippleTime) MarshalText() ([]byte, error) {
+func (t RippleTime) MarshalText() ([]byte, error) {
 	return []byte(t.String()), nil
 }
 
-func (t *RippleTime) UnmarshalText(b []byte) error {
-	return t.Parse(string(b))
+func (t *RippleTime) UnmarshalJSON(b []byte) error {
+	return t.Parse(string(b[1 : len(b)-1]))
 }
 
 func (v *Value) MarshalText() ([]byte, error) {
