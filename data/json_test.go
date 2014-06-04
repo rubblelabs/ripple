@@ -16,7 +16,7 @@ var _ = Suite(&JSONSuite{})
 func compare(c *C, expected, obtained string) {
 	want := strings.Split(expected, "\n")
 	got := strings.Split(obtained, "\n")
-	// c.Check(len(got), Equals, len(want))
+	c.Check(len(got), Equals, len(want))
 	sort.StringSlice(want).Sort()
 	sort.StringSlice(got).Sort()
 	max := len(want)
@@ -28,6 +28,7 @@ func compare(c *C, expected, obtained string) {
 		if g != w {
 			c.Logf("Want: %s Got: %s", w, g)
 		}
+		// TODO: find out why some numbers get treated as floats
 		// c.Check(g, Equals, w)
 	}
 }

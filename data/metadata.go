@@ -26,6 +26,8 @@ type MetaData struct {
 	DeliveredAmount   *Amount `json:",omitempty"`
 }
 
+type TransactionSlice []*TransactionWithMetaData
+
 type TransactionWithMetaData struct {
 	Transaction
 	MetaData       MetaData `json:"meta"`
