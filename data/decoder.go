@@ -208,7 +208,7 @@ func (dec *Decoder) read(dest interface{}) error {
 func (dec *Decoder) readObject(v *reflect.Value) error {
 	var err error
 	for name, err := dec.next(); err == nil; name, err = dec.next() {
-		fmt.Println(name, v, v.IsValid())
+		// fmt.Println(name, v, v.IsValid())
 		switch name {
 		case "EndOfObject":
 			return nil
