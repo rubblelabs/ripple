@@ -198,7 +198,7 @@ func (p *Peer) handleHello(m *Manager, hello *protocol.Hello) {
 		NodePublic:      []byte(m.PublicKey.ToJSON()),
 		NodeProof:       proof,
 		Ipv4Port:        proto.Uint32(uint32(port)),
-		NetTime:         proto.Uint64(uint64(data.Now())),
+		NetTime:         proto.Uint64(uint64(data.Now().Uint32())),
 		NodePrivate:     proto.Bool(true),
 		TestNet:         proto.Bool(false),
 	}

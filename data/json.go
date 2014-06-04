@@ -15,17 +15,17 @@ type ledgerJSON Ledger
 // adds all the legacy fields
 type ledgerExtraJSON struct {
 	ledgerJSON
-	HumanCloseTime *RippleTime `json:"close_time_human"`
-	Hash           Hash256     `json:"hash"`
-	LedgerHash     Hash256     `json:"ledger_hash"`
-	TotalCoins     uint64      `json:"totalCoins,string"`
-	SequenceNumber uint32      `json:"seqNum,string"`
+	HumanCloseTime *RippleHumanTime `json:"close_time_human"`
+	Hash           Hash256          `json:"hash"`
+	LedgerHash     Hash256          `json:"ledger_hash"`
+	TotalCoins     uint64           `json:"totalCoins,string"`
+	SequenceNumber uint32           `json:"seqNum,string"`
 }
 
 func (l Ledger) MarshalJSON() ([]byte, error) {
 	return json.Marshal(ledgerExtraJSON{
 		ledgerJSON:     ledgerJSON(l),
-		HumanCloseTime: NewRippleTime(l.CloseTime),
+		HumanCloseTime: l.CloseTime.Human(),
 		Hash:           l.Hash(),
 		LedgerHash:     l.Hash(),
 		TotalCoins:     l.TotalXRP,
@@ -233,12 +233,26 @@ func (t *TransactionType) UnmarshalText(b []byte) error {
 	return fmt.Errorf("Unknown TransactionType: %s", string(b))
 }
 
-func (t RippleTime) MarshalText() ([]byte, error) {
-	return []byte(t.String()), nil
+func (t RippleTime) MarshalJSON() ([]byte, error) {
+	return []byte(strconv.FormatUint(uint64(t.Uint32()), 10)), nil
 }
 
 func (t *RippleTime) UnmarshalJSON(b []byte) error {
-	return t.Parse(string(b[1 : len(b)-1]))
+	n, err := strconv.ParseUint(string(b), 10, 32)
+	if err != nil {
+		return err
+	}
+	t.SetUint32(uint32(n))
+	return nil
+}
+
+func (t RippleHumanTime) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + t.String() + `"`), nil
+}
+
+func (t *RippleHumanTime) UnmarshalJSON(b []byte) error {
+	t.RippleTime = &RippleTime{}
+	return t.SetString(string(b[1 : len(b)-1]))
 }
 
 func (v *Value) MarshalText() ([]byte, error) {

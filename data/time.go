@@ -9,30 +9,55 @@ const (
 	rippleTimeFormat string = "2006-Jan-02 15:04:05"
 )
 
-type RippleTime time.Time
-
-func NewRippleTime(t uint32) *RippleTime {
-	r := time.Unix(int64(t)+rippleTimeEpoch, 0)
-	return (*RippleTime)(&r)
+type RippleTime struct {
+	T uint32
 }
 
-func (t *RippleTime) Parse(s string) error {
-	p, err := time.Parse(rippleTimeFormat, s)
+type RippleHumanTime struct {
+	*RippleTime
+}
+
+func NewRippleTime(t uint32) *RippleTime {
+	return &RippleTime{t}
+}
+
+func convertToRippleTime(t time.Time) uint32 {
+	return uint32(t.Sub(time.Unix(rippleTimeEpoch, 0)).Nanoseconds() / 1000000000)
+}
+
+func (t *RippleTime) time() time.Time {
+	return time.Unix(int64(t.T)+rippleTimeEpoch, 0)
+}
+
+func Now() *RippleTime {
+	return &RippleTime{convertToRippleTime(time.Now())}
+}
+
+func (t *RippleTime) SetString(s string) error {
+	v, err := time.Parse(rippleTimeFormat, s)
 	if err != nil {
 		return err
 	}
-	*t = RippleTime(p)
+	t.SetUint32(convertToRippleTime(v))
 	return nil
 }
 
-func Now() int64 {
-	return time.Now().Sub(time.Unix(rippleTimeEpoch, 0)).Nanoseconds() / 1000000000
+func (t *RippleTime) SetUint32(n uint32) {
+	t.T = n
+}
+
+func (t *RippleTime) Uint32() uint32 {
+	return t.T
+}
+
+func (t *RippleTime) Human() *RippleHumanTime {
+	return &RippleHumanTime{t}
 }
 
 func (t *RippleTime) String() string {
-	return time.Time(*t).UTC().Format(rippleTimeFormat)
+	return t.time().UTC().Format(rippleTimeFormat)
 }
 
 func (t *RippleTime) Short() string {
-	return time.Time(*t).UTC().Format("15:04:05")
+	return t.time().UTC().Format("15:04:05")
 }
