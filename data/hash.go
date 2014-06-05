@@ -3,6 +3,7 @@ package data
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/donovanhide/ripple/crypto"
 )
 
 type Hash128 [16]byte
@@ -84,9 +85,27 @@ func (p *PublicKey) Bytes() []byte {
 	return []byte(nil)
 }
 
+// Expects address in base58 form
+func NewAccountFromAddress(s string) (*Account, error) {
+	hash, err := crypto.NewRippleHashCheck(s, crypto.RIPPLE_ACCOUNT_ID)
+	if err != nil {
+		return nil, err
+	}
+	var account Account
+	copy(account[:], hash.Payload())
+	return &account, nil
+}
+
+func (a Account) Hash() (crypto.Hash, error) {
+	return crypto.NewRippleAccount(a[:])
+}
+
 func (a Account) String() string {
-	b, _ := a.MarshalText()
-	return string(b)
+	address, err := a.Hash()
+	if err != nil {
+		return fmt.Sprintf("Bad Address: %s", b2h(a[:]))
+	}
+	return address.String()
 }
 
 func (a Account) IsZero() bool {
@@ -100,9 +119,27 @@ func (a *Account) Bytes() []byte {
 	return []byte(nil)
 }
 
+// Expects address in base58 form
+func NewRegularKeyFromAddress(s string) (*RegularKey, error) {
+	hash, err := crypto.NewRippleHashCheck(s, crypto.RIPPLE_ACCOUNT_PUBLIC)
+	if err != nil {
+		return nil, err
+	}
+	var regKey RegularKey
+	copy(regKey[:], hash.Payload())
+	return &regKey, nil
+}
+
+func (r RegularKey) Hash() (crypto.Hash, error) {
+	return crypto.NewRippleAccount(r[:])
+}
+
 func (r RegularKey) String() string {
-	b, _ := r.MarshalText()
-	return string(b)
+	address, err := r.Hash()
+	if err != nil {
+		return fmt.Sprintf("Bad Address: %s", b2h(r[:]))
+	}
+	return address.String()
 }
 
 func (r *RegularKey) Bytes() []byte {

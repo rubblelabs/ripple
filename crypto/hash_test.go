@@ -27,12 +27,12 @@ var testAccounts = map[string]struct {
 
 var accountTests = TestSlice{
 	{accountCheck("0").Value().String(), Equals, "0", "Parse 0"},
-	{accountCheck("0").ToJSON(), Equals, ACCOUNT_ZERO, "Parse 0 export"},
+	{accountCheck("0").String(), Equals, ACCOUNT_ZERO, "Parse 0 export"},
 	{accountCheck("1").Value().String(), Equals, "1", "Parse 1"},
-	{accountCheck("1").ToJSON(), Equals, ACCOUNT_ONE, "Parse 1 export"},
-	{accountCheck(ACCOUNT_ZERO).ToJSON(), Equals, ACCOUNT_ZERO, "Parse rrrrrrrrrrrrrrrrrrrrrhoLvTp export"},
-	{accountCheck(ACCOUNT_ONE).ToJSON(), Equals, ACCOUNT_ONE, "Parse rrrrrrrrrrrrrrrrrrrrBZbvji export"},
-	{accountCheck(testAccounts["mtgox"].Account).ToJSON(), Equals, testAccounts["mtgox"].Account, "Parse mtgox export"},
+	{accountCheck("1").String(), Equals, ACCOUNT_ONE, "Parse 1 export"},
+	{accountCheck(ACCOUNT_ZERO).String(), Equals, ACCOUNT_ZERO, "Parse rrrrrrrrrrrrrrrrrrrrrhoLvTp export"},
+	{accountCheck(ACCOUNT_ONE).String(), Equals, ACCOUNT_ONE, "Parse rrrrrrrrrrrrrrrrrrrrBZbvji export"},
+	{accountCheck(testAccounts["mtgox"].Account).String(), Equals, testAccounts["mtgox"].Account, "Parse mtgox export"},
 	{accountCheck(ACCOUNT_ZERO), Not(Equals), nil, "IsValid rrrrrrrrrrrrrrrrrrrrrhoLvTp"},
 	{ErrorCheck(NewRippleHash("rrrrrrrrrrrrrrrrrrrrrhoLvT")), ErrorMatches, "Bad Base58 checksum:.*", "IsValid rrrrrrrrrrrrrrrrrrrrrhoLvT"},
 }

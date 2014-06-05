@@ -195,7 +195,7 @@ func (p *Peer) handleHello(m *Manager, hello *protocol.Hello) {
 		FullVersion:     proto.String(m.Name),
 		ProtoVersion:    proto.Uint32(MAJOR_VERSION),
 		ProtoVersionMin: proto.Uint32(MINOR_VERSION),
-		NodePublic:      []byte(m.PublicKey.ToJSON()),
+		NodePublic:      []byte(m.PublicKey.String()),
 		NodeProof:       proof,
 		Ipv4Port:        proto.Uint32(uint32(port)),
 		NetTime:         proto.Uint64(uint64(data.Now().Uint32())),

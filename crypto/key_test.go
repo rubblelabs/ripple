@@ -14,7 +14,7 @@ func checkHash(h Hash, err error) string {
 	if err != nil {
 		panic(err)
 	}
-	return h.ToJSON()
+	return h.String()
 }
 
 func checkSignature(sender, receiver Key, hash []byte) bool {
@@ -48,14 +48,14 @@ func hexToBytes(s string) []byte {
 func (s *KeySuite) TestWikiVectors(c *C) {
 	zero, err := NewRippleHash("0")
 	c.Check(err, IsNil)
-	c.Check(zero.ToJSON(), Equals, ACCOUNT_ZERO)
+	c.Check(zero.String(), Equals, ACCOUNT_ZERO)
 	c.Check(checkHex(Sha512Half(zero.PayloadTrimmed())), Equals, "B8244D028981D693AF7B456AF8EFA4CAD63D282E19FF14942C246E50D9351D22")
 
 	seed := hexToBytes("71ED064155FFADFA38782C5E0158CB26")
 	key, err := GenerateRootDeterministicKey(seed)
 	c.Check(err, IsNil)
 	c.Check(checkHex(key.PrivateBytes(), nil), Equals, "7CFBA64F771E93E817E15039215430B53F7401C34931D111EAB3510B22DBB0D8")
-	c.Check(key.Seed.ToJSON(), Equals, "shHM53KPZ87Gwdqarm1bAmPeXg8Tn")
+	c.Check(key.Seed.String(), Equals, "shHM53KPZ87Gwdqarm1bAmPeXg8Tn")
 	c.Check(checkHex(key.Seed.Value().Bytes(), nil), Equals, "71ED064155FFADFA38782C5E0158CB26")
 	c.Check(checkHash(key.PublicGenerator()), Equals, "fht5yrLWh3P8DrJgQuVNDPQVXGTMyPpgRHFKGQzFQ66o3ssesk3o")
 	c.Check(checkHash(key.GenerateAccountId(0)), Equals, "rhcfR9Cg98qCxHpCcPBmMonbDBXo84wyTn")
@@ -73,7 +73,7 @@ func (s *KeySuite) TestRippledVectors(c *C) {
 	testMessage := []byte("Hello, nurse!")
 	seed, err := GenerateFamilySeed("masterpassphrase")
 	c.Check(err, IsNil)
-	c.Check(seed.ToJSON(), Equals, "snoPBrXtMeMyMHUVTgbuqAfg1SUTb")
+	c.Check(seed.String(), Equals, "snoPBrXtMeMyMHUVTgbuqAfg1SUTb")
 	key, err := GenerateRootDeterministicKey(seed.PayloadTrimmed())
 	c.Check(err, IsNil)
 	c.Check(checkHash(key.PublicNodeKey()), Equals, "n94a1u4jAz288pZLtw6yFWVbi89YamiC6JBXPVUj5zmExe5fTVg9")

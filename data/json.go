@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/donovanhide/ripple/crypto"
 	"regexp"
 	"strconv"
 )
@@ -357,38 +356,38 @@ func (h *Hash256) UnmarshalText(b []byte) error {
 }
 
 func (a Account) MarshalText() ([]byte, error) {
-	if len(a) == 0 {
-		return nil, nil
-	}
-	if address, err := crypto.NewRippleAccount(a[:]); err != nil {
+	address, err := a.Hash()
+	if err != nil {
 		return nil, err
-	} else {
-		return []byte(address.ToJSON()), nil
 	}
-}
-
-func (r RegularKey) MarshalText() ([]byte, error) {
-	if len(r) == 0 {
-		return nil, nil
-	}
-	if address, err := crypto.NewRippleAccount(r[:]); err != nil {
-		return nil, err
-	} else {
-		return []byte(address.ToJSON()), nil
-	}
+	return address.MarshalText()
 }
 
 // Expects base58-encoded account id
-func (a *Account) UnmarshalText(text []byte) error {
-	tmp, err := crypto.NewRippleHash(string(text))
+func (a *Account) UnmarshalText(b []byte) error {
+	account, err := NewAccountFromAddress(string(b))
 	if err != nil {
 		return err
 	}
-	if tmp.Version() != crypto.RIPPLE_ACCOUNT_ID {
-		return fmt.Errorf("Incorrect version for Account: %d", tmp.Version())
-	}
+	copy(a[:], account[:])
+	return nil
+}
 
-	copy(a[:], tmp.Payload())
+func (r RegularKey) MarshalText() ([]byte, error) {
+	address, err := r.Hash()
+	if err != nil {
+		return nil, err
+	}
+	return address.MarshalText()
+}
+
+// Expects base58-encoded account id
+func (r *RegularKey) UnmarshalText(b []byte) error {
+	account, err := NewRegularKeyFromAddress(string(b))
+	if err != nil {
+		return err
+	}
+	copy(r[:], account[:])
 	return nil
 }
 

@@ -1,7 +1,6 @@
 package crypto
 
 import (
-	"encoding/json"
 	"fmt"
 	"math/big"
 )
@@ -12,8 +11,9 @@ type Hash interface {
 	Payload() []byte
 	PayloadTrimmed() []byte
 	Value() *big.Int
-	ToJSON() string
+	String() string
 	Clone() Hash
+	MarshalText() ([]byte, error)
 }
 
 // First byte is the network
@@ -31,6 +31,20 @@ func NewRippleHash(s string) (Hash, error) {
 	default:
 		return newHashFromString(s, RIPPLE)
 	}
+}
+
+// Checks hash matches expected version
+func NewRippleHashCheck(s string, version HashVersion) (Hash, error) {
+	hash, err := NewRippleHash(s)
+	if err != nil {
+		return nil, err
+	}
+	if hash.Version() != version {
+		want := hashTypes[RIPPLE][version].Description
+		got := hashTypes[RIPPLE][hash.Version()].Description
+		return nil, fmt.Errorf("Bad version for: %s expected: %s got: %s ", s, want, got)
+	}
+	return hash, nil
 }
 
 func NewRippleAccount(b []byte) (Hash, error) {
@@ -93,14 +107,22 @@ func newHashFromString(s string, network HashNetwork) (Hash, error) {
 	return append(hash{byte(network)}, decoded[:len(decoded)-4]...), nil
 }
 
-func (h hash) ToJSON() string {
+func (h hash) string() (string, error) {
 	b := append(hash{byte(h.Version())}, h.Payload()...)
 	sha, err := DoubleSha256(b)
 	if err != nil {
-		panic(fmt.Sprintf("Bad Sha256 of Version and Payload: %s", err.Error()))
+		return "", fmt.Errorf("Bad Sha256 of Version and Payload: %s", err.Error())
 	}
 	b = append(b, sha[0:4]...)
-	return Base58Encode(b, alphabets[h.Network()])
+	return Base58Encode(b, alphabets[h.Network()]), nil
+}
+
+func (h hash) String() string {
+	s, err := h.string()
+	if err != nil {
+		return err.Error()
+	}
+	return s
 }
 
 func (h hash) Network() HashNetwork {
@@ -130,8 +152,12 @@ func (h hash) Value() *big.Int {
 	return big.NewInt(0).SetBytes(h.Payload())
 }
 
-func (h hash) MarshalJSON() ([]byte, error) {
-	return json.Marshal(h.ToJSON())
+func (h hash) MarshalText() ([]byte, error) {
+	s, err := h.string()
+	if err != nil {
+		return nil, err
+	}
+	return []byte(s), nil
 }
 
 func (h hash) Clone() Hash {
