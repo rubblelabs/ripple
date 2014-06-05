@@ -26,8 +26,8 @@ func search(target *regexp.Regexp) {
 		checkErr(err)
 		account, err := key.GenerateAccountId(0)
 		checkErr(err)
-		if target.MatchString(account.ToJSON()) {
-			log.Println(key.Seed.ToJSON(), account.ToJSON())
+		if target.MatchString(account.String()) {
+			log.Println(key.Seed.String(), account.String())
 		}
 	}
 }
