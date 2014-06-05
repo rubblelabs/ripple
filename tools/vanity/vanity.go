@@ -12,7 +12,7 @@ import (
 )
 
 var name = flag.String("name", "ripple", "desired name to appear in ripple account id")
-var insensitive = flag.Bool("insenstive", true, "ignore case sensitity")
+var insensitive = flag.Bool("insenstive", true, "ignore case sensitivity")
 
 func checkErr(err error) {
 	if err != nil {
