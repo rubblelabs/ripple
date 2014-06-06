@@ -49,7 +49,7 @@ func (v *Value) Debug() string {
 	return fmt.Sprintf("Native: %t Negative: %t Value: %d Offset: %d", v.Native, v.Negative, v.Num, v.Offset)
 }
 
-func NewValue(native, negative bool, num uint64, offset int64) *Value {
+func newValue(native, negative bool, num uint64, offset int64) *Value {
 	return &Value{
 		Native:   native,
 		Negative: negative,
@@ -159,7 +159,7 @@ func (v *Value) canonicalise() error {
 }
 
 func (v *Value) Clone() *Value {
-	return NewValue(v.Native, v.Negative, v.Num, v.Offset)
+	return newValue(v.Native, v.Negative, v.Num, v.Offset)
 }
 
 func (v *Value) Equals(other *Value) bool {
@@ -181,7 +181,7 @@ func NewAmount(v interface{}) (*Amount, error) {
 	switch n := v.(type) {
 	case int64:
 		return &Amount{
-			Value: NewValue(true, n < 0, abs(n), 0),
+			Value: newValue(true, n < 0, abs(n), 0),
 		}, nil
 	case string:
 		amount := &Amount{
@@ -282,7 +282,7 @@ func (a *Amount) Add(b *Amount) (*Amount, error) {
 		return NewAmount(int64(a.Num + b.Num))
 	default:
 		av, bv, ao := a.factor(b.Value)
-		v := NewValue(false, (av+bv) < 0, abs(av+bv), ao)
+		v := newValue(false, (av+bv) < 0, abs(av+bv), ao)
 		c := newAmount(v, a.Currency, a.Issuer)
 		return c, c.canonicalise()
 	}
@@ -298,7 +298,7 @@ func (a *Amount) Subtract(b *Amount) (*Amount, error) {
 		return NewAmount(int64(a.Num - b.Num))
 	default:
 		av, bv, ao := a.factor(b.Value)
-		v := NewValue(false, (av-bv) < 0, abs(av-bv), ao)
+		v := newValue(false, (av-bv) < 0, abs(av-bv), ao)
 		c := newAmount(v, a.Currency, a.Issuer)
 		return c, c.canonicalise()
 	}
@@ -337,7 +337,7 @@ func (a *Amount) Multiply(b *Amount) (*Amount, error) {
 	if len(m.Bytes()) > 64 {
 		return nil, fmt.Errorf("Multiply: %s*%s", a.Debug(), b.Debug())
 	}
-	v := NewValue(a.Native, a.Negative != b.Negative, m.Uint64()+7, ao+bo+14)
+	v := newValue(a.Native, a.Negative != b.Negative, m.Uint64()+7, ao+bo+14)
 	c := newAmount(v, a.Currency, a.Issuer)
 	return c, c.canonicalise()
 }
@@ -369,7 +369,7 @@ func (num *Amount) Divide(den *Amount) (*Amount, error) {
 	if len(d.Bytes()) > 64 {
 		return nil, fmt.Errorf("Divide: %s/%s", num.Debug(), den.Debug())
 	}
-	v := NewValue(num.Native, num.Negative != den.Negative, d.Uint64()+5, ao-bo-17)
+	v := newValue(num.Native, num.Negative != den.Negative, d.Uint64()+5, ao-bo-17)
 	c := newAmount(v, num.Currency, num.Issuer)
 	return c, c.canonicalise()
 }
