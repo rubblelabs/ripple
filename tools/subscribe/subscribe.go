@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/donovanhide/ripple/data"
 	"github.com/donovanhide/ripple/websockets"
 	"github.com/fatih/color"
 )
@@ -26,6 +27,7 @@ func main() {
 
 	ledgerStyle := color.New(color.FgRed, color.Underline)
 	transactionStyle := color.New(color.FgGreen)
+	nodeStyle := color.New(color.FgBlue)
 	serverStyle := color.New(color.FgMagenta)
 
 	// Consume messages as they arrive
@@ -45,6 +47,12 @@ func main() {
 				msg.Transaction.GetTransactionType().String(),
 				msg.Transaction.GetAccount(),
 			)
+			for _, n := range msg.Transaction.MetaData.AffectedNodes {
+				s := ExplainNodeEffect(&n)
+				if s != "" {
+					nodeStyle.Printf("        %s\n", s)
+				}
+			}
 		case *websockets.ServerStreamMsg:
 			serverStyle.Printf(
 				"Server Status: %s (%d/%d)\n",
@@ -53,5 +61,43 @@ func main() {
 				msg.LoadBase,
 			)
 		}
+	}
+}
+
+func ExplainNodeEffect(ne *data.NodeEffect) string {
+	var op string
+	var n *data.AffectedNode
+	var fields interface{}
+
+	switch {
+	case ne.CreatedNode != nil:
+		op = "Created"
+		n = ne.CreatedNode
+		fields = n.NewFields
+	case ne.ModifiedNode != nil:
+		op = "Modified"
+		n = ne.ModifiedNode
+		fields = n.FinalFields
+	case ne.DeletedNode != nil:
+		op = "Deleted"
+		n = ne.DeletedNode
+		fields = n.FinalFields
+	}
+
+	switch n.LedgerEntryType {
+	case data.DIRECTORY:
+		// Skip
+		return ""
+
+	case data.OFFER:
+		return fmt.Sprintf("%s Offer %s %s for %s @ %s",
+			op,
+			fields.(*data.OfferFields).Account,
+			fields.(*data.OfferFields).TakerGets,
+			fields.(*data.OfferFields).TakerPays,
+		)
+
+	default:
+		return fmt.Sprintf("%s %s node: %s", op, n.LedgerEntryType, n.LedgerIndex)
 	}
 }
