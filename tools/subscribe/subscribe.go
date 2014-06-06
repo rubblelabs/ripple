@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/donovanhide/ripple/websockets"
+	"github.com/fatih/color"
 )
 
 func main() {
@@ -23,25 +24,29 @@ func main() {
 		confirmation.(*websockets.SubscribeCommand).Streams,
 	)
 
+	ledgerStyle := color.New(color.FgRed, color.Underline)
+	transactionStyle := color.New(color.FgGreen)
+	serverStyle := color.New(color.FgMagenta)
+
 	// Consume messages as they arrive
 	for {
 		msg := <-r.Incoming
 		switch msg := msg.(type) {
 		case *websockets.LedgerStreamMsg:
-			fmt.Printf(
+			ledgerStyle.Printf(
 				"Ledger %d closed at %s with %d transactions\n",
 				msg.LedgerSequence,
 				msg.LedgerTime.String(),
 				msg.TxnCount,
 			)
 		case *websockets.TransactionStreamMsg:
-			fmt.Printf(
+			transactionStyle.Printf(
 				"    %s by %s\n",
 				msg.Transaction.GetTransactionType().String(),
 				msg.Transaction.GetAccount(),
 			)
 		case *websockets.ServerStreamMsg:
-			fmt.Printf(
+			serverStyle.Printf(
 				"Server Status: %s (%d/%d)\n",
 				msg.Status,
 				msg.LoadFactor,
