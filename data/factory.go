@@ -123,12 +123,20 @@ func init() {
 	}
 }
 
+func (le LedgerEntryType) String() string {
+	return ledgerEntryNames[le]
+}
+
 func GetTxFactoryByType(txType string) func() Transaction {
 	return TxFactory[txTypes[txType]]
 }
 
 func GetLedgerEntryFactoryByType(leType string) func() LedgerEntry {
 	return LedgerEntryFactory[ledgerEntryTypes[leType]]
+}
+
+func GetLedgerEntryFieldsFactoryByType(leType LedgerEntryType) func() interface{} {
+	return fieldsFactory[leType]
 }
 
 func NewHashable(typ reflect.Type) (Hashable, error) {

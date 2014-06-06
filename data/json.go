@@ -411,3 +411,50 @@ func (p *PublicKey) UnmarshalText(b []byte) error {
 	_, err := hex.Decode(p[:], b)
 	return err
 }
+
+func (n *AffectedNode) UnmarshalJSON(b []byte) error {
+	var tmp map[string]json.RawMessage
+	if err := json.Unmarshal(b, &tmp); err != nil {
+		return err
+	}
+
+	// Required
+	if err := json.Unmarshal(tmp["LedgerEntryType"], &n.LedgerEntryType); err != nil {
+		return err
+	}
+
+	// Required
+	n.LedgerIndex = &Hash256{}
+	if err := json.Unmarshal(tmp["LedgerIndex"], n.LedgerIndex); err != nil {
+		return err
+	}
+
+	// Optional
+	n.PreviousTxnID = &Hash256{}
+	if err := json.Unmarshal(tmp["PreviousTxnID"], n.PreviousTxnID); err != nil {
+		n.PreviousTxnID = nil
+	}
+
+	// Optional
+	var previousTxnLgrSeq uint32
+	n.PreviousTxnLgrSeq = &previousTxnLgrSeq
+	if err := json.Unmarshal(tmp["PreviousTxnLgrSeq"], n.PreviousTxnLgrSeq); err != nil {
+		n.PreviousTxnLgrSeq = nil
+	}
+
+	// Optional
+	if tmp["FinalFields"] != nil {
+		n.FinalFields = GetLedgerEntryFieldsFactoryByType(n.LedgerEntryType)()
+		json.Unmarshal(tmp["FinalFields"], n.FinalFields)
+	}
+	if tmp["PreviousFields"] != nil {
+		n.PreviousFields = GetLedgerEntryFieldsFactoryByType(n.LedgerEntryType)()
+		json.Unmarshal(tmp["PreviousFields"], n.PreviousFields)
+	}
+	if tmp["NewFields"] != nil {
+		n.NewFields = GetLedgerEntryFieldsFactoryByType(n.LedgerEntryType)()
+		json.Unmarshal(tmp["NewFields"], n.NewFields)
+	}
+
+	return nil
+}
