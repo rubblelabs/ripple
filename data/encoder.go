@@ -5,7 +5,6 @@ import (
 	"crypto/sha512"
 	"encoding/binary"
 	"fmt"
-	"github.com/donovanhide/ripple/crypto"
 	"hash"
 	"io"
 	"reflect"
@@ -17,26 +16,6 @@ type Encoder struct {
 	buf   bytes.Buffer
 	hash  hash.Hash
 	multi io.Writer
-}
-
-func CheckSignature(h Hashable) (bool, error) {
-	switch v := h.(type) {
-	case *Validation:
-		if err := NewEncoder().Validation(v, true); err != nil {
-			return false, err
-		}
-		return crypto.Verify(v.SigningPubKey.Bytes(), v.Signature.Bytes(), v.Hash().Bytes())
-	case *SetFee, *Amendment:
-		return true, nil
-	case Transaction:
-		if err := NewEncoder().Transaction(v, true); err != nil {
-			return false, err
-		}
-		base := v.GetBase()
-		return crypto.Verify(base.SigningPubKey.Bytes(), base.TxnSignature.Bytes(), v.Hash().Bytes())
-	default:
-		return false, fmt.Errorf("Not a signed type")
-	}
 }
 
 func NewEncoder() *Encoder {

@@ -5,7 +5,19 @@ import (
 )
 
 func format(h Hashable, format string, values ...interface{}) string {
-	return fmt.Sprintf(h.GetType()+":"+format, values...)
+	prefix := h.GetType() + ": "
+	switch v := h.(type) {
+	case Transaction:
+		prefix += "Fee: %d Flags: %08X "
+		base := v.GetBase()
+		var flags uint32
+		if base.Flags != nil {
+			flags = *base.Flags
+		}
+		values = append([]interface{}{base.Fee.Num, flags}, values...)
+	default:
+	}
+	return fmt.Sprintf(prefix+format, values...)
 }
 
 func (l *Ledger) String() string {
@@ -13,7 +25,7 @@ func (l *Ledger) String() string {
 }
 
 func (v *Validation) String() string {
-	return format(v, "%d %d %s %d %s", v.LedgerSequence, v.BaseFee, v.LedgerHash.String(), v.SigningTime, v.SigningPubKey.String())
+	return format(v, "%d %d %s %d %s", v.LedgerSequence, v.BaseFee, v.LedgerHash.TruncatedString(8), v.SigningTime, v.SigningPubKey.String())
 }
 
 func (p *Proposal) String() string {
@@ -25,7 +37,7 @@ func (m *MetaData) String() string {
 }
 
 func (p *Payment) String() string {
-	return format(p, "%s => %s Amount: %s", p.Account.String(), p.Destination.String(), p.Amount.String())
+	return format(p, "%s => %s Amount: %s ", p.Account.String(), p.Destination.String(), p.Amount.String())
 }
 
 func (o *OfferCreate) String() string {
