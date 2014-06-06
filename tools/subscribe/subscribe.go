@@ -90,7 +90,7 @@ func ExplainNodeEffect(ne *data.NodeEffect) string {
 		return ""
 
 	case data.OFFER:
-		return fmt.Sprintf("%s Offer %s %s for %s @ %s",
+		return fmt.Sprintf("%s Offer %s %s for %s",
 			op,
 			fields.(*data.OfferFields).Account,
 			fields.(*data.OfferFields).TakerGets,
