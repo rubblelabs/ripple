@@ -45,7 +45,7 @@ type Amount struct {
 	Issuer   Account
 }
 
-func (v *Value) Debug() string {
+func (v Value) Debug() string {
 	return fmt.Sprintf("Native: %t Negative: %t Value: %d Offset: %d", v.Native, v.Negative, v.Num, v.Offset)
 }
 
@@ -158,11 +158,11 @@ func (v *Value) canonicalise() error {
 	return nil
 }
 
-func (v *Value) Clone() *Value {
+func (v Value) Clone() *Value {
 	return newValue(v.Native, v.Negative, v.Num, v.Offset)
 }
 
-func (v *Value) Equals(other *Value) bool {
+func (v Value) Equals(other *Value) bool {
 	return v.Native == other.Native &&
 		v.Negative == other.Negative &&
 		v.Num == other.Num &&
@@ -219,42 +219,44 @@ func NewAmount(v interface{}) (*Amount, error) {
 	}
 }
 
-func (a *Amount) Equals(b *Amount) bool {
+func (a Amount) Equals(b *Amount) bool {
 	return a.Value.Equals(b.Value) &&
 		a.Currency == b.Currency &&
 		a.Issuer == b.Issuer
 }
 
-func (a *Amount) SameValue(b *Amount) bool {
+// Returns true if the values are equal, but ignores the currency and issuer
+func (a Amount) SameValue(b *Amount) bool {
 	return a.Value.Equals(b.Value)
 }
 
-func (a *Amount) Clone() *Amount {
+func (a Amount) Clone() *Amount {
 	return newAmount(a.Value.Clone(), a.Currency, a.Issuer)
 }
 
-func (a *Amount) ZeroClone() *Amount {
+// Returns a new Amount with the same currency and issuer, but a zero value
+func (a Amount) ZeroClone() *Amount {
 	zero := &Value{Native: a.Native}
 	return newAmount(zero, a.Currency, a.Issuer)
 }
 
-func (a *Amount) IsPositive() bool {
+func (a Amount) IsPositive() bool {
 	return !a.Negative
 }
 
-func (a *Amount) Negate() *Amount {
+func (a Amount) Negate() *Amount {
 	clone := a.Clone()
 	clone.Negative = !clone.Negative
 	return clone
 }
 
-func (a *Amount) Abs() *Amount {
+func (a Amount) Abs() *Amount {
 	clone := a.Clone()
 	clone.Negative = false
 	return clone
 }
 
-func (a *Value) factor(b *Value) (int64, int64, int64) {
+func (a Value) factor(b *Value) (int64, int64, int64) {
 	ao, bo := a.Offset, b.Offset
 	av, bv := int64(a.Num), int64(b.Num)
 	if a.Negative {
@@ -272,7 +274,7 @@ func (a *Value) factor(b *Value) (int64, int64, int64) {
 	return av, bv, ao
 }
 
-func (a *Amount) Add(b *Amount) (*Amount, error) {
+func (a Amount) Add(b *Amount) (*Amount, error) {
 	switch {
 	case b.IsZero():
 		return a.Clone(), nil
@@ -288,7 +290,7 @@ func (a *Amount) Add(b *Amount) (*Amount, error) {
 	}
 }
 
-func (a *Amount) Subtract(b *Amount) (*Amount, error) {
+func (a Amount) Subtract(b *Amount) (*Amount, error) {
 	switch {
 	case b.IsZero():
 		return a.Clone(), nil
@@ -304,7 +306,7 @@ func (a *Amount) Subtract(b *Amount) (*Amount, error) {
 	}
 }
 
-func (a *Amount) Multiply(b *Amount) (*Amount, error) {
+func (a Amount) Multiply(b *Amount) (*Amount, error) {
 	if a.IsZero() || b.IsZero() {
 		return a.ZeroClone(), nil
 	}
@@ -342,7 +344,7 @@ func (a *Amount) Multiply(b *Amount) (*Amount, error) {
 	return c, c.canonicalise()
 }
 
-func (num *Amount) Divide(den *Amount) (*Amount, error) {
+func (num Amount) Divide(den *Amount) (*Amount, error) {
 	if den.IsZero() {
 		return nil, fmt.Errorf("Division by zero")
 	}
@@ -374,15 +376,15 @@ func (num *Amount) Divide(den *Amount) (*Amount, error) {
 	return c, c.canonicalise()
 }
 
-func (v *Value) IsScientific() bool {
+func (v Value) IsScientific() bool {
 	return v.Offset != 0 && (v.Offset < -25 || v.Offset > -5)
 }
 
-func (v *Value) IsZero() bool {
+func (v Value) IsZero() bool {
 	return v.Num == 0
 }
 
-func (v *Value) String() string {
+func (v Value) String() string {
 	if v.IsZero() {
 		return "0"
 	}
@@ -417,7 +419,7 @@ func (v *Value) String() string {
 	return strings.TrimRight(rat.FloatString(32-length), "0")
 }
 
-func (a *Amount) String() string {
+func (a Amount) String() string {
 	switch {
 	case a.Native:
 		return a.Value.String() + "/XRP"
@@ -429,7 +431,7 @@ func (a *Amount) String() string {
 	}
 }
 
-func (a *Amount) JSON() string {
+func (a Amount) JSON() string {
 	b, _ := a.MarshalText()
 	return string(b)
 }

@@ -3,7 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/donovanhide/ripple/data"
 	"github.com/donovanhide/ripple/websockets"
+	"github.com/fatih/color"
 )
 
 func main() {
@@ -23,30 +25,79 @@ func main() {
 		confirmation.(*websockets.SubscribeCommand).Streams,
 	)
 
+	ledgerStyle := color.New(color.FgRed, color.Underline)
+	transactionStyle := color.New(color.FgGreen)
+	nodeStyle := color.New(color.FgBlue)
+	serverStyle := color.New(color.FgMagenta)
+
 	// Consume messages as they arrive
 	for {
 		msg := <-r.Incoming
 		switch msg := msg.(type) {
 		case *websockets.LedgerStreamMsg:
-			fmt.Printf(
+			ledgerStyle.Printf(
 				"Ledger %d closed at %s with %d transactions\n",
 				msg.LedgerSequence,
 				msg.LedgerTime.String(),
 				msg.TxnCount,
 			)
 		case *websockets.TransactionStreamMsg:
-			fmt.Printf(
+			transactionStyle.Printf(
 				"    %s by %s\n",
 				msg.Transaction.GetTransactionType().String(),
 				msg.Transaction.GetAccount(),
 			)
+			for _, n := range msg.Transaction.MetaData.AffectedNodes {
+				s := ExplainNodeEffect(&n)
+				if s != "" {
+					nodeStyle.Printf("        %s\n", s)
+				}
+			}
 		case *websockets.ServerStreamMsg:
-			fmt.Printf(
+			serverStyle.Printf(
 				"Server Status: %s (%d/%d)\n",
 				msg.Status,
 				msg.LoadFactor,
 				msg.LoadBase,
 			)
 		}
+	}
+}
+
+func ExplainNodeEffect(ne *data.NodeEffect) string {
+	var op string
+	var n *data.AffectedNode
+	var fields interface{}
+
+	switch {
+	case ne.CreatedNode != nil:
+		op = "Created"
+		n = ne.CreatedNode
+		fields = n.NewFields
+	case ne.ModifiedNode != nil:
+		op = "Modified"
+		n = ne.ModifiedNode
+		fields = n.FinalFields
+	case ne.DeletedNode != nil:
+		op = "Deleted"
+		n = ne.DeletedNode
+		fields = n.FinalFields
+	}
+
+	switch n.LedgerEntryType {
+	case data.DIRECTORY:
+		// Skip
+		return ""
+
+	case data.OFFER:
+		return fmt.Sprintf("%s Offer %s %s for %s",
+			op,
+			fields.(*data.OfferFields).Account,
+			fields.(*data.OfferFields).TakerGets,
+			fields.(*data.OfferFields).TakerPays,
+		)
+
+	default:
+		return fmt.Sprintf("%s %s node: %s", op, n.LedgerEntryType, n.LedgerIndex)
 	}
 }
