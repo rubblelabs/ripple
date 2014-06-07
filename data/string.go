@@ -37,11 +37,15 @@ func (m *MetaData) String() string {
 }
 
 func (p *Payment) String() string {
-	return format(p, "%s => %s Amount: %s ", p.Account.String(), p.Destination.String(), p.Amount.String())
+	return format(p, "%s => %s Amount: %s ", p.Account, p.Destination, p.Amount)
 }
 
 func (o *OfferCreate) String() string {
-	return format(o, "%s Sequence: %d Pays: %s Gets: %s", o.Account.String(), o.Sequence, o.TakerPays.String(), o.TakerGets.String())
+	ratio, err := o.TakerPays.Divide(&o.TakerGets)
+	if err != nil {
+		return "Bad OfferCreate"
+	}
+	return format(o, "%s Sequence: %d Pays: %s Gets: %s Ratio: %s", o.Account, o.Sequence, o.TakerPays, o.TakerGets, ratio.Value)
 }
 
 func (o *OfferCancel) String() string {

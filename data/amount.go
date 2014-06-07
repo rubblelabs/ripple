@@ -177,6 +177,7 @@ func newAmount(value *Value, currency Currency, issuer Account) *Amount {
 	}
 }
 
+// Requires v to be in computer parsable form
 func NewAmount(v interface{}) (*Amount, error) {
 	switch n := v.(type) {
 	case int64:
@@ -306,7 +307,7 @@ func (a Amount) Subtract(b *Amount) (*Amount, error) {
 	}
 }
 
-func (a Amount) Multiply(b *Amount) (*Amount, error) {
+func (a Amount) multiply(b *Amount) (*Amount, error) {
 	if a.IsZero() || b.IsZero() {
 		return a.ZeroClone(), nil
 	}
@@ -344,7 +345,7 @@ func (a Amount) Multiply(b *Amount) (*Amount, error) {
 	return c, c.canonicalise()
 }
 
-func (num Amount) Divide(den *Amount) (*Amount, error) {
+func (num Amount) divide(den *Amount) (*Amount, error) {
 	if den.IsZero() {
 		return nil, fmt.Errorf("Division by zero")
 	}
@@ -419,19 +420,65 @@ func (v Value) String() string {
 	return strings.TrimRight(rat.FloatString(32-length), "0")
 }
 
+func (a Amount) ApplyInterest() (*Amount, error) {
+	if a.Currency.Type() != CT_DEMURRAGE {
+		return &a, nil
+	}
+	rate := fmt.Sprintf("%f/%s/%s", a.Currency.Rate(Now().Uint32()), a.Currency.Machine(), a.Issuer.String())
+	factor, err := NewAmount(rate)
+	if err != nil {
+		return nil, err
+	}
+	return a.multiply(factor)
+}
+
+type amountFunc func(Amount, *Amount) (*Amount, error)
+
+func applyInterestPair(a Amount, b *Amount, f amountFunc) (*Amount, error) {
+	v1, err := a.ApplyInterest()
+	if err != nil {
+		return nil, err
+	}
+	v2, err := b.ApplyInterest()
+	if err != nil {
+		return nil, err
+	}
+	return f(*v1, v2)
+}
+
+func (a Amount) Divide(b *Amount) (*Amount, error) {
+	return applyInterestPair(a, b, Amount.divide)
+}
+
+func (a Amount) Multiply(b *Amount) (*Amount, error) {
+	return applyInterestPair(a, b, Amount.multiply)
+}
+
+// Amount in human parsable form
+// with demurrage applied
 func (a Amount) String() string {
+	factored, err := a.ApplyInterest()
+	if err != nil {
+		return "Bad Amount"
+	}
+	switch {
+	case a.Native:
+		return factored.Value.String() + "/XRP"
+	case a.Issuer.IsZero():
+		return factored.Value.String() + "/" + a.Currency.String()
+	default:
+		return factored.Value.String() + "/" + a.Currency.String() + "/" + a.Issuer.String()
+	}
+}
+
+// Amount in computer parsable form
+func (a Amount) Machine() string {
 	switch {
 	case a.Native:
 		return a.Value.String() + "/XRP"
 	case a.Issuer.IsZero():
-		return a.Value.String() + "/" + a.Currency.String()
+		return a.Value.String() + "/" + a.Currency.Machine()
 	default:
-		issuer, _ := a.Issuer.MarshalText()
-		return a.Value.String() + "/" + a.Currency.String() + "/" + string(issuer)
+		return a.Value.String() + "/" + a.Currency.Machine() + "/" + a.Issuer.String()
 	}
-}
-
-func (a Amount) JSON() string {
-	b, _ := a.MarshalText()
-	return string(b)
 }
