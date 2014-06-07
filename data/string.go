@@ -5,17 +5,18 @@ import (
 )
 
 func format(h Hashable, format string, values ...interface{}) string {
-	prefix := h.GetType() + ": "
+	var prefix string
 	switch v := h.(type) {
 	case Transaction:
-		prefix += "Fee: %d Flags: %08X "
+		prefix = "%-13s %6d %08X %-34s %8d "
 		base := v.GetBase()
 		var flags uint32
 		if base.Flags != nil {
 			flags = *base.Flags
 		}
-		values = append([]interface{}{base.Fee.Num, flags}, values...)
+		values = append([]interface{}{base.GetType(), base.Fee.Num, flags, base.Account, base.Sequence}, values...)
 	default:
+		prefix = v.GetType() + " "
 	}
 	return fmt.Sprintf(prefix+format, values...)
 }
@@ -37,27 +38,31 @@ func (m *MetaData) String() string {
 }
 
 func (p *Payment) String() string {
-	return format(p, "%s => %s Amount: %s ", p.Account, p.Destination, p.Amount)
+	return format(p, "%-34s %s", p.Destination, p.Amount)
 }
 
 func (o *OfferCreate) String() string {
-	ratio, err := o.TakerPays.Divide(&o.TakerGets)
+	gets, pays := o.TakerGets, o.TakerPays
+	if gets.Native {
+		gets, pays = pays, gets
+	}
+	ratio, err := pays.Divide(&gets)
 	if err != nil {
 		return "Bad OfferCreate"
 	}
-	return format(o, "%s Sequence: %d Pays: %s Gets: %s Ratio: %s", o.Account, o.Sequence, o.TakerPays, o.TakerGets, ratio.Value)
+	return format(o, "%s %s %s", ratio.Value, o.TakerPays, o.TakerGets)
 }
 
 func (o *OfferCancel) String() string {
-	return format(o, "%s Sequence: %d", o.Account, o.Sequence)
+	return format(o, "%d", o.OfferSequence)
 }
 
 func (a *AccountSet) String() string {
-	return format(a, "%s %d", a.Account, a.Sequence)
+	return format(a, "%d", a.TransferRate)
 }
 
 func (t *TrustSet) String() string {
-	return format(t, "%s", t.Account)
+	return format(t, "%s %d %d", t.LimitAmount, t.QualityIn, t.QualityOut)
 }
 
 func (f *SetFee) String() string {
@@ -69,7 +74,7 @@ func (a *Amendment) String() string {
 }
 
 func (s *SetRegularKey) String() string {
-	return format(s, "%s %s", s.Account, s.RegularKey)
+	return format(s, "%-34s", s.RegularKey)
 }
 
 func (a *AccountRoot) String() string {
