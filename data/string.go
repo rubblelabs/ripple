@@ -33,10 +33,6 @@ func (p *Proposal) String() string {
 	return format(p, "%d", p.Sequence)
 }
 
-func (m *MetaData) String() string {
-	return format(m, "")
-}
-
 func (p *Payment) String() string {
 	return format(p, "%-34s %s", p.Destination, p.Amount)
 }

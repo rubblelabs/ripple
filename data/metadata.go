@@ -19,7 +19,6 @@ type NodeEffect struct {
 type NodeEffects []NodeEffect
 
 type MetaData struct {
-	hashable
 	AffectedNodes     NodeEffects
 	TransactionIndex  uint32
 	TransactionResult TransactionResult
