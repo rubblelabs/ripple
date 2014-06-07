@@ -52,7 +52,7 @@ type OfferCreate struct {
 
 type OfferCancel struct {
 	TxBase
-	OfferSequence *uint32
+	OfferSequence uint32
 }
 
 type TrustSet struct {
