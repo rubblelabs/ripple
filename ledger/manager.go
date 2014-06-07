@@ -38,6 +38,7 @@ func NewManager(db storage.DB) (*Manager, error) {
 func (m *Manager) Start() {
 	m.started = time.Now()
 	tick := time.NewTicker(time.Minute)
+	var held CanonicalTxSet
 	for {
 		select {
 		case <-tick.C:
@@ -49,7 +50,6 @@ func (m *Manager) Start() {
 			}
 		case in := <-m.incoming:
 			for _, item := range in {
-				fmt.Println(item.String())
 				switch v := item.(type) {
 				case *data.Validation:
 					continue
@@ -62,11 +62,14 @@ func (m *Manager) Start() {
 					if err := m.db.Insert(v); err != nil {
 						glog.Errorln("Manager: Ledger Insert:", err.Error())
 					}
-				case data.Transaction:
+				case *data.TransactionWithMetaData:
 					m.stats["transactions"]++
 					if err := m.db.Insert(v); err != nil {
 						glog.Errorln("Manager: Transaction Insert:", err.Error())
 					}
+				case data.Transaction:
+					held.Add(v)
+					fmt.Println(item.String(), held.Len())
 				}
 			}
 		case missing := <-m.missing:

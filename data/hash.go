@@ -1,6 +1,7 @@
 package data
 
 import (
+	"bytes"
 	"encoding/hex"
 	"fmt"
 	"github.com/donovanhide/ripple/crypto"
@@ -40,6 +41,18 @@ func NewHash256(s string) (Hash256, error) {
 }
 func (h Hash256) IsZero() bool {
 	return h == zero256
+}
+
+func (h Hash256) Xor(x Hash256) Hash256 {
+	var xor Hash256
+	for i := range h {
+		xor[i] = h[i] ^ x[i]
+	}
+	return x
+}
+
+func (h Hash256) Compare(x Hash256) int {
+	return bytes.Compare(h[:], x[:])
 }
 
 func (h Hash256) Bytes() []byte {
@@ -117,6 +130,12 @@ func (a *Account) Bytes() []byte {
 		return a[:]
 	}
 	return []byte(nil)
+}
+
+func (a Account) Hash256() Hash256 {
+	var h Hash256
+	copy(h[:], a[:])
+	return h
 }
 
 // Expects address in base58 form
