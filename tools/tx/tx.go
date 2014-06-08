@@ -47,7 +47,7 @@ func sign(c *cli.Context, tx data.Transaction, sequence int32) {
 	base := tx.GetBase()
 	base.SigningPubKey = new(data.PublicKey)
 	base.Sequence = 44193
-	base.Flags = new(uint32)
+	base.Flags = new(data.TransactionFlag)
 	copy(base.Account[:], id.Payload())
 	copy(base.SigningPubKey[:], pub.Payload())
 	if c.GlobalString("fee") != "" {
