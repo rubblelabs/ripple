@@ -34,7 +34,7 @@ var LedgerFactory = [...]func() Hashable{
 	func() Hashable { return &Ledger{} },
 }
 
-var fieldsFactory = [...]func() interface{}{
+var FieldsFactory = [...]func() interface{}{
 	ACCOUNT_ROOT:  func() interface{} { return &AccountRootFields{} },
 	DIRECTORY:     func() interface{} { return &DirectoryFields{} },
 	AMENDMENTS:    func() interface{} { return &AmendmentsFields{} },
@@ -133,10 +133,6 @@ func GetTxFactoryByType(txType string) func() Transaction {
 
 func GetLedgerEntryFactoryByType(leType string) func() LedgerEntry {
 	return LedgerEntryFactory[ledgerEntryTypes[leType]]
-}
-
-func GetLedgerEntryFieldsFactoryByType(leType LedgerEntryType) func() interface{} {
-	return fieldsFactory[leType]
 }
 
 func NewHashable(typ reflect.Type) (Hashable, error) {

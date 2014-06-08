@@ -216,7 +216,7 @@ func (dec *Decoder) readObject(v *reflect.Value) error {
 			continue
 		case "PreviousFields", "NewFields", "FinalFields":
 			ledgerEntryType := uint16(v.Elem().FieldByName("LedgerEntryType").Uint())
-			le := fieldsFactory[ledgerEntryType]()
+			le := FieldsFactory[ledgerEntryType]()
 			lePtr := reflect.ValueOf(le)
 			if err := dec.readObject(&lePtr); err != nil {
 				return err
