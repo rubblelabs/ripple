@@ -24,8 +24,16 @@ func (h Hash128) Bytes() []byte {
 	return h[:]
 }
 
+func (h Hash128) String() string {
+	return string(b2h(h[:]))
+}
+
 func (h Hash160) Bytes() []byte {
 	return h[:]
+}
+
+func (h Hash160) String() string {
+	return string(b2h(h[:]))
 }
 
 func NewHash256(s string) (Hash256, error) {
