@@ -148,7 +148,7 @@ func (a Account) Hash256() Hash256 {
 
 // Expects address in base58 form
 func NewRegularKeyFromAddress(s string) (*RegularKey, error) {
-	hash, err := crypto.NewRippleHashCheck(s, crypto.RIPPLE_ACCOUNT_PUBLIC)
+	hash, err := crypto.NewRippleHashCheck(s, crypto.RIPPLE_ACCOUNT_ID)
 	if err != nil {
 		return nil, err
 	}
