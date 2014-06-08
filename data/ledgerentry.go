@@ -2,33 +2,29 @@ package data
 
 type LedgerEntrySlice []LedgerEntry
 
-type LeCommon struct {
-	Flags             *uint32  `json:",omitempty"`
-	LedgerIndex       *Hash256 `json:",omitempty"`
-	PreviousTxnID     *Hash256 `json:",omitempty"`
-	PreviousTxnLgrSeq *uint32  `json:",omitempty"`
-}
-
 type LeBase struct {
 	hashable
 	LedgerEntryType LedgerEntryType `json:",omitempty"`
+	LedgerIndex     *Hash256        `json:",omitempty"`
 }
 
 type AccountRootFields struct {
-	LeCommon
-	Account       *Account        `json:",omitempty"`
-	Sequence      *uint32         `json:",omitempty"`
-	Balance       *Value          `json:",omitempty"`
-	AccountTxnID  *Hash256        `json:",omitempty"`
-	OwnerCount    *uint32         `json:",omitempty"`
-	RegularKey    *RegularKey     `json:",omitempty"`
-	EmailHash     *Hash128        `json:",omitempty"`
-	WalletLocator *Hash256        `json:",omitempty"`
-	WalletSize    *uint32         `json:",omitempty"`
-	MessageKey    *PublicKey      `json:",omitempty"`
-	TransferRate  *uint32         `json:",omitempty"`
-	Domain        *VariableLength `json:",omitempty"`
-	Signers       *VariableLength `json:",omitempty"`
+	Flags             *uint32         `json:",omitempty"`
+	Account           *Account        `json:",omitempty"`
+	Sequence          *uint32         `json:",omitempty"`
+	Balance           *Value          `json:",omitempty"`
+	OwnerCount        *uint32         `json:",omitempty"`
+	PreviousTxnID     *Hash256        `json:",omitempty"`
+	PreviousTxnLgrSeq *uint32         `json:",omitempty"`
+	AccountTxnID      *Hash256        `json:",omitempty"`
+	RegularKey        *RegularKey     `json:",omitempty"`
+	EmailHash         *Hash128        `json:",omitempty"`
+	WalletLocator     *Hash256        `json:",omitempty"`
+	WalletSize        *uint32         `json:",omitempty"`
+	MessageKey        *PublicKey      `json:",omitempty"`
+	TransferRate      *uint32         `json:",omitempty"`
+	Domain            *VariableLength `json:",omitempty"`
+	Signers           *VariableLength `json:",omitempty"`
 }
 
 type AccountRoot struct {
@@ -37,16 +33,18 @@ type AccountRoot struct {
 }
 
 type RippleStateFields struct {
-	LeCommon
-	LowLimit       *Amount `json:",omitempty"`
-	HighLimit      *Amount `json:",omitempty"`
-	Balance        *Amount `json:",omitempty"`
-	LowNode        *Index  `json:",omitempty"`
-	HighNode       *Index  `json:",omitempty"`
-	LowQualityIn   *uint32 `json:",omitempty"`
-	LowQualityOut  *uint32 `json:",omitempty"`
-	HighQualityIn  *uint32 `json:",omitempty"`
-	HighQualityOut *uint32 `json:",omitempty"`
+	Flags             *uint32  `json:",omitempty"`
+	LowLimit          *Amount  `json:",omitempty"`
+	HighLimit         *Amount  `json:",omitempty"`
+	PreviousTxnID     *Hash256 `json:",omitempty"`
+	PreviousTxnLgrSeq *uint32  `json:",omitempty"`
+	Balance           *Amount  `json:",omitempty"`
+	LowNode           *Index   `json:",omitempty"`
+	HighNode          *Index   `json:",omitempty"`
+	LowQualityIn      *uint32  `json:",omitempty"`
+	LowQualityOut     *uint32  `json:",omitempty"`
+	HighQualityIn     *uint32  `json:",omitempty"`
+	HighQualityOut    *uint32  `json:",omitempty"`
 }
 
 type RippleState struct {
@@ -55,15 +53,17 @@ type RippleState struct {
 }
 
 type OfferFields struct {
-	LeCommon
-	Account       *Account `json:",omitempty"`
-	Sequence      *uint32  `json:",omitempty"`
-	TakerPays     *Amount  `json:",omitempty"`
-	TakerGets     *Amount  `json:",omitempty"`
-	BookDirectory *Hash256 `json:",omitempty"`
-	BookNode      *Index   `json:",omitempty"`
-	OwnerNode     *Index   `json:",omitempty"`
-	Expiration    *uint32  `json:",omitempty"`
+	Flags             *uint32  `json:",omitempty"`
+	Account           *Account `json:",omitempty"`
+	Sequence          *uint32  `json:",omitempty"`
+	TakerPays         *Amount  `json:",omitempty"`
+	TakerGets         *Amount  `json:",omitempty"`
+	BookDirectory     *Hash256 `json:",omitempty"`
+	BookNode          *Index   `json:",omitempty"`
+	OwnerNode         *Index   `json:",omitempty"`
+	PreviousTxnID     *Hash256 `json:",omitempty"`
+	PreviousTxnLgrSeq *uint32  `json:",omitempty"`
+	Expiration        *uint32  `json:",omitempty"`
 }
 
 type Offer struct {
@@ -93,7 +93,7 @@ type Directory struct {
 }
 
 type LedgerHashesFields struct {
-	LeCommon
+	Flags               *uint32 `json:",omitempty"`
 	FirstLedgerSequence uint32
 	LastLedgerSequence  uint32
 	Hashes              Vector256
@@ -105,7 +105,7 @@ type LedgerHashes struct {
 }
 
 type AmendmentsFields struct {
-	LeCommon
+	Flags      *uint32 `json:",omitempty"`
 	Amendments Hash256
 }
 
@@ -115,7 +115,7 @@ type Amendments struct {
 }
 
 type FeeSettingFields struct {
-	LeCommon
+	Flags             *uint32 `json:",omitempty"`
 	BaseFee           uint64
 	ReferenceFeeUnits uint32
 	ReserveBase       uint32
