@@ -45,13 +45,13 @@ var FieldsFactory = [...]func() interface{}{
 }
 
 var LedgerEntryFactory = [...]func() LedgerEntry{
-	ACCOUNT_ROOT:  func() LedgerEntry { return &AccountRoot{LeBase: LeBase{LedgerEntryType: ACCOUNT_ROOT}} },
-	DIRECTORY:     func() LedgerEntry { return &Directory{LeBase: LeBase{LedgerEntryType: DIRECTORY}} },
-	AMENDMENTS:    func() LedgerEntry { return &Amendments{LeBase: LeBase{LedgerEntryType: AMENDMENTS}} },
-	LEDGER_HASHES: func() LedgerEntry { return &LedgerHashes{LeBase: LeBase{LedgerEntryType: LEDGER_HASHES}} },
-	OFFER:         func() LedgerEntry { return &Offer{LeBase: LeBase{LedgerEntryType: OFFER}} },
-	RIPPLE_STATE:  func() LedgerEntry { return &RippleState{LeBase: LeBase{LedgerEntryType: RIPPLE_STATE}} },
-	FEE_SETTING:   func() LedgerEntry { return &FeeSetting{LeBase: LeBase{LedgerEntryType: FEE_SETTING}} },
+	ACCOUNT_ROOT:  func() LedgerEntry { return &AccountRoot{leBase: leBase{LedgerEntryType: ACCOUNT_ROOT}} },
+	DIRECTORY:     func() LedgerEntry { return &Directory{leBase: leBase{LedgerEntryType: DIRECTORY}} },
+	AMENDMENTS:    func() LedgerEntry { return &Amendments{leBase: leBase{LedgerEntryType: AMENDMENTS}} },
+	LEDGER_HASHES: func() LedgerEntry { return &LedgerHashes{leBase: leBase{LedgerEntryType: LEDGER_HASHES}} },
+	OFFER:         func() LedgerEntry { return &Offer{leBase: leBase{LedgerEntryType: OFFER}} },
+	RIPPLE_STATE:  func() LedgerEntry { return &RippleState{leBase: leBase{LedgerEntryType: RIPPLE_STATE}} },
+	FEE_SETTING:   func() LedgerEntry { return &FeeSetting{leBase: leBase{LedgerEntryType: FEE_SETTING}} },
 }
 
 var TxFactory = [...]func() Transaction{

@@ -10,7 +10,7 @@ func format(h Hashable, format string, values ...interface{}) string {
 	case Transaction:
 		prefix = "%-13s %6d %08X %-34s %8d "
 		base := v.GetBase()
-		var flags uint32
+		var flags TransactionFlag
 		if base.Flags != nil {
 			flags = *base.Flags
 		}

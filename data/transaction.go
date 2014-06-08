@@ -3,8 +3,8 @@ package data
 type TxBase struct {
 	hashable
 	TransactionType    TransactionType
-	Flags              *uint32 `json:",omitempty"`
-	SourceTag          *uint32 `json:",omitempty"`
+	Flags              *TransactionFlag `json:",omitempty"`
+	SourceTag          *uint32          `json:",omitempty"`
 	Account            Account
 	Sequence           uint32
 	Fee                Value
