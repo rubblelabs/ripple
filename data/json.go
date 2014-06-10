@@ -1,5 +1,6 @@
-// Evil things happen here. Rippled needs a V2 API...
 package data
+
+// Evil things happen here. Rippled needs a V2 API...
 
 import (
 	"encoding/hex"
