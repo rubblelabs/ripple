@@ -109,7 +109,11 @@ func (enc *Encoder) Node(h Hashable) error {
 		if err := enc.raw(enc.multi, v, false); err != nil {
 			return err
 		}
-		if err := write(enc.multi, enc.hash.Sum(nil)[:32]); err != nil {
+		index, err := LedgerIndex(v)
+		if err != nil {
+			return err
+		}
+		if err = write(enc.multi, *index); err != nil {
 			return err
 		}
 	default:
@@ -119,7 +123,6 @@ func (enc *Encoder) Node(h Hashable) error {
 	h.SetRaw(enc.buf.Bytes())
 	return nil
 }
-
 func (enc *Encoder) reset() {
 	enc.buf.Reset()
 	enc.hash.Reset()

@@ -36,17 +36,29 @@ func (h Hash160) String() string {
 	return string(b2h(h[:]))
 }
 
-func NewHash256(s string) (Hash256, error) {
+// Accepts either a hex string or a byte slice of length 32
+func NewHash256(value interface{}) (*Hash256, error) {
 	var h Hash256
-	n, err := hex.Decode(h[:], []byte(s))
-	if err != nil {
-		return h, err
+	switch v := value.(type) {
+	case []byte:
+		if len(v) != 32 {
+			return nil, fmt.Errorf("NewHash256: Wrong length %X", value)
+		}
+		copy(h[:], v)
+	case string:
+		n, err := hex.Decode(h[:], []byte(v))
+		if err != nil {
+			return nil, err
+		}
+		if n != 32 {
+			return nil, fmt.Errorf("NewHash256: Wrong length %s", v)
+		}
+	default:
+		return nil, fmt.Errorf("NewHash256: Wrong type %+v", v)
 	}
-	if n != 32 {
-		return h, fmt.Errorf("NewHash256: Wrong length %s", s)
-	}
-	return h, nil
+	return &h, nil
 }
+
 func (h Hash256) IsZero() bool {
 	return h == zero256
 }

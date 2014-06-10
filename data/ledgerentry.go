@@ -6,8 +6,8 @@ type Index uint64
 
 type leBase struct {
 	hashable
-	LedgerEntryType LedgerEntryType `json:",omitempty"`
-	LedgerIndex     *Hash256        `json:",omitempty"`
+	LedgerEntryType LedgerEntryType
+	LedgerIndex     *Hash256 `json:",omitempty"`
 }
 
 type AccountRootFields struct {
@@ -54,9 +54,6 @@ type RippleState struct {
 	RippleStateFields
 }
 
-type RippleStateOutcome struct {
-}
-
 type OfferFields struct {
 	Flags             *LedgerEntryFlag `json:",omitempty"`
 	Account           *Account         `json:",omitempty"`
@@ -74,12 +71,6 @@ type OfferFields struct {
 type Offer struct {
 	leBase
 	OfferFields
-}
-
-type OfferOutcome struct {
-	Account *Account
-	Paid    *Amount
-	Got     *Amount
 }
 
 type DirectoryFields struct {

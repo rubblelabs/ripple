@@ -158,7 +158,7 @@ func (dec *Decoder) LedgerEntry() (LedgerEntry, error) {
 	}
 	le := LedgerEntryFactory[leType]()
 	v := reflect.ValueOf(le)
-	// LedgerEntries have 32 bytes of hash suffixed
+	// LedgerEntries have 32 bytes of index suffixed
 	// but don't have a variable bytes indicator
 	lr := LimitedByteReader(dec.r, int64(dec.r.Len()-32))
 	if err := NewDecoder(lr).readObject(&v); err != nil {

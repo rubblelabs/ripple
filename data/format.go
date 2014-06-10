@@ -6,7 +6,9 @@ import (
 )
 
 type NodeType uint8
+type NodeFormat uint8
 type HashPrefix uint32
+type LedgerNamespace uint16
 
 const (
 	// Hash Prefixes
@@ -26,10 +28,21 @@ const (
 	NT_ACCOUNT_NODE     NodeType = 3
 	NT_TRANSACTION_NODE NodeType = 4
 
-	// Node encodings
-	snfPREFIX uint8 = 1
-	snfHASH   uint8 = 2
-	snfWIRE   uint8 = 3
+	// Node Formats
+	NF_PREFIX NodeFormat = 1
+	NF_HASH   NodeFormat = 2
+	NF_WIRE   NodeFormat = 3
+
+	// Ledger index NameSpaces
+	NS_ACCOUNT         LedgerNamespace = 'a'
+	NS_DIRECTORY_NODE  LedgerNamespace = 'd'
+	NS_RIPPLE_STATE    LedgerNamespace = 'r'
+	NS_OFFER           LedgerNamespace = 'o' // Entry for an offer
+	NS_OWNER_DIRECTORY LedgerNamespace = 'O' // Directory of things owned by an account
+	NS_BOOK_DIRECTORY  LedgerNamespace = 'B' // Directory of order books
+	NS_SKIP_LIST       LedgerNamespace = 's'
+	NS_AMENDMENT       LedgerNamespace = 'f'
+	NS_FEE             LedgerNamespace = 'e'
 )
 
 var nodeTypes = [...]string{
