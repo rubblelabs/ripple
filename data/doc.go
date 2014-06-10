@@ -25,7 +25,8 @@ they are the same thing, sometimes not.
 LedgerHeader
 
 This is the root of the two trees for a single ledger. It contains information
-about the ledger and its predecessor.
+about the ledger and its predecessor. A ledger header node is never reused
+between ledgers.
 
 	Node:	Simple big-endian binary encoding of LedgerHeader
 	Index:  SHA512Half of HP_LEDGER_MASTER:Node
@@ -38,7 +39,8 @@ Inner Node
 
 This is a node in either the transaction or account state tree which contains up
 to 16 hashes of other nodes. The position of the hash represents a 4 bit nibble
-of the index that is being searched for in the tree.
+of the index that is being searched for in the tree. An account state inner node
+may be reused between ledgers, a transaction inner node will never be reused.
 
 	Node:	Simple big-endian binary encoding of 16 x 32 byte hashes
 	Index:	SHA512Half of HP_INNER_NODE:Node
@@ -64,6 +66,7 @@ length marker.
 LedgerEntry Node
 
 This contains the state of an account after a transaction has been applied.
+Ledger Entry nodes may be reused between ledgers.
 
 	Node:	Complex encoding of LedgerEntry
 	Index:	SHA512Half of namespace and a type-specific rule
