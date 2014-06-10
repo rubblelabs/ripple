@@ -4,24 +4,21 @@ import (
 	"bytes"
 	"crypto/sha512"
 	"fmt"
+	"math"
 )
 
 type NodeIndex uint64
 
 func (i *NodeIndex) Previous() *NodeIndex {
-	switch {
-	case i == nil:
+	if i == nil || *i == 0 {
 		return nil
-	case *i == 0:
-		return nil
-	default:
-		prev := *i - 1
-		return &prev
 	}
+	prev := *i - 1
+	return &prev
 }
 
 func (i *NodeIndex) Next() *NodeIndex {
-	if i == nil {
+	if i == nil || *i == math.MaxUint64 {
 		return nil
 	}
 	next := *i + 1
