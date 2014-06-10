@@ -256,7 +256,7 @@ func (dec *Decoder) readObject(v *reflect.Value) error {
 				if err := f.Unmarshal(dec.r); err != nil {
 					return err
 				}
-			case *uint64, *uint32, *uint16, *uint8, *TransactionResult, *LedgerEntryType, *TransactionType, *Index, *TransactionFlag, *LedgerEntryFlag:
+			case *uint64, *uint32, *uint16, *uint8, *TransactionResult, *LedgerEntryType, *TransactionType, *NodeIndex, *TransactionFlag, *LedgerEntryFlag:
 				if err := dec.read(f); err != nil {
 					return err
 				}

@@ -201,13 +201,13 @@ func (s LedgerEntrySlice) MarshalJSON() ([]byte, error) {
 	return json.Marshal(raw)
 }
 
-func (i Index) MarshalText() ([]byte, error) {
+func (i NodeIndex) MarshalText() ([]byte, error) {
 	return []byte(fmt.Sprintf("%016X", i)), nil
 }
 
-func (i *Index) UnmarshalText(b []byte) error {
+func (i *NodeIndex) UnmarshalText(b []byte) error {
 	n, err := strconv.ParseUint(string(b), 16, 64)
-	*i = Index(n)
+	*i = NodeIndex(n)
 	return err
 }
 

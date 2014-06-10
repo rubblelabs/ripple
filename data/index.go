@@ -6,6 +6,28 @@ import (
 	"fmt"
 )
 
+type NodeIndex uint64
+
+func (i *NodeIndex) Previous() *NodeIndex {
+	switch {
+	case i == nil:
+		return nil
+	case *i == 0:
+		return nil
+	default:
+		prev := *i - 1
+		return &prev
+	}
+}
+
+func (i *NodeIndex) Next() *NodeIndex {
+	if i == nil {
+		return nil
+	}
+	next := *i + 1
+	return &next
+}
+
 func LedgerIndex(le LedgerEntry) (*Hash256, error) {
 	switch v := le.(type) {
 	case *AccountRoot:
@@ -17,12 +39,7 @@ func LedgerIndex(le LedgerEntry) (*Hash256, error) {
 	case *LedgerHashes:
 		return GetLedgerHashIndex()
 	case *Directory:
-		var nodeIndex *Index
-		if v.IndexPrevious != nil {
-			nodeIndex = new(Index)
-			*nodeIndex = *v.IndexPrevious + 1
-		}
-		return GetDirectoryNodeIndex(*v.RootIndex, nodeIndex)
+		return GetDirectoryNodeIndex(*v.RootIndex, v.IndexPrevious.Next())
 	default:
 		return nil, fmt.Errorf("Unknown LedgerEntry")
 	}
@@ -43,7 +60,7 @@ func GetRippleStateIndex(a, b Account, c Currency) (*Hash256, error) {
 	return buildIndex([]interface{}{NS_RIPPLE_STATE, b.Bytes(), a.Bytes(), c.Bytes()})
 }
 
-func GetDirectoryNodeIndex(root Hash256, index *Index) (*Hash256, error) {
+func GetDirectoryNodeIndex(root Hash256, index *NodeIndex) (*Hash256, error) {
 	if index == nil {
 		return &root, nil
 	}

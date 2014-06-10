@@ -2,8 +2,6 @@ package data
 
 type LedgerEntrySlice []LedgerEntry
 
-type Index uint64
-
 type leBase struct {
 	hashable
 	LedgerEntryType LedgerEntryType
@@ -41,8 +39,8 @@ type RippleStateFields struct {
 	PreviousTxnID     *Hash256         `json:",omitempty"`
 	PreviousTxnLgrSeq *uint32          `json:",omitempty"`
 	Balance           *Amount          `json:",omitempty"`
-	LowNode           *Index           `json:",omitempty"`
-	HighNode          *Index           `json:",omitempty"`
+	LowNode           *NodeIndex       `json:",omitempty"`
+	HighNode          *NodeIndex       `json:",omitempty"`
 	LowQualityIn      *uint32          `json:",omitempty"`
 	LowQualityOut     *uint32          `json:",omitempty"`
 	HighQualityIn     *uint32          `json:",omitempty"`
@@ -61,8 +59,8 @@ type OfferFields struct {
 	TakerPays         *Amount          `json:",omitempty"`
 	TakerGets         *Amount          `json:",omitempty"`
 	BookDirectory     *Hash256         `json:",omitempty"`
-	BookNode          *Index           `json:",omitempty"`
-	OwnerNode         *Index           `json:",omitempty"`
+	BookNode          *NodeIndex       `json:",omitempty"`
+	OwnerNode         *NodeIndex       `json:",omitempty"`
 	PreviousTxnID     *Hash256         `json:",omitempty"`
 	PreviousTxnLgrSeq *uint32          `json:",omitempty"`
 	Expiration        *RippleTime      `json:",omitempty"`
@@ -82,9 +80,9 @@ type DirectoryFields struct {
 	TakerPaysIssuer   *Hash160         `json:",omitempty"`
 	TakerGetsCurrency *Hash160         `json:",omitempty"`
 	TakerGetsIssuer   *Hash160         `json:",omitempty"`
-	ExchangeRate      *Index           `json:",omitempty"`
-	IndexNext         *Index           `json:",omitempty"`
-	IndexPrevious     *Index           `json:",omitempty"`
+	ExchangeRate      *NodeIndex       `json:",omitempty"`
+	IndexNext         *NodeIndex       `json:",omitempty"`
+	IndexPrevious     *NodeIndex       `json:",omitempty"`
 }
 
 type Directory struct {
