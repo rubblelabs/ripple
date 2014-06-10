@@ -6,7 +6,7 @@ Ledger
 
 The ledger is a mixture of various data types, all persisted in the form of a
 key and value. The value contains a node, and some nodes refer to other nodes by
-their index. An index may or may not be equivalent to a node's key. A ledger is
+their index. An index may or may not be equivalent to a node's key. A ledger
 consists of a LedgerHeader as the root of two trees, one for the transactions in
 that ledger and one for the state of all accounts at that point in time.
 
