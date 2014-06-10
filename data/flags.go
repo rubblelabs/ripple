@@ -19,6 +19,8 @@ const (
 	TxSetRequireAuth   TransactionFlag = 0x00000002
 	TxSetDisallowXRP   TransactionFlag = 0x00000003
 	TxSetDisableMaster TransactionFlag = 0x00000004
+	TxNoFreeze         TransactionFlag = 0x00000006
+	TxGlobalFreeze     TransactionFlag = 0x00000007
 	TxRequireDestTag   TransactionFlag = 0x00010000
 	TxOptionalDestTag  TransactionFlag = 0x00020000
 	TxRequireAuth      TransactionFlag = 0x00040000
@@ -35,6 +37,8 @@ const (
 	TxSetAuth       TransactionFlag = 0x00010000
 	TxSetNoRipple   TransactionFlag = 0x00020000
 	TxClearNoRipple TransactionFlag = 0x00040000
+	TxSetFreeze     TransactionFlag = 0x00100000
+	TxClearFreeze   TransactionFlag = 0x00200000
 )
 
 // Ledger entry flags
@@ -45,6 +49,7 @@ const (
 	LsRequireAuth    LedgerEntryFlag = 0x00040000
 	LsDisallowXRP    LedgerEntryFlag = 0x00080000
 	LsDisableMaster  LedgerEntryFlag = 0x00100000
+	LsNoFreeze       LedgerEntryFlag = 0x00200000
 
 	// Offer flags
 	LsPassive LedgerEntryFlag = 0x00010000
@@ -57,4 +62,6 @@ const (
 	LsHighAuth     LedgerEntryFlag = 0x00080000
 	LsLowNoRipple  LedgerEntryFlag = 0x00100000
 	LsHighNoRipple LedgerEntryFlag = 0x00200000
+	LsLowFreeze    LedgerEntryFlag = 0x00400000
+	LsHighFreeze   LedgerEntryFlag = 0x00800000
 )
