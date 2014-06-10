@@ -47,7 +47,7 @@ may be reused between ledgers, a transaction inner node will never be reused.
 	Hash:	Same as Index
 
 	Key: 	Index
-	Value:	LedgerSequence:LedgerSequence:NT_ACCOUNT_NODE or NT_TRANSACTION_NODE:HP_LEDGER_MASTER:Node
+	Value:	LedgerSequence:LedgerSequence:NT_ACCOUNT_NODE or NT_TRANSACTION_NODE:HP_INNER_NODE:Node
 
 TransactionWithMetadata Node
 
@@ -73,7 +73,7 @@ Ledger Entry nodes may be reused between ledgers.
 	Hash:	SHA512Half of HP_LEAF_NODE:Node:Index
 
 	Key:	Hash
-	Value:	LedgerSequence:LedgerSequence:NT_ACCOUNT_NODE:Node:Index
+	Value:	LedgerSequence:LedgerSequence:NT_ACCOUNT_NODE:HP_LEAF_NODE:Node:Index
 
 */
 package data
