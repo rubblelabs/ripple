@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/codegangsta/cli"
@@ -58,11 +57,14 @@ func sign(c *cli.Context, tx data.Transaction, sequence int32) {
 }
 
 func payment(c *cli.Context) {
-	if c.Args().Get(1) == "" {
-		fmt.Println("Destination and amount are required")
+	// Validate and parse required fields
+	if c.String("dest") == "" || c.String("amount") == "" || key == nil {
+		fmt.Println("Destination, amount, and seed are required")
 		os.Exit(1)
 	}
-	destination, amount := parseAccount(c.Args().Get(0)), parseAmount(c.Args().Get(1))
+	destination, amount := parseAccount(c.String("dest")), parseAmount(c.String("amount"))
+
+	// Create payment and sign it
 	payment := &data.Payment{
 		Destination: *destination,
 		Amount:      *amount,
@@ -70,14 +72,11 @@ func payment(c *cli.Context) {
 	payment.TransactionType = data.PAYMENT
 	sign(c, payment, 0)
 	fmt.Printf("%X\n", payment.Raw())
+
+	// Print it in JSON
 	out, err := json.Marshal(payment)
 	checkErr(err)
 	fmt.Println(string(out))
-	tx2, err := data.NewDecoder(bytes.NewReader(payment.Raw())).Transaction()
-	checkErr(err)
-	out2, err := json.Marshal(tx2)
-	checkErr(err)
-	fmt.Println(string(out2))
 }
 
 func common(c *cli.Context) error {
@@ -88,7 +87,6 @@ func common(c *cli.Context) error {
 }
 
 var key *crypto.RootDeterministicKey
-var account *data.Account
 
 func main() {
 	app := cli.NewApp()
@@ -97,7 +95,7 @@ func main() {
 	app.Version = "0.1"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{"seed,s", "", "the seed for the submitting account"},
-		cli.StringFlag{"fee,f", "", "the fee you want to pay"},
+		cli.StringFlag{"fee,f", "10", "the fee you want to pay"},
 	}
 	app.Before = common
 	app.Commands = []cli.Command{{
@@ -107,11 +105,13 @@ func main() {
 		Description: "destination and amount are required",
 		Action:      payment,
 		Flags: []cli.Flag{
+			cli.StringFlag{"dest,d", "", "destination account"},
+			cli.StringFlag{"amount,a", "", "amount to send"},
 			cli.IntFlag{"tag,t", 0, "destination tag"},
 			cli.StringFlag{"invoice,i", "", "invoice id (will be passed through SHA512Half)"},
 			cli.StringFlag{"paths", "", "paths"},
 			cli.StringFlag{"sendmax,m", "", "maximum to send"},
-			cli.BoolTFlag{"direct,d", "look for direct path"},
+			cli.BoolTFlag{"direct,r", "look for direct path"},
 			cli.BoolFlag{"partial,p", "permit partial payment"},
 			cli.BoolFlag{"limit,l", "limit quality"},
 		},
