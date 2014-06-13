@@ -81,7 +81,9 @@ func payment(c *cli.Context) {
 }
 
 func common(c *cli.Context) error {
-	key = parseSeed(c.String("seed"))
+	if c.String("seed") != "" {
+		key = parseSeed(c.String("seed"))
+	}
 	return nil
 }
 
