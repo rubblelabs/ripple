@@ -6,6 +6,7 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/donovanhide/ripple/crypto"
 	"github.com/donovanhide/ripple/data"
+	"github.com/donovanhide/ripple/websockets"
 	"os"
 )
 
@@ -56,6 +57,19 @@ func sign(c *cli.Context, tx data.Transaction, sequence int32) {
 	checkErr(data.Sign(priv, tx))
 }
 
+func submitTx(tx data.Transaction) {
+	r, err := websockets.NewRemote("wss://s-east.ripple.com:443")
+	if err != nil {
+		panic(err)
+	}
+	go r.Run()
+	r.Outgoing <- websockets.Submit(tx)
+	msg := (<-r.Incoming).(*websockets.SubmitCommand)
+	fmt.Printf("%+v\n", msg.Result)
+	fmt.Printf("%s: %s\n", msg.Result.EngineResult, msg.Result.EngineResultMessage)
+	os.Exit(0)
+}
+
 func payment(c *cli.Context) {
 	// Validate and parse required fields
 	if c.String("dest") == "" || c.String("amount") == "" || key == nil {
@@ -77,6 +91,10 @@ func payment(c *cli.Context) {
 	out, err := json.Marshal(payment)
 	checkErr(err)
 	fmt.Println(string(out))
+
+	if c.GlobalBool("submit") {
+		submitTx(payment)
+	}
 }
 
 func common(c *cli.Context) error {
@@ -96,6 +114,7 @@ func main() {
 	app.Flags = []cli.Flag{
 		cli.StringFlag{"seed,s", "", "the seed for the submitting account"},
 		cli.StringFlag{"fee,f", "10", "the fee you want to pay"},
+		cli.BoolFlag{"submit,t", "submits the transaction via websocket"},
 	}
 	app.Before = common
 	app.Commands = []cli.Command{{

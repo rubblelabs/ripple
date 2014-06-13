@@ -1,6 +1,7 @@
 package websockets
 
 import (
+	"fmt"
 	"github.com/donovanhide/ripple/data"
 	"sync/atomic"
 )
@@ -78,5 +79,25 @@ func GetTransaction(hash string) *TransactionCommand {
 		Command:     newCommand("tx"),
 		Transaction: hash,
 		Binary:      true,
+	}
+}
+
+type SubmitCommand struct {
+	Command
+	TxBlob string `json:"tx_blob"`
+	Result *struct {
+		//EngineResult        data.TransactionResult `json:"engine_result"`
+		EngineResult        string      `json:"engine_result"`
+		EngineResultCode    int         `json:"engine_result_code"`
+		EngineResultMessage string      `json:"engine_result_message"`
+		TxBlob              string      `json:"tx_blob"`
+		Tx                  interface{} `json:"tx_json"`
+	}
+}
+
+func Submit(tx data.Transaction) *SubmitCommand {
+	return &SubmitCommand{
+		Command: newCommand("submit"),
+		TxBlob:  fmt.Sprintf("%X", tx.Raw()),
 	}
 }
