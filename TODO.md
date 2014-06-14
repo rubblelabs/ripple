@@ -10,6 +10,8 @@
 * Allow connection to multiple endpoints?
 
 ##Tools
+
+###tx
 * Implement OfferCreate, OfferCancel, AccountSet and TrustSet commands
 * Use websockets to optionally acquire correct sequence number for account derived from seed 
-
+* Add memo support
