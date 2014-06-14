@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/donovanhide/ripple/data"
@@ -43,16 +44,33 @@ func main() {
 			)
 		case *websockets.TransactionStreamMsg:
 			transactionStyle.Printf(
-				"    %s by %s\n",
+				"    %-11s by %-34s Fee: %-8s Result: %s\n",
 				msg.Transaction.GetTransactionType().String(),
 				msg.Transaction.GetAccount(),
+				msg.Transaction.GetBase().Fee,
+				msg.EngineResult.String(),
 			)
-			for _, n := range msg.Transaction.MetaData.AffectedNodes {
-				s := ExplainNodeEffect(&n)
-				if s != "" {
-					nodeStyle.Printf("        %s\n", s)
-				}
+			trades, err := msg.Transaction.Trades()
+			if err != nil {
+				fmt.Println(err.Error())
 			}
+			for _, trade := range trades {
+				nodeStyle.Printf("\t%s\n", trade.String())
+			}
+			balances, err := msg.Transaction.Balances()
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+			for _, balance := range balances {
+				nodeStyle.Printf("\t%s\n", balance.String())
+			}
+
+			// for _, n := range msg.Transaction.MetaData.AffectedNodes {
+			// 	s := ExplainNodeEffect(&n)
+			// 	if s != "" {
+			// 		nodeStyle.Printf("        %s\n", s)
+			// 	}
+			// }
 		case *websockets.ServerStreamMsg:
 			serverStyle.Printf(
 				"Server Status: %s (%d/%d)\n",
@@ -83,11 +101,13 @@ func ExplainNodeEffect(ne *data.NodeEffect) string {
 		n = ne.DeletedNode
 		fields = n.FinalFields
 	}
+	out, _ := json.Marshal(ne)
+	fmt.Println(string(out))
 
 	switch n.LedgerEntryType {
-	case data.DIRECTORY:
-		// Skip
-		return ""
+	// case data.DIRECTORY:
+	// 	// Skip
+	// 	return ""
 
 	case data.OFFER:
 		return fmt.Sprintf("%s Offer %s %s for %s",

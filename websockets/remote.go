@@ -75,7 +75,7 @@ func (r *Remote) Run() {
 			if ok {
 				cmd := factory()
 				if err := json.Unmarshal(in, &cmd); err != nil {
-					glog.Errorln(err.Error())
+					glog.Errorln(err.Error(), string(in))
 					continue
 				}
 				r.Incoming <- cmd

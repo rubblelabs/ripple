@@ -1,6 +1,7 @@
 package data
 
 import (
+	"encoding/json"
 	"fmt"
 	"sort"
 )
@@ -80,13 +81,15 @@ func (txm *TransactionWithMetaData) Trades() (TradeSlice, error) {
 		account = txm.Transaction.GetBase().Account
 	)
 	for _, node := range txm.MetaData.AffectedNodes {
+		var reason = ""
 		switch {
 		case node.CreatedNode != nil && node.CreatedNode.LedgerEntryType == OFFER:
 			// No actual side effect
 		case node.DeletedNode != nil && node.DeletedNode.LedgerEntryType == OFFER:
 			// An OfferCreate specifying previous OfferSequence has no side effect
 			if node.DeletedNode.PreviousFields == nil {
-				continue
+				// reason = "No side effect"
+				break
 			}
 			// Fully consumed offer
 			previous, final := node.DeletedNode.PreviousFields.(*OfferFields), node.DeletedNode.FinalFields.(*OfferFields)
@@ -98,13 +101,22 @@ func (txm *TransactionWithMetaData) Trades() (TradeSlice, error) {
 		case node.ModifiedNode != nil && node.ModifiedNode.LedgerEntryType == OFFER:
 			// No change?
 			if node.ModifiedNode.PreviousFields == nil {
-				continue
+				reason = "no change"
+				break
 			}
 			// Partially consumed offer
 			previous, current := node.ModifiedNode.PreviousFields.(*OfferFields), node.ModifiedNode.FinalFields.(*OfferFields)
+			if previous.TakerPays == nil || current.TakerPays == nil {
+				reason = "missing taker pays"
+				break
+			}
 			paid, err := previous.TakerPays.Subtract(current.TakerPays)
 			if err != nil {
 				return nil, err
+			}
+			if previous.TakerGets == nil || current.TakerGets == nil {
+				reason = "missing taker gets"
+				break
 			}
 			got, err := previous.TakerGets.Subtract(current.TakerGets)
 			if err != nil {
@@ -115,6 +127,11 @@ func (txm *TransactionWithMetaData) Trades() (TradeSlice, error) {
 				return nil, err
 			}
 			trades.Add(&account, current.Account, price, got)
+		}
+		if reason != "" {
+			fmt.Println(reason)
+			out, _ := json.MarshalIndent(node, "", "  ")
+			fmt.Println(string(out))
 		}
 	}
 	sort.Sort(trades)
@@ -162,7 +179,16 @@ func (txm *TransactionWithMetaData) Balances() (BalanceSlice, error) {
 				if err != nil {
 					return nil, err
 				}
-				balances.Add(current.Account, current.Balance, change.Value, &zeroCurrency)
+				// Add fee and see if change is non-zero
+				if current.Account.Equals(account) {
+					change.Value, err = change.Value.Add(txm.GetBase().Fee)
+					if err != nil {
+						return nil, err
+					}
+				}
+				if change.Num != 0 {
+					balances.Add(current.Account, current.Balance, change.Value, &zeroCurrency)
+				}
 			case RIPPLE_STATE:
 				// Changed non-native balance
 				previous, current := node.ModifiedNode.PreviousFields.(*RippleStateFields), node.ModifiedNode.FinalFields.(*RippleStateFields)
