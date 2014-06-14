@@ -47,7 +47,13 @@ func sign(c *cli.Context, tx data.Transaction, sequence int32) {
 	base := tx.GetBase()
 	base.Sequence = uint32(c.GlobalInt("sequence"))
 	base.SigningPubKey = new(data.PublicKey)
-	base.Flags = new(data.TransactionFlag)
+	if c.GlobalInt("lastledger") > 0 {
+		base.LastLedgerSequence = new(uint32)
+		*base.LastLedgerSequence = uint32(c.GlobalInt("lastledger"))
+	}
+	if base.Flags == nil {
+		base.Flags = new(data.TransactionFlag)
+	}
 	copy(base.Account[:], id.Payload())
 	copy(base.SigningPubKey[:], pub.Payload())
 	if c.GlobalString("fee") != "" {
@@ -66,7 +72,6 @@ func submitTx(tx data.Transaction) {
 	go r.Run()
 	r.Outgoing <- websockets.Submit(tx)
 	msg := (<-r.Incoming).(*websockets.SubmitCommand)
-	fmt.Printf("%+v\n", msg.Result)
 	fmt.Printf("%s: %s\n", msg.Result.EngineResult, msg.Result.EngineResultMessage)
 	os.Exit(0)
 }
@@ -85,6 +90,18 @@ func payment(c *cli.Context) {
 		Amount:      *amount,
 	}
 	payment.TransactionType = data.PAYMENT
+
+	payment.Flags = new(data.TransactionFlag)
+	if c.Bool("nodirect") {
+		*payment.Flags = *payment.Flags | data.TxNoDirectRipple
+	}
+	if c.Bool("partial") {
+		*payment.Flags = *payment.Flags | data.TxPartialPayment
+	}
+	if c.Bool("limit") {
+		*payment.Flags = *payment.Flags | data.TxLimitQuality
+	}
+
 	sign(c, payment, 0)
 	fmt.Printf("%X\n", payment.Raw())
 
@@ -122,6 +139,7 @@ func main() {
 		cli.StringFlag{"seed,s", "", "the seed for the submitting account"},
 		cli.IntFlag{"fee,f", 10, "the fee you want to pay"},
 		cli.IntFlag{"sequence,q", 0, "the sequence for the transaction"},
+		cli.IntFlag{"lastledger,l", 0, "highest ledger number that the transaction can appear in"},
 		cli.BoolFlag{"submit,t", "submits the transaction via websocket"},
 	}
 	app.Before = common
@@ -138,7 +156,7 @@ func main() {
 			cli.StringFlag{"invoice,i", "", "invoice id (will be passed through SHA512Half)"},
 			cli.StringFlag{"paths", "", "paths"},
 			cli.StringFlag{"sendmax,m", "", "maximum to send"},
-			cli.BoolTFlag{"direct,r", "look for direct path"},
+			cli.BoolFlag{"nodirect,r", "do not look for direct path"},
 			cli.BoolFlag{"partial,p", "permit partial payment"},
 			cli.BoolFlag{"limit,l", "limit quality"},
 		},
