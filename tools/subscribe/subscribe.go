@@ -33,7 +33,12 @@ func main() {
 
 	// Consume messages as they arrive
 	for {
-		msg := <-r.Incoming
+		msg, ok := <-r.Incoming
+		if !ok {
+			fmt.Println(r.Wait().Error())
+			return
+		}
+
 		switch msg := msg.(type) {
 		case *websockets.LedgerStreamMsg:
 			ledgerStyle.Printf(
