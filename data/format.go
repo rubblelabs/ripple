@@ -241,9 +241,13 @@ func (e enc) SigningField() bool {
 }
 
 func (h HashPrefix) String() string {
+	return string(h.Bytes())
+}
+
+func (h HashPrefix) Bytes() []byte {
 	b := make([]byte, 4)
 	binary.BigEndian.PutUint32(b, uint32(h))
-	return string(b)
+	return b
 }
 
 func (n NodeType) String() string {

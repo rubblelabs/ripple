@@ -45,8 +45,8 @@ func sign(c *cli.Context, tx data.Transaction, sequence int32) {
 	pub, err := priv.PublicAccountKey()
 	checkErr(err)
 	base := tx.GetBase()
+	base.Sequence = uint32(c.GlobalInt("sequence"))
 	base.SigningPubKey = new(data.PublicKey)
-	base.Sequence = 44193
 	base.Flags = new(data.TransactionFlag)
 	copy(base.Account[:], id.Payload())
 	copy(base.SigningPubKey[:], pub.Payload())
@@ -99,9 +99,15 @@ func payment(c *cli.Context) {
 }
 
 func common(c *cli.Context) error {
-	if c.String("seed") != "" {
-		key = parseSeed(c.String("seed"))
+	if c.GlobalString("seed") == "" {
+		cli.ShowAppHelp(c)
+		os.Exit(1)
 	}
+	if c.GlobalInt("sequence") == 0 {
+		cli.ShowAppHelp(c)
+		os.Exit(1)
+	}
+	key = parseSeed(c.String("seed"))
 	return nil
 }
 
@@ -110,11 +116,12 @@ var key *crypto.RootDeterministicKey
 func main() {
 	app := cli.NewApp()
 	app.Name = "tx"
-	app.Usage = "create a Ripple transaction"
+	app.Usage = "create a Ripple transaction. Sequence and seed must be specified for every command."
 	app.Version = "0.1"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{"seed,s", "", "the seed for the submitting account"},
 		cli.IntFlag{"fee,f", 10, "the fee you want to pay"},
+		cli.IntFlag{"sequence,q", 0, "the sequence for the transaction"},
 		cli.BoolFlag{"submit,t", "submits the transaction via websocket"},
 	}
 	app.Before = common
@@ -122,7 +129,7 @@ func main() {
 		Name:        "payment",
 		ShortName:   "p",
 		Usage:       "create a payment",
-		Description: "destination and amount are required",
+		Description: "seed, sequence, destination and amount are required",
 		Action:      payment,
 		Flags: []cli.Flag{
 			cli.StringFlag{"dest,d", "", "destination account"},

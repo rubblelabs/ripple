@@ -34,6 +34,18 @@ func (enc *Encoder) Hex(w io.Writer, h Hashable) error {
 	return err
 }
 
+func (enc *Encoder) SigningHash(tx Transaction) ([]byte, error) {
+	if err := enc.Transaction(tx, true); err != nil {
+		return nil, err
+	}
+	enc.reset()
+	if err := write(enc.hash, append(HP_TRANSACTION_SIGN.Bytes(), tx.Raw()...)); err != nil {
+		return nil, err
+	}
+	return enc.hash.Sum(nil), nil
+
+}
+
 func (enc *Encoder) Transaction(tx Transaction, ignoreSigningFields bool) error {
 	enc.reset()
 	if err := enc.HashPrefix(enc.hash, tx); err != nil {

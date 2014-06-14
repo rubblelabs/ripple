@@ -28,10 +28,11 @@ func CheckSignature(h Hashable) (bool, error) {
 // Fills the raw field with a signed version of the encoding
 func Sign(key crypto.Key, tx Transaction) error {
 	enc := NewEncoder()
-	if err := enc.Transaction(tx, true); err != nil {
+	signingHash, err := enc.SigningHash(tx)
+	if err != nil {
 		return err
 	}
-	sig, err := key.Sign(tx.Raw())
+	sig, err := key.Sign(signingHash)
 	if err != nil {
 		return nil
 	}
