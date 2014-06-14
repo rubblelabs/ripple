@@ -278,15 +278,24 @@ func (v *Value) MarshalText() ([]byte, error) {
 }
 
 func (v *Value) UnmarshalText(b []byte) error {
-	v.Native = true
-	return v.Parse(string(b))
+	value, err := NewValue(string(b), true)
+	if err != nil {
+		return err
+	}
+	*v = *value
+	return nil
 }
 
 type nonNativeValue Value
 
 func (v *nonNativeValue) UnmarshalText(b []byte) error {
-	v.Native = false
-	return (*Value)(v).Parse(string(b))
+	value, err := NewValue(string(b), false)
+	if err != nil {
+		return err
+	}
+	*v = nonNativeValue(*value)
+	return nil
+	// return (*Value)(v).Parse(string(b))
 }
 
 func (v *nonNativeValue) MarshalText() ([]byte, error) {
@@ -299,7 +308,7 @@ type amountJSON struct {
 	Issuer   Account         `json:"issuer"`
 }
 
-func (a *Amount) MarshalJSON() ([]byte, error) {
+func (a Amount) MarshalJSON() ([]byte, error) {
 	if a.Native {
 		return []byte(`"` + strconv.FormatUint(a.Num, 10) + `"`), nil
 	}

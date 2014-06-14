@@ -1,6 +1,7 @@
 package data
 
 import (
+	"fmt"
 	. "github.com/donovanhide/ripple/testing"
 	. "launchpad.net/gocheck"
 	"testing"
@@ -42,6 +43,7 @@ var amountTests = TestSlice{
 	{addCheck("150", "50").String(), Equals, "0.0002/XRP", "Add XRP to XRP"},
 	{addCheck("150.02/USD/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh", "50.5/USD/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh").String(), Equals, "200.52/USD/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh", "Add USD to USD"},
 	{addCheck("0/USD", "1/USD").String(), Equals, "1/USD", "Add 0 USD to 1 USD"},
+	{ErrorCheck(amountCheck("1/XRP").Add(amountCheck("1/USD"))), ErrorMatches, "Cannot add.*", "Add 1 XRP to 1 USD"},
 	{subCheck("150.02/USD/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh", "50.5/USD/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh").String(), Equals, "99.52/USD/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh", "Subtract USD from USD"},
 	{mulCheck("0", "0").String(), Equals, "0/XRP", "Multiply 0 XRP with 0 XRP"},
 	{mulCheck("0/USD/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh", "0").String(), Equals, "0/USD/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh", "Multiply 0 USD with 0 XRP"},
@@ -151,9 +153,22 @@ func amountCheck(v interface{}) *Amount {
 }
 
 func equalCheck(a, b string) bool {
-	return amountCheck(a).Equals(amountCheck(b))
+	return amountCheck(a).Equals(*amountCheck(b))
 }
 
 func (s *AmountSuite) TestAmount(c *C) {
 	amountTests.Test(c)
+}
+
+func ExampleValue_Add() {
+	v1, _ := NewValue("100", false)
+	v2, _ := NewValue("200.199", false)
+	sum, _ := v1.Add(*v2)
+	fmt.Println(v1.String())
+	fmt.Println(v2.String())
+	fmt.Println(sum.String())
+	// Output:
+	// 100
+	// 200.199
+	// 300.199
 }

@@ -30,3 +30,7 @@ type Transaction interface {
 	// GetAffectedNodes() []NodeEffect
 	GetBase() *TxBase
 }
+
+type Delta interface {
+	// String() string
+}

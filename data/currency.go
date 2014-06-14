@@ -44,6 +44,10 @@ func NewCurrency(s string) (Currency, error) {
 	}
 }
 
+func (a Currency) Less(b Currency) bool {
+	return bytes.Compare(a.Bytes(), b.Bytes()) < 0
+}
+
 func (c Currency) Equals(other Currency) bool {
 	return c == other
 }

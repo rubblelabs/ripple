@@ -152,6 +152,14 @@ func (a *Account) Bytes() []byte {
 	return []byte(nil)
 }
 
+func (a Account) Less(b Account) bool {
+	return bytes.Compare(a[:], b[:]) < 0
+}
+
+func (a Account) Equals(b Account) bool {
+	return a == b
+}
+
 func (a Account) Hash256() Hash256 {
 	var h Hash256
 	copy(h[:], a[:])

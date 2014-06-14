@@ -51,8 +51,9 @@ func sign(c *cli.Context, tx data.Transaction, sequence int32) {
 	copy(base.Account[:], id.Payload())
 	copy(base.SigningPubKey[:], pub.Payload())
 	if c.GlobalString("fee") != "" {
-		base.Fee.Native = true
-		checkErr(base.Fee.Parse(c.GlobalString("fee")))
+		fee, err := data.NewNativeValue(int64(c.GlobalInt("fee")))
+		checkErr(err)
+		base.Fee = *fee
 	}
 	checkErr(data.Sign(priv, tx))
 }
@@ -95,7 +96,7 @@ func main() {
 	app.Version = "0.1"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{"seed,s", "", "the seed for the submitting account"},
-		cli.StringFlag{"fee,f", "", "the fee you want to pay"},
+		cli.IntFlag{"fee,f", 10, "the fee you want to pay"},
 	}
 	app.Before = common
 	app.Commands = []cli.Command{{

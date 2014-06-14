@@ -60,22 +60,3 @@ func (s *JSONSuite) TestLedgersJSON(c *C) {
 		compare(c, string(b), string(out))
 	}
 }
-
-// func (s *JSONSuite) TestMetadata(c *C) {
-// 	files, err := filepath.Glob("testdata/transaction_*.json")
-// 	c.Assert(err, IsNil)
-// 	for _, f := range files {
-// 		b, err := ioutil.ReadFile(f)
-// 		c.Assert(err, IsNil)
-// 		var txm TransactionWithMetaData
-// 		c.Assert(json.Unmarshal(b, &txm), IsNil)
-// 		for _, n := range txm.MetaData.AffectedNodes {
-// 			out, _ := json.MarshalIndent(n, "", "  ")
-// 			fmt.Println(string(out))
-// 			diff, err := n.Diff()
-// 			c.Check(err, IsNil)
-// 			fmt.Println(diff)
-// 			fmt.Println(n)
-// 		}
-// 	}
-// }
