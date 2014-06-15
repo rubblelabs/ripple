@@ -193,8 +193,8 @@ func (p *Peer) handleHello(m *Manager, hello *protocol.Hello) {
 	port, _ := strconv.ParseUint(m.Port, 10, 32)
 	p.Outgoing <- &protocol.TMHello{
 		FullVersion:     proto.String(m.Name),
-		ProtoVersion:    proto.Uint32(uint32(minVersion)),
-		ProtoVersionMin: proto.Uint32(uint32(maxVersion)),
+		ProtoVersion:    proto.Uint32(uint32(maxVersion)),
+		ProtoVersionMin: proto.Uint32(uint32(minVersion)),
 		NodePublic:      []byte(m.PublicKey.String()),
 		NodeProof:       proof,
 		Ipv4Port:        proto.Uint32(uint32(port)),
