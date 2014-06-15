@@ -13,9 +13,9 @@ import (
 	"time"
 )
 
-const (
-	MAJOR_VERSION = 65538
-	MINOR_VERSION = 65538
+var (
+	minVersion = protocol.NewNodeVersion(1, 2)
+	maxVersion = protocol.NewNodeVersion(1, 2)
 )
 
 type Dump struct {
@@ -193,8 +193,8 @@ func (p *Peer) handleHello(m *Manager, hello *protocol.Hello) {
 	port, _ := strconv.ParseUint(m.Port, 10, 32)
 	p.Outgoing <- &protocol.TMHello{
 		FullVersion:     proto.String(m.Name),
-		ProtoVersion:    proto.Uint32(MAJOR_VERSION),
-		ProtoVersionMin: proto.Uint32(MINOR_VERSION),
+		ProtoVersion:    proto.Uint32(uint32(minVersion)),
+		ProtoVersionMin: proto.Uint32(uint32(maxVersion)),
 		NodePublic:      []byte(m.PublicKey.String()),
 		NodeProof:       proof,
 		Ipv4Port:        proto.Uint32(uint32(port)),

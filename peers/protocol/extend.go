@@ -85,18 +85,29 @@ func (m *TMPing) Extend() (ExtendedMessage, error) {
 	}, nil
 }
 
+// Node Version
+type NodeVersion uint32
+
+func NewNodeVersion(major, minor uint16) NodeVersion {
+	return NodeVersion(major)<<16 | NodeVersion(minor)
+}
+
+func (n NodeVersion) String() string {
+	return fmt.Sprintf("%d.%d", n>>16, n&0xFFFF)
+}
+
 // TMHello extension
 type Hello struct {
 	*TMHello
-	Version    string
-	MinVersion string
+	Version    NodeVersion
+	MinVersion NodeVersion
 }
 
 func (m *TMHello) Extend() (ExtendedMessage, error) {
 	return &Hello{
 		TMHello:    m,
-		Version:    fmt.Sprintf("%d.%d", m.GetProtoVersion()>>16, m.GetProtoVersion()&0xFFFF),
-		MinVersion: fmt.Sprintf("%d.%d", m.GetProtoVersionMin()>>16, m.GetProtoVersionMin()&0xFFFF),
+		Version:    NodeVersion(m.GetProtoVersion()),
+		MinVersion: NodeVersion(m.GetProtoVersionMin()),
 	}, nil
 }
 
