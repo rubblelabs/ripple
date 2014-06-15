@@ -1,6 +1,7 @@
 package websockets
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/donovanhide/ripple/data"
 	"sync/atomic"
@@ -63,13 +64,26 @@ func Ledger(ledger interface{}, transactions bool) *LedgerCommand {
 	}
 }
 
+type TxResult struct {
+	data.TransactionWithMetaData
+	Validated bool `json:"validated"`
+}
+
 type TxCommand struct {
 	Command
-	Transaction string `json:"transaction"`
-	Result      *struct {
-		data.TransactionWithMetaData
-		Validated bool `json:"validated"`
-	} `json:"result,omitempty"`
+	Transaction string    `json:"transaction"`
+	Result      *TxResult `json:"result,omitempty"`
+}
+
+// A shim to populate the Validated field before passing
+// control on to TransactionWithMetaData.UnmarshalJSON
+func (txr *TxResult) UnmarshalJSON(b []byte) error {
+	var extract map[string]interface{}
+	if err := json.Unmarshal(b, &extract); err != nil {
+		return err
+	}
+	txr.Validated = extract["validated"].(bool)
+	return json.Unmarshal(b, &txr.TransactionWithMetaData)
 }
 
 // Creates new `tx` command to request a transaction by hash
