@@ -33,8 +33,10 @@ func newCommand(command string) Command {
 
 type LedgerCommand struct {
 	Command
-	LedgerIndex  uint32 `json:"ledger_index"`
-	Transactions bool   `json:"transactions"`
+	LedgerIndex  interface{} `json:"ledger_index"`
+	Accounts     bool        `json:"accounts"`
+	Transactions bool        `json:"transactions"`
+	Expand       bool        `json:"expand"`
 	Result       *struct {
 		Ledger struct {
 			LedgerSequence  uint32                `json:"ledger_index,string"`
@@ -52,33 +54,29 @@ type LedgerCommand struct {
 }
 
 // Creates new `ledger` command to request a ledger by index
-func GetLedger(ledger uint32) *LedgerCommand {
+func Ledger(ledger interface{}, transactions bool) *LedgerCommand {
 	return &LedgerCommand{
 		Command:      newCommand("ledger"),
 		LedgerIndex:  ledger,
-		Transactions: true,
+		Transactions: transactions,
+		Expand:       true,
 	}
 }
 
-type TransactionCommand struct {
+type TxCommand struct {
 	Command
 	Transaction string `json:"transaction"`
-	Binary      bool   `json:"binary"`
 	Result      *struct {
-		Hash           string `json:"hash"`
-		LedgerSequence uint32 `json:"ledger_index"`
-		Meta           string `json:"meta"`
-		Transaction    string `json:"tx"`
-		Validated      bool   `json:"validated"`
+		data.TransactionWithMetaData
+		Validated bool `json:"validated"`
 	} `json:"result,omitempty"`
 }
 
 // Creates new `tx` command to request a transaction by hash
-func GetTransaction(hash string) *TransactionCommand {
-	return &TransactionCommand{
+func Tx(hash string) *TxCommand {
+	return &TxCommand{
 		Command:     newCommand("tx"),
 		Transaction: hash,
-		Binary:      true,
 	}
 }
 
@@ -86,6 +84,7 @@ type SubmitCommand struct {
 	Command
 	TxBlob string `json:"tx_blob"`
 	Result *struct {
+		//FIXME(luke): TransactionResult doesn't support > 255 (tem, etc.)
 		//EngineResult        data.TransactionResult `json:"engine_result"`
 		EngineResult        string      `json:"engine_result"`
 		EngineResultCode    int         `json:"engine_result_code"`

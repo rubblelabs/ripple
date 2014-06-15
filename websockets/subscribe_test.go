@@ -1,29 +1,9 @@
 package websockets
 
 import (
-	"encoding/json"
 	"github.com/donovanhide/ripple/data"
-	"io/ioutil"
 	. "launchpad.net/gocheck"
-	"testing"
 )
-
-func Test(t *testing.T) { TestingT(t) }
-
-type MessagesSuite struct{}
-
-var _ = Suite(&MessagesSuite{})
-
-func readResponseFile(c *C, msg interface{}, path string) {
-	b, err := ioutil.ReadFile(path)
-	if err != nil {
-		c.Error(err)
-	}
-
-	if err = json.Unmarshal(b, msg); err != nil {
-		c.Error(err)
-	}
-}
 
 func (s *MessagesSuite) TestLedgerSubscribeResponse(c *C) {
 	msg := Subscribe(true, false, false)
