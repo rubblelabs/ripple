@@ -63,7 +63,7 @@ type OfferFields struct {
 	OwnerNode         *NodeIndex       `json:",omitempty"`
 	PreviousTxnID     *Hash256         `json:",omitempty"`
 	PreviousTxnLgrSeq *uint32          `json:",omitempty"`
-	Expiration        *RippleTime      `json:",omitempty"`
+	Expiration        *uint32          `json:",omitempty"`
 }
 
 type Offer struct {
