@@ -105,7 +105,7 @@ type SubmitCommand struct {
 		EngineResultMessage string      `json:"engine_result_message"`
 		TxBlob              string      `json:"tx_blob"`
 		Tx                  interface{} `json:"tx_json"`
-	}
+	} `json:"result,omitempty"`
 }
 
 func Submit(tx data.Transaction) *SubmitCommand {
