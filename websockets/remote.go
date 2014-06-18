@@ -2,10 +2,8 @@ package websockets
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/golang/glog"
 	"github.com/gorilla/websocket"
-	"launchpad.net/tomb"
 	"net"
 	"net/url"
 	"reflect"
@@ -14,10 +12,10 @@ import (
 
 const (
 	// Time allowed to write a message to the peer.
-	writeWait = 5 * time.Second
+	writeWait = 10 * time.Second
 
 	// Time allowed to read the next pong message from the peer.
-	pongWait = 15 * time.Second
+	pongWait = 60 * time.Second
 
 	// Send pings to peer with this period. Must be less than pongWait.
 	pingPeriod = (pongWait * 9) / 10
@@ -27,7 +25,6 @@ type Remote struct {
 	Outgoing chan interface{}
 	Incoming chan interface{}
 	ws       *websocket.Conn
-	t        tomb.Tomb
 }
 
 func NewRemote(endpoint string) (*Remote, error) {
@@ -58,10 +55,7 @@ func (r *Remote) Run() {
 
 	defer func() {
 		close(outbound)
-		close(inbound)
-		close(r.Outgoing)
 		close(r.Incoming)
-		r.t.Done()
 	}()
 
 	// Spawn read/write goroutines
@@ -75,12 +69,19 @@ func (r *Remote) Run() {
 	var response Response
 	for {
 		select {
-		case command := <-r.Outgoing:
+		case command, ok := <-r.Outgoing:
+			if !ok {
+				return
+			}
 			outbound <- command
 			id := reflect.ValueOf(command).Elem().FieldByName("Id").Uint()
 			pending[id] = command
 
-		case in := <-inbound:
+		case in, ok := <-inbound:
+			if !ok {
+				return
+			}
+
 			if err := json.Unmarshal(in, &response); err != nil {
 				glog.Errorln(err.Error())
 				continue
@@ -110,16 +111,8 @@ func (r *Remote) Run() {
 				continue
 			}
 			r.Incoming <- cmd
-
-		case <-r.t.Dying():
-			return
 		}
 	}
-}
-
-// Waits for the session to close and returns the error (if any)
-func (r *Remote) Wait() error {
-	return r.t.Wait()
 }
 
 // Reads from the websocket and sends to inbound channel
@@ -130,10 +123,12 @@ func (r *Remote) readPump(inbound chan []byte) {
 	for {
 		_, message, err := r.ws.ReadMessage()
 		if err != nil {
-			r.t.Kill(err)
+			glog.Errorln(err)
+			close(inbound)
 			return
 		}
 		glog.V(2).Infoln(string(message))
+		r.ws.SetReadDeadline(time.Now().Add(pongWait))
 		inbound <- message
 	}
 }
@@ -152,7 +147,6 @@ func (r *Remote) writePump(outbound chan interface{}) {
 		case message, ok := <-outbound:
 			if !ok {
 				r.ws.WriteMessage(websocket.CloseMessage, []byte{})
-				r.t.Kill(fmt.Errorf("outbound channel closed"))
 				return
 			}
 
@@ -165,21 +159,16 @@ func (r *Remote) writePump(outbound chan interface{}) {
 
 			glog.V(2).Infoln(string(b))
 			if err := r.ws.WriteMessage(websocket.TextMessage, b); err != nil {
-				r.t.Kill(err)
+				glog.Errorln(err)
 				return
 			}
 
 		// Time to send a ping
 		case <-ticker.C:
 			if err := r.ws.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
-				r.t.Kill(err)
+				glog.Errorln(err)
 				return
 			}
-
-		// The session is shutting down
-		case <-r.t.Dying():
-			r.ws.WriteMessage(websocket.CloseMessage, []byte{})
-			return
 		}
 	}
 }

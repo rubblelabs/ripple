@@ -35,7 +35,6 @@ func main() {
 	for {
 		msg, ok := <-r.Incoming
 		if !ok {
-			fmt.Println(r.Wait().Error())
 			return
 		}
 
