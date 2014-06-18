@@ -5,7 +5,7 @@ import (
 )
 
 type Reader interface {
-	io.ByteReader
+	io.ByteScanner
 	io.Reader
 	Len() int
 }
@@ -41,4 +41,12 @@ func (l *LimitByteReader) ReadByte() (c byte, err error) {
 	}
 	l.N--
 	return l.R.ReadByte()
+}
+
+func (l *LimitByteReader) UnreadByte() error {
+	if err := l.UnreadByte(); err != nil {
+		return err
+	}
+	l.N++
+	return nil
 }
