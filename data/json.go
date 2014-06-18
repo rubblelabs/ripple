@@ -329,7 +329,7 @@ func (a *Amount) UnmarshalJSON(b []byte) (err error) {
 }
 
 func (c Currency) MarshalText() ([]byte, error) {
-	return []byte(c.String()), nil
+	return []byte(c.Machine()), nil
 }
 
 func (c *Currency) UnmarshalText(text []byte) error {
