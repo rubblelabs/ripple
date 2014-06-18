@@ -21,7 +21,7 @@ type AccountRootFields struct {
 	EmailHash         *Hash128         `json:",omitempty"`
 	WalletLocator     *Hash256         `json:",omitempty"`
 	WalletSize        *uint32          `json:",omitempty"`
-	MessageKey        *PublicKey       `json:",omitempty"`
+	MessageKey        *VariableLength  `json:",omitempty"`
 	TransferRate      *uint32          `json:",omitempty"`
 	Domain            *VariableLength  `json:",omitempty"`
 	Signers           *VariableLength  `json:",omitempty"`
