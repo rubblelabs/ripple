@@ -422,39 +422,39 @@ func (p *PublicKey) UnmarshalText(b []byte) error {
 	return err
 }
 
-type affectedNodeJSON AffectedNode
+// type affectedNodeJSON AffectedNode
 
-type affectedFields struct {
-	*affectedNodeJSON
-	FinalFields    *json.RawMessage
-	PreviousFields *json.RawMessage
-	NewFields      *json.RawMessage
-}
+// type affectedFields struct {
+// 	*affectedNodeJSON
+// 	FinalFields    *json.RawMessage
+// 	PreviousFields *json.RawMessage
+// 	NewFields      *json.RawMessage
+// }
 
-func (n *AffectedNode) UnmarshalJSON(b []byte) error {
-	affected := affectedFields{
-		affectedNodeJSON: (*affectedNodeJSON)(n),
-	}
-	if err := json.Unmarshal(b, &affected); err != nil {
-		return err
-	}
-	if affected.FinalFields != nil {
-		n.FinalFields = FieldsFactory[n.LedgerEntryType]()
-		if err := json.Unmarshal(*affected.FinalFields, n.FinalFields); err != nil {
-			return err
-		}
-	}
-	if affected.PreviousFields != nil {
-		n.PreviousFields = FieldsFactory[n.LedgerEntryType]()
-		if err := json.Unmarshal(*affected.PreviousFields, n.PreviousFields); err != nil {
-			return err
-		}
-	}
-	if affected.NewFields != nil {
-		n.NewFields = FieldsFactory[n.LedgerEntryType]()
-		if err := json.Unmarshal(*affected.NewFields, n.NewFields); err != nil {
-			return err
-		}
-	}
-	return nil
-}
+// func (n *AffectedNode) UnmarshalJSON(b []byte) error {
+// 	affected := affectedFields{
+// 		affectedNodeJSON: (*affectedNodeJSON)(n),
+// 	}
+// 	if err := json.Unmarshal(b, &affected); err != nil {
+// 		return err
+// 	}
+// 	if affected.FinalFields != nil {
+// 		n.FinalFields = FieldsFactory[n.LedgerEntryType]()
+// 		if err := json.Unmarshal(*affected.FinalFields, n.FinalFields); err != nil {
+// 			return err
+// 		}
+// 	}
+// 	if affected.PreviousFields != nil {
+// 		n.PreviousFields = FieldsFactory[n.LedgerEntryType]()
+// 		if err := json.Unmarshal(*affected.PreviousFields, n.PreviousFields); err != nil {
+// 			return err
+// 		}
+// 	}
+// 	if affected.NewFields != nil {
+// 		n.NewFields = FieldsFactory[n.LedgerEntryType]()
+// 		if err := json.Unmarshal(*affected.NewFields, n.NewFields); err != nil {
+// 			return err
+// 		}
+// 	}
+// 	return nil
+// }

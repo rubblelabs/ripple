@@ -2,6 +2,7 @@ package data
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"io"
 	"reflect"
@@ -24,7 +25,8 @@ func (dec *Decoder) Wire(typ NodeType) (Hashable, error) {
 	case HP_LEAF_NODE:
 		return dec.LedgerEntry()
 	case HP_TRANSACTION_NODE:
-		return dec.TransactionWithMetadata()
+		// TODO: What is the correct ledger sequence?
+		return dec.TransactionWithMetadata(0)
 	case HP_INNER_NODE:
 		return dec.CompressedInnerNode(typ)
 	default:
@@ -49,7 +51,7 @@ func (dec *Decoder) Prefix() (Hashable, error) {
 	case header.NodeType == NT_TRANSACTION:
 		return dec.Transaction()
 	case header.NodeType == NT_TRANSACTION_NODE:
-		return dec.TransactionWithMetadata()
+		return dec.TransactionWithMetadata(header.LedgerIndex)
 	case header.NodeType == NT_ACCOUNT_NODE:
 		return dec.LedgerEntry()
 	default:
@@ -115,7 +117,7 @@ func (dec *Decoder) CompressedInnerNode(typ NodeType) (*InnerNode, error) {
 	return &inner, nil
 }
 
-func (dec *Decoder) TransactionWithMetadata() (*TransactionWithMetaData, error) {
+func (dec *Decoder) TransactionWithMetadata(ledger uint32) (*TransactionWithMetaData, error) {
 	br, err := NewVariableByteReader(dec.r)
 	if err != nil {
 		return nil, err
@@ -125,7 +127,8 @@ func (dec *Decoder) TransactionWithMetadata() (*TransactionWithMetaData, error) 
 		return nil, err
 	}
 	txMeta := &TransactionWithMetaData{
-		Transaction: tx,
+		Transaction:    tx,
+		LedgerSequence: ledger,
 	}
 	br, err = NewVariableByteReader(dec.r)
 	if err != nil {
@@ -135,6 +138,15 @@ func (dec *Decoder) TransactionWithMetadata() (*TransactionWithMetaData, error) 
 	if err := NewDecoder(br).readObject(&meta); err != nil {
 		return nil, err
 	}
+	hash := make([]byte, 32)
+	n, err := dec.r.Read(hash)
+	if err != nil {
+		return nil, err
+	}
+	if n != 32 {
+		return nil, fmt.Errorf("Bad hash")
+	}
+	txMeta.SetHash(hash)
 	return txMeta, nil
 }
 
@@ -167,10 +179,10 @@ func (dec *Decoder) LedgerEntry() (LedgerEntry, error) {
 	return le, nil
 }
 
-func (dec *Decoder) next() (string, error) {
+func (dec *Decoder) next() (*enc, error) {
 	var e enc
 	if b, err := dec.r.ReadByte(); err != nil {
-		return "", err
+		return nil, err
 	} else {
 		e.typ = b >> 4
 		e.field = b & 0xF
@@ -178,22 +190,23 @@ func (dec *Decoder) next() (string, error) {
 	var err error
 	if e.typ == 0 {
 		if e.typ, err = dec.r.ReadByte(); err != nil {
-			return "", err
+			return nil, err
 		}
 	}
 	if e.field == 0 {
 		if e.field, err = dec.r.ReadByte(); err != nil {
-			return "", err
+			return nil, err
 		}
 	}
-	return encodings[e], nil
+	return &e, nil
 }
 
 func (dec *Decoder) expectType(expected string) (uint16, error) {
-	name, err := dec.next()
+	enc, err := dec.next()
 	if err != nil {
 		return 0, err
 	}
+	name := encodings[*enc]
 	if name != expected {
 		return 0, fmt.Errorf("Unexpected type: %s expected: %s", name, expected)
 	}
@@ -205,65 +218,74 @@ func (dec *Decoder) read(dest interface{}) error {
 	return binary.Read(dec.r, binary.BigEndian, dest)
 }
 
+var (
+	errorEndOfObject = errors.New("EndOfObject")
+	errorEndOfArray  = errors.New("EndOfArray")
+)
+
 func (dec *Decoder) readObject(v *reflect.Value) error {
 	var err error
-	for name, err := dec.next(); err == nil; name, err = dec.next() {
-		// fmt.Println(name, v, v.IsValid())
-		switch name {
-		case "EndOfObject":
-			return nil
-		case "EndOfArray":
-			continue
-		case "PreviousFields", "NewFields", "FinalFields":
-			ledgerEntryType := uint16(v.Elem().FieldByName("LedgerEntryType").Uint())
-			le := FieldsFactory[ledgerEntryType]()
-			lePtr := reflect.ValueOf(le)
-			if err := dec.readObject(&lePtr); err != nil {
-				return err
-			}
-			v.Elem().FieldByName(name).Set(lePtr)
-		case "ModifiedNode", "DeletedNode", "CreatedNode":
-			var node AffectedNode
-			n := reflect.ValueOf(&node)
-			if err := dec.readObject(&n); err != nil {
-				return err
-			}
-			var effect NodeEffect
-			e := reflect.ValueOf(&effect)
-			e.Elem().FieldByName(name).Set(n)
-			affected := v.Elem().FieldByName("AffectedNodes")
-			affected.Set(reflect.Append(affected, e.Elem()))
-		case "Memo":
-			var memo Memo
-			m := reflect.ValueOf(&memo.Memo)
-			if err := dec.readObject(&m); err != nil {
-				return err
-			}
-			memos := v.Elem().FieldByName("Memos")
-			memos.Set(reflect.Append(memos, reflect.ValueOf(memo)))
-		default:
-			// fmt.Println(v, name)
-			field := v.Elem().FieldByName(name)
-			if field.Kind() == reflect.Ptr {
-				field.Set(reflect.New(field.Type().Elem()))
-				field = field.Elem()
-			}
-			if !field.IsValid() {
-				return fmt.Errorf("Unknown Field: %s", name)
-			}
-			switch f := field.Addr().Interface().(type) {
-			case Wire:
-				if err := f.Unmarshal(dec.r); err != nil {
+	for enc, err := dec.next(); err == nil; enc, err = dec.next() {
+		name := encodings[*enc]
+		// fmt.Println(name, v, v.IsValid(), enc.typ, enc.field)
+		if name == "EndOfArray" {
+			return errorEndOfArray
+		}
+		if name == "EndOfObject" {
+			return errorEndOfObject
+		}
+		switch enc.typ {
+		case ST_ARRAY:
+			array := getField(v, enc)
+		loop:
+			for {
+				child := reflect.New(array.Type().Elem()).Elem()
+				err := dec.readObject(&child)
+				switch err {
+				case errorEndOfArray:
+					break loop
+				case errorEndOfObject:
+					array.Set(reflect.Append(*array, child))
+				default:
 					return err
 				}
-			case *uint64, *uint32, *uint16, *uint8, *TransactionResult, *LedgerEntryType, *TransactionType, *NodeIndex, *TransactionFlag, *LedgerEntryFlag:
-				if err := dec.read(f); err != nil {
+			}
+		case ST_OBJECT:
+			switch name {
+			case "PreviousFields", "NewFields", "FinalFields":
+				var fields Fields
+				f := reflect.ValueOf(&fields)
+				v.Elem().FieldByName(name).Set(f)
+				if dec.readObject(&f); err != nil && err != errorEndOfObject {
 					return err
 				}
+			case "ModifiedNode", "DeletedNode", "CreatedNode":
+				var node AffectedNode
+				n := reflect.ValueOf(&node)
+				var effect NodeEffect
+				e := reflect.ValueOf(&effect)
+				e.Elem().FieldByName(name).Set(n)
+				v.Set(e.Elem())
+				return dec.readObject(&n)
+			case "Memo":
+				var memo Memo
+				m := reflect.ValueOf(&memo)
+				inner := reflect.ValueOf(&memo.Memo)
+				err := dec.readObject(&inner)
+				v.Set(m.Elem())
+				return err
 			default:
-				if err := dec.readObject(&field); err != nil {
-					return err
-				}
+				panic(fmt.Sprintf("Unknown object: %+v", enc))
+			}
+		case ST_UINT8, ST_UINT16, ST_UINT32, ST_UINT64:
+			field := getField(v, enc)
+			if err := dec.read(field.Addr().Interface()); err != nil {
+				return err
+			}
+		default:
+			w := getField(v, enc).Addr().Interface().(Wire)
+			if err := w.Unmarshal(dec.r); err != nil {
+				return err
 			}
 		}
 	}
@@ -271,4 +293,14 @@ func (dec *Decoder) readObject(v *reflect.Value) error {
 		return nil
 	}
 	return err
+}
+
+func getField(v *reflect.Value, e *enc) *reflect.Value {
+	name := encodings[*e]
+	field := v.Elem().FieldByName(name)
+	if field.Kind() == reflect.Ptr {
+		field.Set(reflect.New(field.Type().Elem()))
+		field = field.Elem()
+	}
+	return &field
 }

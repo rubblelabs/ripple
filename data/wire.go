@@ -315,19 +315,3 @@ func (p *Paths) Marshal(w io.Writer) error {
 	}
 	return nil
 }
-
-func (m *Memos) Unmarshal(r Reader) error {
-	return nil
-}
-
-func (m *Memos) Marshal(w io.Writer) error {
-	return nil
-}
-
-func (e NodeEffects) Unmarshal(r Reader) error {
-	return nil
-}
-
-func (e NodeEffects) Marshal(w io.Writer) error {
-	return nil
-}
