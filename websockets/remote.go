@@ -3,6 +3,7 @@ package websockets
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/donovanhide/ripple/data"
 	"github.com/golang/glog"
 	"github.com/gorilla/websocket"
 	"launchpad.net/tomb"
@@ -85,7 +86,6 @@ func (r *Remote) Run() {
 				glog.Errorln(err.Error())
 				continue
 			}
-
 			// Stream message
 			factory, ok := streamMessageFactory[response.Type]
 			if ok {
@@ -109,12 +109,34 @@ func (r *Remote) Run() {
 				glog.Errorln(err.Error())
 				continue
 			}
-			r.Incoming <- cmd
+			cmd.(Syncer).Done()
 
 		case <-r.t.Dying():
 			return
 		}
 	}
+}
+
+// Synchronously get a single transaction
+func (r *Remote) Tx(hash data.Hash256) *TxResult {
+	cmd := &TxCommand{
+		SynchronousCommand: newSynchonousCommand("tx"),
+		Transaction:        hash,
+	}
+	r.Outgoing <- cmd
+	<-cmd.Ready
+	return cmd.Result
+}
+
+// Synchronously submit a single transaction
+func (r *Remote) Submit(tx data.Transaction) *SubmitResult {
+	cmd := &SubmitCommand{
+		SynchronousCommand: newSynchonousCommand("submit"),
+		TxBlob:             fmt.Sprintf("%X", tx.Raw()),
+	}
+	r.Outgoing <- cmd
+	<-cmd.Ready
+	return cmd.Result
 }
 
 // Waits for the session to close and returns the error (if any)

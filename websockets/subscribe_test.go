@@ -77,7 +77,7 @@ func (s *MessagesSuite) TestTransactionStreamMsg(c *C) {
 	c.Assert(msg.Transaction.MetaData.TransactionIndex, Equals, uint32(0))
 	c.Assert(msg.Transaction.MetaData.AffectedNodes, HasLen, 7)
 
-	offerNodeFields := msg.Transaction.MetaData.AffectedNodes[0].CreatedNode.NewFields.(*data.OfferFields)
+	offerNodeFields := msg.Transaction.MetaData.AffectedNodes[0].CreatedNode.NewFields
 	c.Assert(msg.Transaction.MetaData.AffectedNodes[0].CreatedNode.LedgerEntryType.String(), Equals, "Offer")
 	c.Assert(offerNodeFields.TakerGets.String(), Equals, "6400.064/XRP")
 	c.Assert(offerNodeFields.TakerPays.String(), Equals, "174.72/CNY/razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA")

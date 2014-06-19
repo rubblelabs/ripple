@@ -2,17 +2,29 @@ package websockets
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/donovanhide/ripple/data"
 	"sync/atomic"
 )
 
 var counter uint64
 
+type Syncer interface {
+	Done()
+}
+
 type Command struct {
 	Id      uint64 `json:"id"`
 	Command string `json:"command"`
 	Response
+}
+
+type SynchronousCommand struct {
+	Command
+	Ready chan bool `json:"-"`
+}
+
+func (s SynchronousCommand) Done() {
+	s.Ready <- true
 }
 
 // Fields that are in every json response
@@ -29,6 +41,13 @@ func newCommand(command string) Command {
 	return Command{
 		Id:      atomic.AddUint64(&counter, 1),
 		Command: command,
+	}
+}
+
+func newSynchonousCommand(command string) SynchronousCommand {
+	return SynchronousCommand{
+		Command: newCommand(command),
+		Ready:   make(chan bool),
 	}
 }
 
@@ -64,15 +83,15 @@ func Ledger(ledger interface{}, transactions bool) *LedgerCommand {
 	}
 }
 
+type TxCommand struct {
+	SynchronousCommand
+	Transaction data.Hash256 `json:"transaction"`
+	Result      *TxResult    `json:"result,omitempty"`
+}
+
 type TxResult struct {
 	data.TransactionWithMetaData
 	Validated bool `json:"validated"`
-}
-
-type TxCommand struct {
-	Command
-	Transaction string    `json:"transaction"`
-	Result      *TxResult `json:"result,omitempty"`
 }
 
 // A shim to populate the Validated field before passing
@@ -86,31 +105,16 @@ func (txr *TxResult) UnmarshalJSON(b []byte) error {
 	return json.Unmarshal(b, &txr.TransactionWithMetaData)
 }
 
-// Creates new `tx` command to request a transaction by hash
-func Tx(hash string) *TxCommand {
-	return &TxCommand{
-		Command:     newCommand("tx"),
-		Transaction: hash,
-	}
-}
-
 type SubmitCommand struct {
-	Command
+	SynchronousCommand
 	TxBlob string `json:"tx_blob"`
-	Result *struct {
-		//FIXME(luke): TransactionResult doesn't support > 255 (tem, etc.)
-		//EngineResult        data.TransactionResult `json:"engine_result"`
-		EngineResult        string      `json:"engine_result"`
-		EngineResultCode    int         `json:"engine_result_code"`
-		EngineResultMessage string      `json:"engine_result_message"`
-		TxBlob              string      `json:"tx_blob"`
-		Tx                  interface{} `json:"tx_json"`
-	}
+	Result *SubmitResult
 }
 
-func Submit(tx data.Transaction) *SubmitCommand {
-	return &SubmitCommand{
-		Command: newCommand("submit"),
-		TxBlob:  fmt.Sprintf("%X", tx.Raw()),
-	}
+type SubmitResult struct {
+	EngineResult        data.TransactionResult `json:"engine_result"`
+	EngineResultCode    int                    `json:"engine_result_code"`
+	EngineResultMessage string                 `json:"engine_result_message"`
+	TxBlob              string                 `json:"tx_blob"`
+	Tx                  interface{}            `json:"tx_json"`
 }

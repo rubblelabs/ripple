@@ -70,9 +70,8 @@ func submitTx(tx data.Transaction) {
 		panic(err)
 	}
 	go r.Run()
-	r.Outgoing <- websockets.Submit(tx)
-	msg := (<-r.Incoming).(*websockets.SubmitCommand)
-	fmt.Printf("%s: %s\n", msg.Result.EngineResult, msg.Result.EngineResultMessage)
+	result := r.Submit(tx)
+	fmt.Printf("%s: %s\n", result.EngineResult, result.EngineResultMessage)
 	os.Exit(0)
 }
 

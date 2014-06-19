@@ -51,7 +51,7 @@ func (s *MessagesSuite) TestLedgerResponse(c *C) {
 }
 
 func (s *MessagesSuite) TestTxResponse(c *C) {
-	msg := Tx("2D0CE11154B655A2BFE7F3F857AAC344622EC7DAB11B1EBD920DCDB00E8646FF")
+	msg := &TxCommand{}
 	readResponseFile(c, msg, "testdata/tx.json")
 
 	// Response fields
