@@ -43,10 +43,17 @@ func (l *Ledger) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// Wrapper types to enable second level of marshalling
+// Wrapper type to enable second level of marshalling
 // when found in ledger API call
 type txmLedger struct {
 	MetaData MetaData `json:"metaData"`
+}
+
+// Wrapper type to enable marshalling when found in
+// AccountTx call
+type splitTxm struct {
+	Tx   json.RawMessage
+	Meta json.RawMessage
 }
 
 // Wrapper types to enable second level of marshalling
@@ -57,9 +64,23 @@ var (
 	txmTransactionTypeRegex = regexp.MustCompile(`"TransactionType":\s*"(\w+)"`)
 	txmHashRegex            = regexp.MustCompile(`"hash":\s*"(\w+)"`)
 	txmMetaTypeRegex        = regexp.MustCompile(`"(meta|metaData)"`)
+	txmSplitTypeRegex       = regexp.MustCompile(`"tx":`)
 )
 
+// This function is a horrow show, demonstrating the huge
+// inconsistencies in the presentation of a transaction
+// by the rippled API
 func (txm *TransactionWithMetaData) UnmarshalJSON(b []byte) error {
+	if txmSplitTypeRegex.Match(b) {
+		var split splitTxm
+		if err := json.Unmarshal(b, &split); err != nil {
+			return err
+		}
+		if err := json.Unmarshal(split.Tx, txm); err != nil {
+			return err
+		}
+		return json.Unmarshal(split.Meta, &txm.MetaData)
+	}
 	txTypeMatch := txmTransactionTypeRegex.FindStringSubmatch(string(b))
 	hashMatch := txmHashRegex.FindStringSubmatch(string(b))
 	metaTypeMatch := txmMetaTypeRegex.FindStringSubmatch(string(b))

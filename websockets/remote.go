@@ -130,6 +130,39 @@ func (r *Remote) Tx(hash data.Hash256) (*TxResult, error) {
 	return cmd.Result, nil
 }
 
+func (r *Remote) accountTx(account data.Account, c chan *data.TransactionWithMetaData) {
+	cmd := &AccountTxCommand{
+		Command:   newCommand("account_tx"),
+		Account:   account,
+		MinLedger: 32570,
+		MaxLedger: 7284002,
+		Binary:    false,
+		Forward:   false,
+		Limit:     2,
+	}
+	defer close(c)
+	for {
+		r.Outgoing <- cmd
+		<-cmd.Ready
+		if cmd.CommandError != nil {
+			glog.Errorln(cmd.Error())
+			return
+		}
+		for _, tx := range cmd.Result.Transactions {
+			fmt.Println(tx.String())
+			c <- &tx
+		}
+		return
+	}
+}
+
+// Asynchronously retrieve all transactions for an account
+func (r *Remote) AccountTx(account data.Account) chan *data.TransactionWithMetaData {
+	c := make(chan *data.TransactionWithMetaData)
+	go r.accountTx(account, c)
+	return c
+}
+
 // Synchronously submit a single transaction
 func (r *Remote) Submit(tx data.Transaction) (*SubmitResult, error) {
 	cmd := &SubmitCommand{

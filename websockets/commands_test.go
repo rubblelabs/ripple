@@ -72,3 +72,16 @@ func (s *MessagesSuite) TestTxResponse(c *C) {
 	c.Assert(offer.TxnSignature.String(), Equals, "30440220216D42DF672C1CC7EF0CA9C7840838A2AF5FEDD4DEFCBA770C763D7509703C8702203C8D831BFF8A8BC2CC993BECB4E6C7BE1EA9D394AB7CE7C6F7542B6CDA781467")
 	c.Assert(offer.Sequence, Equals, uint32(1681497))
 }
+
+func (s *MessagesSuite) TestAccountTxResponse(c *C) {
+	msg := &AccountTxCommand{}
+	readResponseFile(c, msg, "testdata/account_tx.json")
+
+	// Response fields
+	c.Assert(msg.Status, Equals, "success")
+	c.Assert(msg.Type, Equals, "response")
+
+	c.Assert(len(msg.Result.Transactions), Equals, 2)
+	offer := msg.Result.Transactions[1].Transaction.(*data.OfferCreate)
+	c.Assert(offer.TakerPays.String(), Equals, "0.034800328/BTC/rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B")
+}

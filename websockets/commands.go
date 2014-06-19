@@ -21,10 +21,10 @@ type CommandError struct {
 
 type Command struct {
 	*CommandError
-	Id     uint64 `json:"id"`
-	Name   string `json:"command"`
-	Type   string
-	Status string
+	Id     uint64    `json:"id"`
+	Name   string    `json:"command"`
+	Type   string    `json:"type,omitempty"`
+	Status string    `json:"status,omitempty"`
 	Ready  chan bool `json:"-"`
 }
 
@@ -66,6 +66,23 @@ type LedgerResult struct {
 		TransactionHash data.Hash256          `json:"transaction_hash"`
 		Transactions    data.TransactionSlice `json:"transactions"`
 	}
+}
+
+type AccountTxCommand struct {
+	*Command
+	Account   data.Account           `json:"account"`
+	MinLedger int64                  `json:"ledger_index_min"`
+	MaxLedger int64                  `json:"ledger_index_max"`
+	Binary    bool                   `json:"binary,omitempty"`
+	Forward   bool                   `json:"forward,omitempty"`
+	Limit     int                    `json:"limit,omitempty"`
+	Marker    map[string]interface{} `json:"marker,omitempty"`
+	Result    *AccountTxResult       `json:"result,omitempty"`
+}
+
+type AccountTxResult struct {
+	Marker       map[string]interface{}         `json:"marker,omitempty"`
+	Transactions []data.TransactionWithMetaData `json:"transactions,omitempty"`
 }
 
 type TxCommand struct {
