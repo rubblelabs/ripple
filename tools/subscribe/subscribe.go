@@ -7,22 +7,27 @@ import (
 	"github.com/donovanhide/ripple/data"
 	"github.com/donovanhide/ripple/websockets"
 	"github.com/fatih/color"
+	"os"
 )
+
+func checkErr(err error) {
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+}
 
 func main() {
 	flag.Parse()
 	r, err := websockets.NewRemote("wss://s-east.ripple.com:443")
-	if err != nil {
-		panic(err)
-	}
+	checkErr(err)
 	go r.Run()
-
 	// Subscribe to all streams
-	confirmation := r.Subscribe(true, true, true)
+	confirmation, err := r.Subscribe(true, true, true)
+	checkErr(err)
 	fmt.Printf(
-		"Subscribed at %d to streams: %v\n",
-		confirmation.Result.LedgerSequence,
-		confirmation.Streams,
+		"Subscribed at %d\n",
+		confirmation.LedgerSequence,
 	)
 
 	ledgerStyle := color.New(color.FgRed, color.Underline)

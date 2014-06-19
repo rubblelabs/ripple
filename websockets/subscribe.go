@@ -45,7 +45,7 @@ var streamMessageFactory = map[string]func() interface{}{
 }
 
 type SubscribeCommand struct {
-	Command
+	*Command
 	Streams []string         `json:"streams"`
 	Result  *SubscribeResult `json:"result,omitempty"`
 }

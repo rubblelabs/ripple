@@ -24,7 +24,7 @@ const (
 )
 
 type Remote struct {
-	Outgoing chan interface{}
+	Outgoing chan Syncer
 	Incoming chan interface{}
 	ws       *websocket.Conn
 }
@@ -44,7 +44,7 @@ func NewRemote(endpoint string) (*Remote, error) {
 		return nil, err
 	}
 	return &Remote{
-		Outgoing: make(chan interface{}, 10),
+		Outgoing: make(chan Syncer, 10),
 		Incoming: make(chan interface{}, 10),
 		ws:       ws,
 	}, nil
@@ -53,7 +53,7 @@ func NewRemote(endpoint string) (*Remote, error) {
 func (r *Remote) Run() {
 	outbound := make(chan interface{})
 	inbound := make(chan []byte)
-	pending := make(map[uint64]interface{})
+	pending := make(map[uint64]Syncer)
 
 	defer func() {
 		close(outbound)
@@ -68,7 +68,7 @@ func (r *Remote) Run() {
 	go r.readPump(inbound)
 
 	// Main run loop
-	var response Response
+	var response Command
 	for {
 		select {
 		case command, ok := <-r.Outgoing:
@@ -111,34 +111,58 @@ func (r *Remote) Run() {
 				glog.Errorln(err.Error())
 				continue
 			}
-			cmd.(Syncer).Done()
+			cmd.Done()
 		}
 	}
 }
 
 // Synchronously get a single transaction
-func (r *Remote) Tx(hash data.Hash256) *TxResult {
+func (r *Remote) Tx(hash data.Hash256) (*TxResult, error) {
 	cmd := &TxCommand{
 		Command:     newCommand("tx"),
 		Transaction: hash,
 	}
 	r.Outgoing <- cmd
 	<-cmd.Ready
-	return cmd.Result
+	if cmd.CommandError != nil {
+		return nil, cmd.CommandError
+	}
+	return cmd.Result, nil
 }
 
 // Synchronously submit a single transaction
-func (r *Remote) Submit(tx data.Transaction) *SubmitResult {
+func (r *Remote) Submit(tx data.Transaction) (*SubmitResult, error) {
 	cmd := &SubmitCommand{
 		Command: newCommand("submit"),
 		TxBlob:  fmt.Sprintf("%X", tx.Raw()),
 	}
 	r.Outgoing <- cmd
 	<-cmd.Ready
-	return cmd.Result
+	if cmd.CommandError != nil {
+		return nil, cmd.CommandError
+	}
+	return cmd.Result, nil
 }
 
-func (r *Remote) Subscribe(ledger, transactions, server bool) *SubscribeCommand {
+// Synchronously gets a single ledger
+func (r *Remote) Ledger(ledger interface{}, transactions bool) (*LedgerResult, error) {
+	cmd := &LedgerCommand{
+		Command:      newCommand("ledger"),
+		LedgerIndex:  ledger,
+		Transactions: transactions,
+		Expand:       true,
+	}
+	r.Outgoing <- cmd
+	<-cmd.Ready
+	if cmd.CommandError != nil {
+		return nil, cmd.CommandError
+	}
+	return cmd.Result, nil
+}
+
+// Synchronously subscribe to streams and receive a confirmation message
+// Streams are recived asynchronously over the Incoming channel
+func (r *Remote) Subscribe(ledger, transactions, server bool) (*SubscribeResult, error) {
 	streams := []string{}
 	if ledger {
 		streams = append(streams, "ledger")
@@ -155,9 +179,11 @@ func (r *Remote) Subscribe(ledger, transactions, server bool) *SubscribeCommand 
 	}
 	r.Outgoing <- cmd
 	<-cmd.Ready
-	// TODO: Luke this could/should just return the SubscribeResult?
-	// return cmd.Result
-	return cmd
+	if cmd.CommandError != nil {
+		return nil, cmd.CommandError
+	}
+	return cmd.Result, nil
+
 }
 
 // Reads from the websocket and sends to inbound channel

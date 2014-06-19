@@ -66,11 +66,10 @@ func sign(c *cli.Context, tx data.Transaction, sequence int32) {
 
 func submitTx(tx data.Transaction) {
 	r, err := websockets.NewRemote("wss://s-east.ripple.com:443")
-	if err != nil {
-		panic(err)
-	}
+	checkErr(err)
 	go r.Run()
-	result := r.Submit(tx)
+	result, err := r.Submit(tx)
+	checkErr(err)
 	fmt.Printf("%s: %s\n", result.EngineResult, result.EngineResultMessage)
 	os.Exit(0)
 }

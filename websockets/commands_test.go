@@ -26,7 +26,7 @@ func readResponseFile(c *C, msg interface{}, path string) {
 }
 
 func (s *MessagesSuite) TestLedgerResponse(c *C) {
-	msg := Ledger(6917762, true)
+	msg := &LedgerCommand{}
 	readResponseFile(c, msg, "testdata/ledger.json")
 
 	// Response fields

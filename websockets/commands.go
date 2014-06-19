@@ -2,6 +2,7 @@ package websockets
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/donovanhide/ripple/data"
 	"sync/atomic"
 )
@@ -12,69 +13,63 @@ type Syncer interface {
 	Done()
 }
 
+type CommandError struct {
+	Name    string `json:"error"`
+	Code    int    `json:"error_code"`
+	Message string `json:"error_message"`
+}
+
 type Command struct {
-	Id      uint64 `json:"id"`
-	Command string `json:"command"`
-	Response
-	Ready chan bool `json:"-"`
+	*CommandError
+	Id     uint64 `json:"id"`
+	Name   string `json:"command"`
+	Type   string
+	Status string
+	Ready  chan bool `json:"-"`
 }
 
-func (s Command) Done() {
-	s.Ready <- true
+func (c *Command) Done() {
+	c.Ready <- true
 }
 
-// Fields that are in every json response
-type Response struct {
-	Id           uint64
-	Type         string
-	Status       string
-	Error        string
-	ErrorCode    int    `json:"error_code"`
-	ErrorMessage string `json:"error_message"`
+func (e *CommandError) Error() string {
+	return fmt.Sprintf("%s %d %s", e.Name, e.Code, e.Message)
 }
 
-func newCommand(command string) Command {
-	return Command{
-		Id:      atomic.AddUint64(&counter, 1),
-		Command: command,
-		Ready:   make(chan bool),
+func newCommand(command string) *Command {
+	return &Command{
+		Id:    atomic.AddUint64(&counter, 1),
+		Name:  command,
+		Ready: make(chan bool),
 	}
 }
 
 type LedgerCommand struct {
-	Command
-	LedgerIndex  interface{} `json:"ledger_index"`
-	Accounts     bool        `json:"accounts"`
-	Transactions bool        `json:"transactions"`
-	Expand       bool        `json:"expand"`
-	Result       *struct {
-		Ledger struct {
-			LedgerSequence  uint32                `json:"ledger_index,string"`
-			Accepted        bool                  `json:"accepted"`
-			CloseTime       data.RippleTime       `json:"close_time"`
-			Closed          bool                  `json:"closed"`
-			Hash            data.Hash256          `json:"ledger_hash"`
-			PreviousLedger  data.Hash256          `json:"parent_hash"`
-			TotalXRP        uint64                `json:"total_coins,string"`
-			AccountHash     data.Hash256          `json:"account_hash"`
-			TransactionHash data.Hash256          `json:"transaction_hash"`
-			Transactions    data.TransactionSlice `json:"transactions"`
-		}
-	} `json:"result,omitempty"`
+	*Command
+	LedgerIndex  interface{}   `json:"ledger_index"`
+	Accounts     bool          `json:"accounts"`
+	Transactions bool          `json:"transactions"`
+	Expand       bool          `json:"expand"`
+	Result       *LedgerResult `json:"result,omitempty"`
 }
 
-// Creates new `ledger` command to request a ledger by index
-func Ledger(ledger interface{}, transactions bool) *LedgerCommand {
-	return &LedgerCommand{
-		Command:      newCommand("ledger"),
-		LedgerIndex:  ledger,
-		Transactions: transactions,
-		Expand:       true,
+type LedgerResult struct {
+	Ledger struct {
+		LedgerSequence  uint32                `json:"ledger_index,string"`
+		Accepted        bool                  `json:"accepted"`
+		CloseTime       data.RippleTime       `json:"close_time"`
+		Closed          bool                  `json:"closed"`
+		Hash            data.Hash256          `json:"ledger_hash"`
+		PreviousLedger  data.Hash256          `json:"parent_hash"`
+		TotalXRP        uint64                `json:"total_coins,string"`
+		AccountHash     data.Hash256          `json:"account_hash"`
+		TransactionHash data.Hash256          `json:"transaction_hash"`
+		Transactions    data.TransactionSlice `json:"transactions"`
 	}
 }
 
 type TxCommand struct {
-	Command
+	*Command
 	Transaction data.Hash256 `json:"transaction"`
 	Result      *TxResult    `json:"result,omitempty"`
 }
@@ -96,7 +91,7 @@ func (txr *TxResult) UnmarshalJSON(b []byte) error {
 }
 
 type SubmitCommand struct {
-	Command
+	*Command
 	TxBlob string        `json:"tx_blob"`
 	Result *SubmitResult `json:"result,omitempty"`
 }

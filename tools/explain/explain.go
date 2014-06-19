@@ -49,7 +49,8 @@ func main() {
 		hash, err := data.NewHash256(matches[1])
 		checkErr(err)
 		fmt.Println(hash.String())
-		result := r.Tx(*hash)
+		result, err := r.Tx(*hash)
+		checkErr(err)
 		explain(&result.TransactionWithMetaData)
 	case len(matches[2]) > 0:
 		fmt.Println(matches[2])
