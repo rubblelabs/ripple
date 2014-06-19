@@ -48,13 +48,18 @@ func main() {
 	case len(matches[1]) > 0:
 		hash, err := data.NewHash256(matches[1])
 		checkErr(err)
-		fmt.Println(hash.String())
+		fmt.Println("Getting transaction: ", hash.String())
 		result, err := r.Tx(*hash)
 		checkErr(err)
 		explain(&result.TransactionWithMetaData)
 	case len(matches[2]) > 0:
 		fmt.Println(matches[2])
 	case len(matches[3]) > 0:
-		fmt.Println(matches[3])
+		account, err := data.NewAccountFromAddress(matches[3])
+		checkErr(err)
+		fmt.Println("Getting transactions for: ", account.String())
+		for tx := range r.AccountTx(*account) {
+			fmt.Println(tx)
+		}
 	}
 }
