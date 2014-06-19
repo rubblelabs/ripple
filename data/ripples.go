@@ -98,7 +98,7 @@ func (s *BalanceSlice) Add(account *Account, balance, change *Value, currency *C
 }
 
 func (txm *TransactionWithMetaData) Trades() (TradeSlice, error) {
-	if txm.GetTransactionType() == SET_FEE || txm.GetTransactionType() == AMENDMENT {
+	if txm.GetTransactionType() != OFFER_CREATE && txm.GetTransactionType() != PAYMENT {
 		return nil, nil
 	}
 	var (
@@ -189,7 +189,7 @@ func (txm *TransactionWithMetaData) Trades() (TradeSlice, error) {
 }
 
 func (txm *TransactionWithMetaData) Balances() (BalanceSlice, error) {
-	if txm.GetTransactionType() == SET_FEE || txm.GetTransactionType() == AMENDMENT {
+	if txm.GetTransactionType() != OFFER_CREATE && txm.GetTransactionType() != PAYMENT {
 		return nil, nil
 	}
 	var (
