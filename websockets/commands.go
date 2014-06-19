@@ -107,8 +107,8 @@ func (txr *TxResult) UnmarshalJSON(b []byte) error {
 
 type SubmitCommand struct {
 	SynchronousCommand
-	TxBlob string `json:"tx_blob"`
-	Result *SubmitResult
+	TxBlob string        `json:"tx_blob"`
+	Result *SubmitResult `json:"result,omitempty"`
 }
 
 type SubmitResult struct {

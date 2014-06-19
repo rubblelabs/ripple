@@ -10,7 +10,7 @@ type LedgerStreamMsg struct {
 	FeeBase          uint64          `json:"fee_base"`
 	FeeRef           uint64          `json:"fee_ref"`
 	LedgerSequence   uint32          `json:"ledger_index"`
-	LedgerHash       string          `json:"ledger_hash"`
+	LedgerHash       data.Hash256    `json:"ledger_hash"`
 	LedgerTime       data.RippleTime `json:"ledger_time"`
 	ReserveBase      uint64          `json:"reserve_base"`
 	ReserveIncrement uint64          `json:"reserve_inc"`
