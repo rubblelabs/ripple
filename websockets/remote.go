@@ -119,8 +119,8 @@ func (r *Remote) Run() {
 // Synchronously get a single transaction
 func (r *Remote) Tx(hash data.Hash256) *TxResult {
 	cmd := &TxCommand{
-		SynchronousCommand: newSynchonousCommand("tx"),
-		Transaction:        hash,
+		Command:     newCommand("tx"),
+		Transaction: hash,
 	}
 	r.Outgoing <- cmd
 	<-cmd.Ready
@@ -130,8 +130,8 @@ func (r *Remote) Tx(hash data.Hash256) *TxResult {
 // Synchronously submit a single transaction
 func (r *Remote) Submit(tx data.Transaction) *SubmitResult {
 	cmd := &SubmitCommand{
-		SynchronousCommand: newSynchonousCommand("submit"),
-		TxBlob:             fmt.Sprintf("%X", tx.Raw()),
+		Command: newCommand("submit"),
+		TxBlob:  fmt.Sprintf("%X", tx.Raw()),
 	}
 	r.Outgoing <- cmd
 	<-cmd.Ready
@@ -150,8 +150,8 @@ func (r *Remote) Subscribe(ledger, transactions, server bool) *SubscribeCommand 
 		streams = append(streams, "server")
 	}
 	cmd := &SubscribeCommand{
-		SynchronousCommand: newSynchonousCommand("subscribe"),
-		Streams:            streams,
+		Command: newCommand("subscribe"),
+		Streams: streams,
 	}
 	r.Outgoing <- cmd
 	<-cmd.Ready

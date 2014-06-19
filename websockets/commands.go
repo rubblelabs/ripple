@@ -16,14 +16,10 @@ type Command struct {
 	Id      uint64 `json:"id"`
 	Command string `json:"command"`
 	Response
-}
-
-type SynchronousCommand struct {
-	Command
 	Ready chan bool `json:"-"`
 }
 
-func (s SynchronousCommand) Done() {
+func (s Command) Done() {
 	s.Ready <- true
 }
 
@@ -41,12 +37,6 @@ func newCommand(command string) Command {
 	return Command{
 		Id:      atomic.AddUint64(&counter, 1),
 		Command: command,
-	}
-}
-
-func newSynchonousCommand(command string) SynchronousCommand {
-	return SynchronousCommand{
-		Command: newCommand(command),
 		Ready:   make(chan bool),
 	}
 }
@@ -84,7 +74,7 @@ func Ledger(ledger interface{}, transactions bool) *LedgerCommand {
 }
 
 type TxCommand struct {
-	SynchronousCommand
+	Command
 	Transaction data.Hash256 `json:"transaction"`
 	Result      *TxResult    `json:"result,omitempty"`
 }
@@ -106,7 +96,7 @@ func (txr *TxResult) UnmarshalJSON(b []byte) error {
 }
 
 type SubmitCommand struct {
-	SynchronousCommand
+	Command
 	TxBlob string        `json:"tx_blob"`
 	Result *SubmitResult `json:"result,omitempty"`
 }
