@@ -134,11 +134,9 @@ func (r *Remote) accountTx(account data.Account, c chan *data.TransactionWithMet
 	cmd := &AccountTxCommand{
 		Command:   newCommand("account_tx"),
 		Account:   account,
-		MinLedger: 32570,
-		MaxLedger: 7284002,
-		Binary:    false,
-		Forward:   false,
-		Limit:     2,
+		MinLedger: -1,
+		MaxLedger: -1,
+		Limit:     50,
 	}
 	defer close(c)
 	for {
@@ -149,10 +147,13 @@ func (r *Remote) accountTx(account data.Account, c chan *data.TransactionWithMet
 			return
 		}
 		for _, tx := range cmd.Result.Transactions {
-			fmt.Println(tx.String())
-			c <- &tx
+			c <- tx
 		}
-		return
+		if len(cmd.Result.Transactions) < 50 {
+			return
+		}
+		cmd.Marker = cmd.Result.Marker
+		cmd.IncrementId()
 	}
 }
 

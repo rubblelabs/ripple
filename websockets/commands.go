@@ -32,6 +32,10 @@ func (c *Command) Done() {
 	c.Ready <- true
 }
 
+func (c *Command) IncrementId() {
+	c.Id = atomic.AddUint64(&counter, 1)
+}
+
 func (e *CommandError) Error() string {
 	return fmt.Sprintf("%s %d %s", e.Name, e.Code, e.Message)
 }
@@ -81,8 +85,8 @@ type AccountTxCommand struct {
 }
 
 type AccountTxResult struct {
-	Marker       map[string]interface{}         `json:"marker,omitempty"`
-	Transactions []data.TransactionWithMetaData `json:"transactions,omitempty"`
+	Marker       map[string]interface{} `json:"marker,omitempty"`
+	Transactions data.TransactionSlice  `json:"transactions,omitempty"`
 }
 
 type TxCommand struct {
