@@ -24,7 +24,12 @@ func explain(txm *data.TransactionWithMetaData) {
 	trades, err := txm.Trades()
 	checkErr(err)
 	for _, trade := range trades {
-		fmt.Println(trade.String())
+		fmt.Println("  ", trade.String())
+	}
+	balances, err := txm.Balances()
+	checkErr(err)
+	for _, balance := range balances {
+		fmt.Println("  ", balance.String())
 	}
 }
 
@@ -59,7 +64,7 @@ func main() {
 		checkErr(err)
 		fmt.Println("Getting transactions for: ", account.String())
 		for tx := range r.AccountTx(*account) {
-			fmt.Println(tx)
+			explain(tx)
 		}
 	}
 }
