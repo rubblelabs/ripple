@@ -61,8 +61,8 @@ type splitTxm struct {
 type txmNormal TransactionWithMetaData
 
 var (
-	txmTransactionTypeRegex = regexp.MustCompile(`"TransactionType":\s*"(\w+)"`)
-	txmHashRegex            = regexp.MustCompile(`"hash":\s*"(\w+)"`)
+	txmTransactionTypeRegex = regexp.MustCompile(`"TransactionType"\s*:\s*"(\w+)"`)
+	txmHashRegex            = regexp.MustCompile(`"hash"\s*:\s*"(\w+)"`)
 	txmMetaTypeRegex        = regexp.MustCompile(`"(meta|metaData)"`)
 	txmSplitTypeRegex       = regexp.MustCompile(`"tx":`)
 )
@@ -176,8 +176,8 @@ func (s TransactionSlice) MarshalJSON() ([]byte, error) {
 }
 
 var (
-	leTypeRegex  = regexp.MustCompile(`"LedgerEntryType":\s*"(\w+)"`)
-	leIndexRegex = regexp.MustCompile(`"index":\s*"(\w+)"`)
+	leTypeRegex  = regexp.MustCompile(`"LedgerEntryType"\s*:\s*"(\w+)"`)
+	leIndexRegex = regexp.MustCompile(`"index"\s*:\s*"(\w+)"`)
 )
 
 func (l *LedgerEntrySlice) UnmarshalJSON(b []byte) error {
