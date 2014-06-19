@@ -6,7 +6,7 @@ import (
 )
 
 func (s *MessagesSuite) TestLedgerSubscribeResponse(c *C) {
-	msg := Subscribe(true, false, false)
+	msg := &SubscribeCommand{}
 	readResponseFile(c, msg, "testdata/subscribe_ledger.json")
 
 	// Response fields
@@ -42,7 +42,7 @@ func (s *MessagesSuite) TestLedgerStreamMsg(c *C) {
 }
 
 func (s *MessagesSuite) TestTransactionSubscribeResponse(c *C) {
-	msg := Subscribe(false, true, false)
+	msg := &SubscribeCommand{}
 	readResponseFile(c, msg, "testdata/subscribe_transactions.json")
 
 	// Response fields
@@ -92,7 +92,7 @@ func (s *MessagesSuite) TestTransactionStreamMsg(c *C) {
 }
 
 func (s *MessagesSuite) TestServerSubscribeResponse(c *C) {
-	msg := Subscribe(false, false, true)
+	msg := &SubscribeCommand{}
 	readResponseFile(c, msg, "testdata/subscribe_server.json")
 
 	// Response fields

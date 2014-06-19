@@ -45,30 +45,15 @@ var streamMessageFactory = map[string]func() interface{}{
 }
 
 type SubscribeCommand struct {
-	Command
-	Streams []string `json:"streams"`
-	Result  *struct {
-		// Contains one or both of these, depending what streams were subscribed
-		*LedgerStreamMsg
-		*ServerStreamMsg
-	} `json:"result,omitempty"`
+	SynchronousCommand
+	Streams []string         `json:"streams"`
+	Result  *SubscribeResult `json:"result,omitempty"`
 }
 
-func Subscribe(ledger, transactions, server bool) *SubscribeCommand {
-	streams := []string{}
-	if ledger {
-		streams = append(streams, "ledger")
-	}
-	if transactions {
-		streams = append(streams, "transactions")
-	}
-	if server {
-		streams = append(streams, "server")
-	}
-	return &SubscribeCommand{
-		Command: newCommand("subscribe"),
-		Streams: streams,
-	}
+type SubscribeResult struct {
+	// Contains one or both of these, depending what streams were subscribed
+	*LedgerStreamMsg
+	*ServerStreamMsg
 }
 
 // Wrapper to stop recursive unmarshalling

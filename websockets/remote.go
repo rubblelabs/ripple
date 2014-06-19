@@ -138,6 +138,28 @@ func (r *Remote) Submit(tx data.Transaction) *SubmitResult {
 	return cmd.Result
 }
 
+func (r *Remote) Subscribe(ledger, transactions, server bool) *SubscribeCommand {
+	streams := []string{}
+	if ledger {
+		streams = append(streams, "ledger")
+	}
+	if transactions {
+		streams = append(streams, "transactions")
+	}
+	if server {
+		streams = append(streams, "server")
+	}
+	cmd := &SubscribeCommand{
+		SynchronousCommand: newSynchonousCommand("subscribe"),
+		Streams:            streams,
+	}
+	r.Outgoing <- cmd
+	<-cmd.Ready
+	// TODO: Luke this could/should just return the SubscribeResult?
+	// return cmd.Result
+	return cmd
+}
+
 // Reads from the websocket and sends to inbound channel
 // Expects to receive PONGs at specified interval, or kills the session
 func (r *Remote) readPump(inbound chan []byte) {

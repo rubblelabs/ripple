@@ -18,12 +18,11 @@ func main() {
 	go r.Run()
 
 	// Subscribe to all streams
-	r.Outgoing <- websockets.Subscribe(true, true, true)
-	confirmation := <-r.Incoming
+	confirmation := r.Subscribe(true, true, true)
 	fmt.Printf(
 		"Subscribed at %d to streams: %v\n",
-		confirmation.(*websockets.SubscribeCommand).Result.LedgerSequence,
-		confirmation.(*websockets.SubscribeCommand).Streams,
+		confirmation.Result.LedgerSequence,
+		confirmation.Streams,
 	)
 
 	ledgerStyle := color.New(color.FgRed, color.Underline)
