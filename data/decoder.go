@@ -277,15 +277,16 @@ func (dec *Decoder) readObject(v *reflect.Value) error {
 			default:
 				panic(fmt.Sprintf("Unknown object: %+v", enc))
 			}
-		case ST_UINT8, ST_UINT16, ST_UINT32, ST_UINT64:
-			field := getField(v, enc)
-			if err := dec.read(field.Addr().Interface()); err != nil {
-				return err
-			}
 		default:
-			w := getField(v, enc).Addr().Interface().(Wire)
-			if err := w.Unmarshal(dec.r); err != nil {
-				return err
+			field := getField(v, enc)
+			if w, ok := field.Addr().Interface().(Wire); ok {
+				if err := w.Unmarshal(dec.r); err != nil {
+					return err
+				}
+			} else {
+				if err := dec.read(field.Addr().Interface()); err != nil {
+					return err
+				}
 			}
 		}
 	}

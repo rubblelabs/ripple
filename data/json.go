@@ -213,7 +213,7 @@ func (i *NodeIndex) UnmarshalText(b []byte) error {
 }
 
 func (r TransactionResult) MarshalText() ([]byte, error) {
-	return []byte(resultNames[r]), nil
+	return []byte(r.String()), nil
 }
 
 func (r *TransactionResult) UnmarshalText(b []byte) error {

@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"math"
 )
 
 const (
@@ -313,5 +314,21 @@ func (p *Paths) Marshal(w io.Writer) error {
 			return err
 		}
 	}
+	return nil
+}
+
+func (res *TransactionResult) Marshal(w io.Writer) error {
+	if *res > math.MaxUint8 || *res < 0 {
+		return fmt.Errorf("Cannot marshal transaction result: %d", *res)
+	}
+	return write(w, uint8(*res))
+}
+
+func (res *TransactionResult) Unmarshal(r Reader) error {
+	var result uint8
+	if err := binary.Read(r, binary.BigEndian, &result); err != nil {
+		return err
+	}
+	*res = TransactionResult(result)
 	return nil
 }
