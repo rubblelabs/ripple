@@ -23,6 +23,7 @@ const (
 	tenTo14m1        uint64 = tenTo14 - 1
 	tenTo17          uint64 = tenTo14 * 1000
 	tenTo17m1        uint64 = tenTo17 - 1
+	xrpPrecision     uint64 = 1000000
 )
 
 var (
@@ -31,6 +32,7 @@ var (
 	bigTenTo17    = big.NewInt(0).SetUint64(tenTo17)
 	zeroNative    Value
 	zeroNonNative Value
+	xrpMultipler  = newValue(true, false, xrpPrecision, 0)
 )
 
 type Value struct {
@@ -47,6 +49,9 @@ func init() {
 		panic(err)
 	}
 	if err := zeroNonNative.canonicalise(); err != nil {
+		panic(err)
+	}
+	if err := xrpMultipler.canonicalise(); err != nil {
 		panic(err)
 	}
 }
@@ -289,6 +294,17 @@ func (num Value) Divide(den Value) (*Value, error) {
 	}
 	v := newValue(num.Native, num.Negative != den.Negative, d.Uint64()+5, ao-bo-17)
 	return v, v.canonicalise()
+}
+
+func (num Value) Ratio(den Value) (*Value, error) {
+	quotient, err := num.Divide(den)
+	if err != nil {
+		return nil, err
+	}
+	if den.Native {
+		return quotient.Multiply(*xrpMultipler)
+	}
+	return quotient, nil
 }
 
 // Less compares values and returns true
