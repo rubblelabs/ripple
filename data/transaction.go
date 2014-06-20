@@ -32,7 +32,7 @@ type AccountSet struct {
 	WalletSize    *uint32         `json:",omitempty"`
 	MessageKey    *VariableLength `json:",omitempty"`
 	Domain        *VariableLength `json:",omitempty"`
-	TransferRate  *uint32         `json:",string"`
+	TransferRate  *uint32         `json:",omitempty"`
 	SetFlag       *uint32         `json:",omitempty"`
 	ClearFlag     *uint32         `json:",omitempty"`
 }
