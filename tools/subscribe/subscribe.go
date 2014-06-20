@@ -1,10 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/donovanhide/ripple/data"
 	"github.com/donovanhide/ripple/websockets"
 	"github.com/fatih/color"
 	"os"
@@ -17,9 +15,13 @@ func checkErr(err error) {
 	}
 }
 
+var (
+	host = flag.String("host", "wss://s-east.ripple.com:443", "websockets host to connect to")
+)
+
 func main() {
 	flag.Parse()
-	r, err := websockets.NewRemote("wss://s-east.ripple.com:443")
+	r, err := websockets.NewRemote(*host)
 	checkErr(err)
 	go r.Run()
 	// Subscribe to all streams
@@ -72,13 +74,6 @@ func main() {
 			for _, balance := range balances {
 				nodeStyle.Printf("\t%s\n", balance.String())
 			}
-
-			// for _, n := range msg.Transaction.MetaData.AffectedNodes {
-			// 	s := ExplainNodeEffect(&n)
-			// 	if s != "" {
-			// 		nodeStyle.Printf("        %s\n", s)
-			// 	}
-			// }
 		case *websockets.ServerStreamMsg:
 			serverStyle.Printf(
 				"Server Status: %s (%d/%d)\n",
@@ -87,45 +82,5 @@ func main() {
 				msg.LoadBase,
 			)
 		}
-	}
-}
-
-func ExplainNodeEffect(ne *data.NodeEffect) string {
-	var op string
-	var n *data.AffectedNode
-	var fields interface{}
-
-	switch {
-	case ne.CreatedNode != nil:
-		op = "Created"
-		n = ne.CreatedNode
-		fields = n.NewFields
-	case ne.ModifiedNode != nil:
-		op = "Modified"
-		n = ne.ModifiedNode
-		fields = n.FinalFields
-	case ne.DeletedNode != nil:
-		op = "Deleted"
-		n = ne.DeletedNode
-		fields = n.FinalFields
-	}
-	out, _ := json.Marshal(ne)
-	fmt.Println(string(out))
-
-	switch n.LedgerEntryType {
-	// case data.DIRECTORY:
-	// 	// Skip
-	// 	return ""
-
-	case data.OFFER:
-		return fmt.Sprintf("%s Offer %s %s for %s",
-			op,
-			fields.(*data.OfferFields).Account,
-			fields.(*data.OfferFields).TakerGets,
-			fields.(*data.OfferFields).TakerPays,
-		)
-
-	default:
-		return fmt.Sprintf("%s %s node: %s", op, n.LedgerEntryType, n.LedgerIndex)
 	}
 }
