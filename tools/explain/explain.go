@@ -8,6 +8,7 @@ import (
 	"github.com/donovanhide/ripple/websockets"
 	"os"
 	"regexp"
+	"strconv"
 )
 
 var argumentRegex = regexp.MustCompile(`(^[0-9a-fA-F]{64}$)|(^\d+$)|(^[r][a-km-zA-HJ-NP-Z0-9]{26,34}$)`)
@@ -63,7 +64,14 @@ func main() {
 		checkErr(err)
 		explain(&result.TransactionWithMetaData)
 	case len(matches[2]) > 0:
-		fmt.Println(matches[2])
+		seq, err := strconv.ParseUint(matches[2], 10, 32)
+		checkErr(err)
+		ledger, err := r.Ledger(seq, true)
+		checkErr(err)
+		fmt.Println("Getting transactions for: ", seq)
+		for _, tx := range ledger.Ledger.Transactions {
+			explain(tx)
+		}
 	case len(matches[3]) > 0:
 		account, err := data.NewAccountFromAddress(matches[3])
 		checkErr(err)
