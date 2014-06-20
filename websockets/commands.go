@@ -89,6 +89,17 @@ type AccountTxResult struct {
 	Transactions data.TransactionSlice  `json:"transactions,omitempty"`
 }
 
+func newAccountTxCommand(account data.Account, pageSize int, marker map[string]interface{}) *AccountTxCommand {
+	return &AccountTxCommand{
+		Command:   newCommand("account_tx"),
+		Account:   account,
+		MinLedger: -1,
+		MaxLedger: -1,
+		Limit:     pageSize,
+		Marker:    marker,
+	}
+}
+
 type TxCommand struct {
 	*Command
 	Transaction data.Hash256 `json:"transaction"`

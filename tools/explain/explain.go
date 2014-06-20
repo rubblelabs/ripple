@@ -38,14 +38,19 @@ func showUsage() {
 	os.Exit(1)
 }
 
+var flags = flag.NewFlagSet("Flags", flag.ExitOnError)
+
+var host = flags.String("host", "wss://s-east.ripple.com:443", "websockets host")
+
 func main() {
-	flag.Parse()
+	flags.Parse(os.Args[2:])
 	if len(os.Args) == 1 {
 		showUsage()
 	}
 	matches := argumentRegex.FindStringSubmatch(os.Args[1])
-	r, err := websockets.NewRemote("wss://s-east.ripple.com:443")
+	r, err := websockets.NewRemote(*host)
 	checkErr(err)
+	fmt.Println("Connected to: ", *host)
 	go r.Run()
 	switch {
 	case len(matches) == 0:
@@ -63,7 +68,7 @@ func main() {
 		account, err := data.NewAccountFromAddress(matches[3])
 		checkErr(err)
 		fmt.Println("Getting transactions for: ", account.String())
-		for tx := range r.AccountTx(*account) {
+		for tx := range r.AccountTx(*account, 20) {
 			explain(tx)
 		}
 	}

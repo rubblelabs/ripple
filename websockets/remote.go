@@ -130,16 +130,10 @@ func (r *Remote) Tx(hash data.Hash256) (*TxResult, error) {
 	return cmd.Result, nil
 }
 
-func (r *Remote) accountTx(account data.Account, c chan *data.TransactionWithMetaData) {
-	cmd := &AccountTxCommand{
-		Command:   newCommand("account_tx"),
-		Account:   account,
-		MinLedger: -1,
-		MaxLedger: -1,
-		Limit:     50,
-	}
+func (r *Remote) accountTx(account data.Account, c chan *data.TransactionWithMetaData, pageSize int) {
 	defer close(c)
-	for {
+	cmd := newAccountTxCommand(account, pageSize, nil)
+	for ; ; cmd = newAccountTxCommand(account, pageSize, cmd.Result.Marker) {
 		r.Outgoing <- cmd
 		<-cmd.Ready
 		if cmd.CommandError != nil {
@@ -149,18 +143,16 @@ func (r *Remote) accountTx(account data.Account, c chan *data.TransactionWithMet
 		for _, tx := range cmd.Result.Transactions {
 			c <- tx
 		}
-		if len(cmd.Result.Transactions) < 50 {
+		if len(cmd.Result.Transactions) < pageSize {
 			return
 		}
-		cmd.Marker = cmd.Result.Marker
-		cmd.IncrementId()
 	}
 }
 
 // Asynchronously retrieve all transactions for an account
-func (r *Remote) AccountTx(account data.Account) chan *data.TransactionWithMetaData {
+func (r *Remote) AccountTx(account data.Account, pageSize int) chan *data.TransactionWithMetaData {
 	c := make(chan *data.TransactionWithMetaData)
-	go r.accountTx(account, c)
+	go r.accountTx(account, c, pageSize)
 	return c
 }
 
