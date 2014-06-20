@@ -6,12 +6,43 @@ import (
 	"fmt"
 	"github.com/donovanhide/ripple/data"
 	"github.com/donovanhide/ripple/websockets"
+	"github.com/golang/glog"
 	"os"
 	"regexp"
 	"strconv"
 )
 
+const usage = `Usage: explain [tx hash|ledger sequence|ripple address] [options]
+
+Examples: 
+
+explain 6000000
+	Explain all transactions for ledger 6000000
+
+explain rrpNnNLKrartuEqfJGpqyDwPj1AFPg9vn1
+	Explain all transactions for account rrpNnNLKrartuEqfJGpqyDwPj1AFPg9vn1
+
+explain 955A4C0B7C66FC97EA4C72634CDCDBF50BB17AAA647EC6C8C592788E5B95173C
+	Explain transaction 955A4C0B7C66FC97EA4C72634CDCDBF50BB17AAA647EC6C8C592788E5B95173C
+
+Options:
+`
+
 var argumentRegex = regexp.MustCompile(`(^[0-9a-fA-F]{64}$)|(^\d+$)|(^[r][a-km-zA-HJ-NP-Z0-9]{26,34}$)`)
+
+var (
+	flags        = flag.CommandLine
+	host         = flags.String("host", "wss://s-east.ripple.com:443", "websockets host")
+	trades       = flag.Bool("t", false, "hide trades")
+	balances     = flag.Bool("b", false, "hide balances")
+	transactions = flag.Bool("tx", false, "hide transactions")
+)
+
+func showUsage() {
+	fmt.Println(usage)
+	flags.PrintDefaults()
+	os.Exit(1)
+}
 
 func checkErr(err error) {
 	if err != nil {
@@ -21,37 +52,34 @@ func checkErr(err error) {
 }
 
 func explain(txm *data.TransactionWithMetaData) {
-	fmt.Println(txm.String())
-	trades, err := txm.Trades()
-	checkErr(err)
-	for _, trade := range trades {
-		fmt.Println("  ", trade.String())
+	if !*transactions {
+		fmt.Println(txm.String())
 	}
-	balances, err := txm.Balances()
-	checkErr(err)
-	for _, balance := range balances {
-		fmt.Println("  ", balance.String())
+	if !*trades {
+		trades, err := txm.Trades()
+		checkErr(err)
+		for _, trade := range trades {
+			fmt.Println("  ", trade.String())
+		}
+	}
+	if !*balances {
+		balances, err := txm.Balances()
+		checkErr(err)
+		for _, balance := range balances {
+			fmt.Println("  ", balance.String())
+		}
 	}
 }
-
-func showUsage() {
-	fmt.Println("Usage: explain [tx hash|ledger sequence|ripple address]")
-	os.Exit(1)
-}
-
-var flags = flag.NewFlagSet("Flags", flag.ExitOnError)
-
-var host = flags.String("host", "wss://s-east.ripple.com:443", "websockets host")
 
 func main() {
-	flags.Parse(os.Args[2:])
 	if len(os.Args) == 1 {
 		showUsage()
 	}
+	flags.Parse(os.Args[2:])
 	matches := argumentRegex.FindStringSubmatch(os.Args[1])
 	r, err := websockets.NewRemote(*host)
 	checkErr(err)
-	fmt.Println("Connected to: ", *host)
+	glog.Infoln("Connected to: ", *host)
 	go r.Run()
 	switch {
 	case len(matches) == 0:
