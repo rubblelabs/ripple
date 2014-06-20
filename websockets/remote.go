@@ -50,6 +50,10 @@ func NewRemote(endpoint string) (*Remote, error) {
 	}, nil
 }
 
+func (r *Remote) Close() {
+	close(r.Outgoing)
+}
+
 func (r *Remote) Run() {
 	outbound := make(chan interface{})
 	inbound := make(chan []byte)
@@ -58,6 +62,9 @@ func (r *Remote) Run() {
 	defer func() {
 		close(outbound)
 		close(r.Incoming)
+		for _, c := range pending {
+			c.Fail("Connection Closed")
+		}
 	}()
 
 	// Spawn read/write goroutines
@@ -73,6 +80,7 @@ func (r *Remote) Run() {
 		select {
 		case command, ok := <-r.Outgoing:
 			if !ok {
+				glog.Infoln("Closing")
 				return
 			}
 			outbound <- command
