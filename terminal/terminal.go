@@ -47,7 +47,7 @@ func newTxBundle(txm *data.TransactionWithMetaData, flag Flag) *bundle {
 	var (
 		base   = txm.GetBase()
 		format = "%-11s %-8s %s%s %-34s "
-		values = []interface{}{base.GetType(), base.Fee, txm.MetaData.TransactionResult.Tick(), base.MemoSymbol(), base.Account}
+		values = []interface{}{base.GetType(), base.Fee, txm.MetaData.TransactionResult.Symbol(), base.MemoSymbol(), base.Account}
 		style  = txStyle
 	)
 	if !txm.MetaData.TransactionResult.Success() {

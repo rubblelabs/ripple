@@ -264,12 +264,18 @@ func (r TransactionResult) Human() string {
 }
 
 func (r TransactionResult) Success() bool {
-	return r == tesSUCCESS
+	return r == tesSUCCESS || r == tecCLAIM
 }
 
-func (r TransactionResult) Tick() string {
-	if r.Success() {
+func (r TransactionResult) Symbol() string {
+	switch r {
+	case tesSUCCESS, tecCLAIM:
 		return "✓"
+	case tecPATH_PARTIAL, tecPATH_DRY:
+		return "½"
+	case tecUNFUNDED, tecUNFUNDED_ADD, tecUNFUNDED_OFFER, tecUNFUNDED_PAYMENT:
+		return "$"
+	default:
+		return "✗"
 	}
-	return "✗"
 }
