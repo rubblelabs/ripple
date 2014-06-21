@@ -11,22 +11,14 @@ import (
 type Flag uint32
 
 const (
-	NoIndent Flag = 1 << iota
-	Indent
+	Indent Flag = 1 << iota
 	DoubleIndent
 	TripleIndent
 
 	ShowLedgerSequence
 )
 
-var indents = map[Flag]string{
-	NoIndent:     "",
-	Indent:       "    ",
-	DoubleIndent: "        ",
-	TripleIndent: "            ",
-}
-
-var Default = NoIndent
+var Default Flag
 
 var (
 	ledgerStyle  = color.New(color.FgRed, color.Underline)
@@ -131,12 +123,25 @@ func newBundle(value interface{}, flag Flag) *bundle {
 	}
 }
 
+func indent(flag Flag) string {
+	switch {
+	case flag&Indent > 0:
+		return "  "
+	case flag&DoubleIndent > 0:
+		return "    "
+	case flag&TripleIndent > 0:
+		return "      "
+	default:
+		return ""
+	}
+}
+
 func Println(value interface{}, flag Flag) (int, error) {
 	b := newBundle(value, flag)
-	return b.color.Printf(indents[flag]+b.format+"\n", b.values...)
+	return b.color.Printf(indent(flag)+b.format+"\n", b.values...)
 }
 
 func Sprint(value interface{}, flag Flag) string {
 	b := newBundle(value, flag)
-	return b.color.SprintfFunc()(indents[flag]+b.format, b.values...)
+	return b.color.SprintfFunc()(indent(flag)+b.format, b.values...)
 }
