@@ -61,10 +61,10 @@ type splitTxm struct {
 type txmNormal TransactionWithMetaData
 
 var (
+	txmSplitTypeRegex       = regexp.MustCompile(`"tx":`)
 	txmTransactionTypeRegex = regexp.MustCompile(`"TransactionType"\s*:\s*"(\w+)"`)
 	txmHashRegex            = regexp.MustCompile(`"hash"\s*:\s*"(\w+)"`)
 	txmMetaTypeRegex        = regexp.MustCompile(`"(meta|metaData)"`)
-	txmSplitTypeRegex       = regexp.MustCompile(`"tx":`)
 )
 
 // This function is a horrow show, demonstrating the huge
@@ -116,7 +116,7 @@ func (txm *TransactionWithMetaData) UnmarshalJSON(b []byte) error {
 		txm.MetaData = meta.MetaData
 		return nil
 	default:
-		return nil
+		return json.Unmarshal(b, (*txmNormal)(txm))
 	}
 }
 
