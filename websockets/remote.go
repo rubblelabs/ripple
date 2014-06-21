@@ -224,7 +224,7 @@ func (r *Remote) readPump(inbound chan []byte) {
 			close(inbound)
 			return
 		}
-		glog.V(2).Infoln(string(message))
+		glog.V(2).Infoln(dump(message))
 		r.ws.SetReadDeadline(time.Now().Add(pongWait))
 		inbound <- message
 	}
@@ -254,7 +254,7 @@ func (r *Remote) writePump(outbound chan interface{}) {
 				continue
 			}
 
-			glog.V(2).Infoln(string(b))
+			glog.V(2).Infoln(dump(b))
 			if err := r.ws.WriteMessage(websocket.TextMessage, b); err != nil {
 				glog.Errorln(err)
 				return
@@ -268,4 +268,11 @@ func (r *Remote) writePump(outbound chan interface{}) {
 			}
 		}
 	}
+}
+
+func dump(b []byte) string {
+	var v map[string]interface{}
+	json.Unmarshal(b, &v)
+	out, _ := json.MarshalIndent(v, "", "  ")
+	return string(out)
 }

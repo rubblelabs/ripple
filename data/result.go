@@ -262,3 +262,14 @@ func (r TransactionResult) String() string {
 func (r TransactionResult) Human() string {
 	return resultNames[r].Human
 }
+
+func (r TransactionResult) Success() bool {
+	return r == tesSUCCESS
+}
+
+func (r TransactionResult) Tick() string {
+	if r.Success() {
+		return "✓"
+	}
+	return "✗"
+}

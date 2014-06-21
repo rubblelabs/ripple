@@ -8,13 +8,13 @@ func format(h Hashable, format string, values ...interface{}) string {
 	var prefix string
 	switch v := h.(type) {
 	case Transaction:
-		prefix = "%-13s %6d %08X %-34s %8d "
+		prefix = "%-13s %6d %08X %8d %-34s "
 		base := v.GetBase()
 		var flags TransactionFlag
 		if base.Flags != nil {
 			flags = *base.Flags
 		}
-		values = append([]interface{}{base.GetType(), base.Fee.Num, flags, base.Account, base.Sequence}, values...)
+		values = append([]interface{}{base.GetType(), base.Fee.Num, flags, base.Sequence, base.Account}, values...)
 	default:
 		prefix = v.GetType() + " "
 	}

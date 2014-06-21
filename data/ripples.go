@@ -7,12 +7,18 @@ import (
 
 // Trade
 type Trade struct {
-	Buyer    Account
-	Seller   Account
-	Price    Value
-	Amount   Value
-	Currency Currency
-	Issuer   Account
+	Buyer  Account
+	Seller Account
+	Paid   Amount
+	Got    Amount
+}
+
+func (t Trade) Price() *Value {
+	price, err := t.Paid.Value.Ratio(*t.Got.Value)
+	if err != nil {
+		return nil
+	}
+	return price
 }
 
 // Transfer is a directional representation of a RippleState or AccountRoot balance change.
@@ -44,9 +50,9 @@ type Balance struct {
 	Currency Currency
 }
 
-func (t Trade) String() string {
-	return fmt.Sprintf("%s/%-34s %-34s=>%-34s %18s@%18s", t.Currency, t.Issuer, t.Seller, t.Buyer, t.Amount, t.Price)
-}
+// func (t Trade) String() string {
+// 	return fmt.Sprintf("%-34s=>%-34s %18s@%18s", t.Currency, t.Issuer, t.Seller, t.Buyer, t.Bought.Value, t.Price())
+// }
 
 func (b Balance) String() string {
 	return fmt.Sprintf("Account: %-34s  Currency: %s Balance: %20s Change: %20s", b.Account, b.Currency, b.Balance, b.Change)
@@ -57,7 +63,7 @@ type BalanceSlice []Balance
 
 func (s TradeSlice) Len() int           { return len(s) }
 func (s TradeSlice) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
-func (s TradeSlice) Less(i, j int) bool { return s[i].Price.Less(s[j].Price) }
+func (s TradeSlice) Less(i, j int) bool { return s[i].Price().Less(*s[j].Price()) }
 
 func (s BalanceSlice) Len() int      { return len(s) }
 func (s BalanceSlice) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
@@ -72,8 +78,8 @@ func (s BalanceSlice) Less(i, j int) bool {
 	}
 }
 
-func (s *TradeSlice) Add(buyer, seller *Account, price, amount *Amount) {
-	*s = append(*s, Trade{*buyer, *seller, *price.Value, *amount.Value, price.Currency, price.Issuer})
+func (s *TradeSlice) Add(buyer, seller *Account, paid, got *Amount) {
+	*s = append(*s, Trade{*buyer, *seller, *paid, *got})
 }
 
 func (s TradeSlice) Sum() (*Amount, error) {
@@ -134,11 +140,7 @@ func (txm *TransactionWithMetaData) Trades() (TradeSlice, error) {
 				reason = "Deleted Offer FinalFields missing TakerGets"
 				break
 			}
-			price, err := previous.TakerPays.Divide(previous.TakerGets)
-			if err != nil {
-				return nil, err
-			}
-			trades.Add(&account, final.Account, price, previous.TakerGets)
+			trades.Add(&account, final.Account, previous.TakerPays, previous.TakerGets)
 		case node.ModifiedNode != nil && node.ModifiedNode.LedgerEntryType == OFFER:
 			// No change?
 			if node.ModifiedNode.PreviousFields == nil {
@@ -171,11 +173,7 @@ func (txm *TransactionWithMetaData) Trades() (TradeSlice, error) {
 			if err != nil {
 				return nil, err
 			}
-			price, err := paid.Divide(got)
-			if err != nil {
-				return nil, err
-			}
-			trades.Add(&account, current.Account, price, got)
+			trades.Add(&account, current.Account, paid, got)
 		}
 		if reason != "" {
 			fmt.Println(txm.LedgerSequence, txm.Hash().String(), reason)

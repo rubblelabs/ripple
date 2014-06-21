@@ -98,6 +98,13 @@ func (t *TxBase) GetAccount() string {
 	return ""
 }
 
+func (t *TxBase) MemoSymbol() string {
+	if len(t.Memos) > 0 {
+		return "✐"
+	}
+	return " "
+}
+
 func (t *TransactionWithMetaData) GetAffectedNodes() []NodeEffect {
 	return t.MetaData.AffectedNodes
 }

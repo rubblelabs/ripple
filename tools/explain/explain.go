@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/donovanhide/ripple/data"
+	"github.com/donovanhide/ripple/terminal"
 	"github.com/donovanhide/ripple/websockets"
 	"github.com/golang/glog"
 	"os"
@@ -36,6 +37,7 @@ var (
 	trades       = flag.Bool("t", false, "hide trades")
 	balances     = flag.Bool("b", false, "hide balances")
 	transactions = flag.Bool("tx", false, "hide transactions")
+	pageSize     = flag.Int("page_size", 20, "page size for account_tx requests")
 )
 
 func showUsage() {
@@ -51,22 +53,22 @@ func checkErr(err error) {
 	}
 }
 
-func explain(txm *data.TransactionWithMetaData) {
+func explain(txm *data.TransactionWithMetaData, flag terminal.Flag) {
 	if !*transactions {
-		fmt.Println(txm.String())
+		terminal.Println(txm, flag)
 	}
 	if !*trades {
 		trades, err := txm.Trades()
 		checkErr(err)
 		for _, trade := range trades {
-			fmt.Println("  ", trade.String())
+			terminal.Println(trade, flag|terminal.Indent)
 		}
 	}
 	if !*balances {
 		balances, err := txm.Balances()
 		checkErr(err)
 		for _, balance := range balances {
-			fmt.Println("  ", balance.String())
+			terminal.Println(balance, flag|terminal.Indent)
 		}
 	}
 }
@@ -90,7 +92,7 @@ func main() {
 		fmt.Println("Getting transaction: ", hash.String())
 		result, err := r.Tx(*hash)
 		checkErr(err)
-		explain(&result.TransactionWithMetaData)
+		explain(&result.TransactionWithMetaData, terminal.Default)
 	case len(matches[2]) > 0:
 		seq, err := strconv.ParseUint(matches[2], 10, 32)
 		checkErr(err)
@@ -98,14 +100,14 @@ func main() {
 		checkErr(err)
 		fmt.Println("Getting transactions for: ", seq)
 		for _, tx := range ledger.Ledger.Transactions {
-			explain(tx)
+			explain(tx, terminal.Default)
 		}
 	case len(matches[3]) > 0:
 		account, err := data.NewAccountFromAddress(matches[3])
 		checkErr(err)
 		fmt.Println("Getting transactions for: ", account.String())
-		for tx := range r.AccountTx(*account, 20) {
-			explain(tx)
+		for tx := range r.AccountTx(*account, *pageSize) {
+			explain(tx, terminal.ShowLedgerSequence)
 		}
 	}
 }
