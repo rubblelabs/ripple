@@ -11,6 +11,7 @@ var counter uint64
 
 type Syncer interface {
 	Done()
+	Fail(message string)
 }
 
 type CommandError struct {
@@ -29,6 +30,15 @@ type Command struct {
 }
 
 func (c *Command) Done() {
+	c.Ready <- true
+}
+
+func (c *Command) Fail(message string) {
+	c.CommandError = &CommandError{
+		Name:    "Client Error",
+		Code:    -1,
+		Message: message,
+	}
 	c.Ready <- true
 }
 
