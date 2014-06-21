@@ -145,3 +145,17 @@ type SubmitResult struct {
 	TxBlob              string                 `json:"tx_blob"`
 	Tx                  interface{}            `json:"tx_json"`
 }
+
+type LedgerDataCommand struct {
+	*Command
+	Ledger interface{}       `json:"ledger"`
+	Marker *data.Hash256     `json:"marker,omitempty"`
+	Result *LedgerDataResult `json:"result,omitempty"`
+}
+
+type LedgerDataResult struct {
+	LedgerSequence uint32                `json:"ledger_index,string"`
+	Hash           data.Hash256          `json:"ledger_hash"`
+	Marker         *data.Hash256         `json:"marker"`
+	State          data.LedgerEntrySlice `json:"state"`
+}

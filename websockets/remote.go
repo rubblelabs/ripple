@@ -178,6 +178,21 @@ func (r *Remote) Submit(tx data.Transaction) (*SubmitResult, error) {
 	return cmd.Result, nil
 }
 
+// Synchronously gets ledger entries
+func (r *Remote) LedgerData(ledger interface{}, marker *data.Hash256) (*LedgerDataResult, error) {
+	cmd := &LedgerDataCommand{
+		Command: newCommand("ledger_data"),
+		Ledger:  ledger,
+		Marker:  marker,
+	}
+	r.Outgoing <- cmd
+	<-cmd.Ready
+	if cmd.CommandError != nil {
+		return nil, cmd.CommandError
+	}
+	return cmd.Result, nil
+}
+
 // Synchronously gets a single ledger
 func (r *Remote) Ledger(ledger interface{}, transactions bool) (*LedgerResult, error) {
 	cmd := &LedgerCommand{

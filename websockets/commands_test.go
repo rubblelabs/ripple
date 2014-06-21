@@ -85,3 +85,18 @@ func (s *MessagesSuite) TestAccountTxResponse(c *C) {
 	offer := msg.Result.Transactions[1].Transaction.(*data.OfferCreate)
 	c.Assert(offer.TakerPays.String(), Equals, "0.034800328/BTC/rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B")
 }
+
+func (s *MessagesSuite) TestLedgerDataResponse(c *C) {
+	msg := &LedgerDataCommand{}
+	readResponseFile(c, msg, "testdata/ledger_data.json")
+
+	// Response fields
+	c.Assert(msg.Status, Equals, "success")
+	c.Assert(msg.Type, Equals, "response")
+
+	c.Assert(msg.Result.LedgerSequence, Equals, uint32(6281820))
+	c.Assert(msg.Result.Hash.String(), Equals, "83CC350B1CDD9792D47F60D3DBB7673518FD6E71821070673E6EAE65DE69086B")
+	c.Assert(msg.Result.Marker.String(), Equals, "02DE1A2AD4332A1AF01C59F16E45218FA70E5792BD963B6D7ACF188D6D150607")
+	c.Assert(len(msg.Result.State), Equals, 2048)
+	c.Assert(msg.Result.State[0].GetType(), Equals, "AccountRoot")
+}
