@@ -23,6 +23,7 @@ var Default Flag
 
 var (
 	ledgerStyle  = color.New(color.FgRed, color.Underline)
+	leStyle      = color.New(color.FgWhite)
 	txStyle      = color.New(color.FgGreen)
 	tradeStyle   = color.New(color.FgBlue)
 	balanceStyle = color.New(color.FgMagenta)
@@ -35,6 +36,41 @@ type bundle struct {
 	format string
 	values []interface{}
 	flag   Flag
+}
+
+func newLeBundle(v interface{}, flag Flag) (*bundle, error) {
+	var (
+		format = "%-11s "
+		values = []interface{}{v.(data.LedgerEntry).GetLedgerEntryType()}
+	)
+	switch le := v.(type) {
+	case *data.AccountRoot:
+		format += "%-34s %08X %s"
+		values = append(values, []interface{}{le.Account, *le.Flags, le.Balance}...)
+	case *data.LedgerHashes:
+		format += "%d hashes"
+		values = append(values, []interface{}{len(le.Hashes)}...)
+	case *data.RippleState:
+		format += "%s %s %s"
+		values = append(values, []interface{}{le.Balance, le.HighLimit, le.LowLimit}...)
+	case *data.Offer:
+		format += "%-34s %-60s %-60s %-18s"
+		values = append(values, []interface{}{le.Account, le.TakerPays, le.TakerGets, le.Ratio()}...)
+	case *data.FeeSetting:
+		format += "%d %d %d %d"
+		values = append(values, []interface{}{le.BaseFee, le.ReferenceFeeUnits, le.ReserveBase, le.ReserveIncrement}...)
+	case *data.Amendments:
+		format += "%s"
+		values = append(values, []interface{}{le.Amendments}...)
+	default:
+		return nil, fmt.Errorf("Unknown Ledger Entry Type")
+	}
+	return &bundle{
+		color:  leStyle,
+		format: format,
+		values: values,
+		flag:   flag,
+	}, nil
 }
 
 func newTxBundle(txm *data.TransactionWithMetaData, flag Flag) (*bundle, error) {
@@ -82,7 +118,7 @@ func newBundle(value interface{}, flag Flag) (*bundle, error) {
 		return &bundle{
 			color:  ledgerStyle,
 			format: "Ledger %d closed at %s",
-			values: []interface{}{v.LedgerSequence, v.CloseTime},
+			values: []interface{}{v.LedgerSequence, v.CloseTime.String()},
 			flag:   flag,
 		}, nil
 	case websockets.LedgerStreamMsg:
@@ -99,8 +135,17 @@ func newBundle(value interface{}, flag Flag) (*bundle, error) {
 			values: []interface{}{v.Status, v.LoadFactor, v.LoadBase},
 			flag:   flag,
 		}, nil
+	case data.InnerNode:
+		return &bundle{
+			color:  leStyle,
+			format: "%s: %d hashes",
+			values: []interface{}{v.Type, v.Count()},
+			flag:   flag,
+		}, nil
 	case data.TransactionWithMetaData:
 		return newTxBundle(&v, flag)
+	case data.AccountRoot, data.LedgerHashes, data.RippleState, data.Offer, data.Directory, data.Amendments, data.FeeSetting:
+		return newLeBundle(value, flag)
 	case data.Trade:
 		return &bundle{
 			color:  tradeStyle,
