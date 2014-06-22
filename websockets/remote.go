@@ -151,7 +151,7 @@ func (r *Remote) accountTx(account data.Account, c chan *data.TransactionWithMet
 		for _, tx := range cmd.Result.Transactions {
 			c <- tx
 		}
-		if len(cmd.Result.Transactions) < pageSize {
+		if cmd.Result.Marker == nil {
 			return
 		}
 	}
