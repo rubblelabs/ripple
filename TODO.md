@@ -2,7 +2,9 @@
 
 ##Data
 * Write good tests for metadata interpretation
-* Improve string formatting for Transaction types and create a short summary string
+
+##Terminal
+* Add pathset output
 
 ##Websockets
 * Add missing commands
