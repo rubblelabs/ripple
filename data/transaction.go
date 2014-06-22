@@ -103,12 +103,7 @@ func (t *TransactionWithMetaData) GetType() string {
 }
 
 func (o *OfferCreate) Ratio() *Value {
-	ratio, err := o.TakerPays.Value.Ratio(*o.TakerGets.Value)
-	if err != nil {
-		//TODO: Is this correct behaviour?
-		return &zeroNonNative
-	}
-	return ratio
+	return o.TakerPays.Ratio(o.TakerGets)
 }
 
 func (p *Payment) PathSet() PathSet {

@@ -132,3 +132,7 @@ func (le *leBase) GetType() string {
 func (le *leBase) GetLedgerEntryType() LedgerEntryType {
 	return le.LedgerEntryType
 }
+
+func (o *Offer) Ratio() *Value {
+	return o.TakerPays.Ratio(*o.TakerGets)
+}

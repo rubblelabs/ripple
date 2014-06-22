@@ -160,6 +160,20 @@ func (a Amount) Multiply(b *Amount) (*Amount, error) {
 	return applyInterestPair(a, b, Amount.multiply)
 }
 
+// Ratio returns the ratio between a and b.
+// Returns a zero value when division is impossible
+func (a Amount) Ratio(b Amount) *Value {
+	ratio, err := a.Value.Ratio(*b.Value)
+	switch {
+	case err == nil:
+		return ratio
+	case a.Native:
+		return &zeroNative
+	default:
+		return &zeroNonNative
+	}
+}
+
 // Amount in human parsable form
 // with demurrage applied
 func (a Amount) String() string {
