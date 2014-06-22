@@ -7,11 +7,6 @@ import (
 	"math"
 )
 
-const (
-	PATH_BOUNDARY uint8 = 0xFF
-	PATH_END      uint8 = 0x00
-)
-
 func NewVariableByteReader(r Reader) (Reader, error) {
 	if length, err := readVariableLength(r); err != nil {
 		return nil, err
@@ -254,10 +249,14 @@ func (k *RegularKey) Marshal(w io.Writer) error {
 	return writeVariableLength(w, k.Bytes())
 }
 
-func (p *Paths) Unmarshal(r Reader) error {
+func (p *PathSet) Unmarshal(r Reader) error {
 	for i := 0; ; i++ {
-		*p = append(*p, []Path{})
-		for entry, err := r.ReadByte(); entry != PATH_BOUNDARY; entry, err = r.ReadByte() {
+		*p = append(*p, Paths{})
+		for b, err := r.ReadByte(); ; b, err = r.ReadByte() {
+			entry := pathEntry(b)
+			if entry == PATH_BOUNDARY {
+				break
+			}
 			if err != nil {
 				return err
 			}
@@ -265,19 +264,19 @@ func (p *Paths) Unmarshal(r Reader) error {
 				return nil
 			}
 			var path Path
-			if entry&0x01 > 0 {
+			if entry&PATH_ACCOUNT > 0 {
 				path.Account = new(Account)
 				if _, err := r.Read(path.Account.Bytes()); err != nil {
 					return err
 				}
 			}
-			if entry&0x10 > 0 {
+			if entry&PATH_CURRENCY > 0 {
 				path.Currency = new(Currency)
 				if _, err := r.Read(path.Currency.Bytes()); err != nil {
 					return err
 				}
 			}
-			if entry&0x20 > 0 {
+			if entry&PATH_ISSUER > 0 {
 				path.Issuer = new(Account)
 				if _, err := r.Read(path.Issuer.Bytes()); err != nil {
 					return err
@@ -288,10 +287,10 @@ func (p *Paths) Unmarshal(r Reader) error {
 	}
 }
 
-func (p *Paths) Marshal(w io.Writer) error {
+func (p *PathSet) Marshal(w io.Writer) error {
 	for i, path := range *p {
 		for _, entry := range path {
-			if err := write(w, entry.PathEntry()); err != nil {
+			if err := write(w, entry.pathEntry()); err != nil {
 				return err
 			}
 			if err := write(w, entry.Account.Bytes()); err != nil {

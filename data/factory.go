@@ -123,6 +123,10 @@ func init() {
 	}
 }
 
+func (t TransactionType) String() string {
+	return txNames[t]
+}
+
 func (le LedgerEntryType) String() string {
 	return ledgerEntryNames[le]
 }

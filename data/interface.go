@@ -26,7 +26,5 @@ type LedgerEntry interface {
 type Transaction interface {
 	Hashable
 	GetTransactionType() TransactionType
-	GetAccount() string
-	// GetAffectedNodes() []NodeEffect
 	GetBase() *TxBase
 }

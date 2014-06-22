@@ -20,7 +20,7 @@ type Payment struct {
 	Destination    Account
 	Amount         Amount
 	SendMax        *Amount  `json:",omitempty"`
-	Paths          *Paths   `json:",omitempty"`
+	Paths          *PathSet `json:",omitempty"`
 	DestinationTag *uint32  `json:",omitempty"`
 	InvoiceID      *Hash256 `json:",omitempty"`
 }
@@ -75,10 +75,6 @@ type Amendment struct {
 	Amendment Hash256
 }
 
-func (t TransactionType) String() string {
-	return txNames[t]
-}
-
 func (t *TxBase) GetBase() *TxBase {
 	return t
 }
@@ -91,22 +87,11 @@ func (t *TxBase) GetType() string {
 	return txNames[t.TransactionType]
 }
 
-func (t *TxBase) GetAccount() string {
-	if a, err := t.Account.MarshalText(); err == nil {
-		return string(a)
-	}
-	return ""
-}
-
 func (t *TxBase) MemoSymbol() string {
 	if len(t.Memos) > 0 {
 		return "✐"
 	}
 	return " "
-}
-
-func (t *TransactionWithMetaData) GetAffectedNodes() []NodeEffect {
-	return t.MetaData.AffectedNodes
 }
 
 func (t *TransactionWithMetaData) GetType() string {

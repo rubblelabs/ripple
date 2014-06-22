@@ -66,7 +66,7 @@ func (s *MessagesSuite) TestTxResponse(c *C) {
 	offer := msg.Result.Transaction.(*data.OfferCreate)
 	c.Assert(offer.Hash().String(), Equals, "2D0CE11154B655A2BFE7F3F857AAC344622EC7DAB11B1EBD920DCDB00E8646FF")
 	c.Assert(offer.GetType(), Equals, "OfferCreate")
-	c.Assert(offer.GetAccount(), Equals, "rwpxNWdpKu2QVgrh5LQXEygYLshhgnRL1Y")
+	c.Assert(offer.Account.String(), Equals, "rwpxNWdpKu2QVgrh5LQXEygYLshhgnRL1Y")
 	c.Assert(offer.Fee.String(), Equals, "0.00001")
 	c.Assert(offer.SigningPubKey.String(), Equals, "02BD6F0CFD0182F2F408512286A0D935C58FF41169DAC7E721D159D711695DFF85")
 	c.Assert(offer.TxnSignature.String(), Equals, "30440220216D42DF672C1CC7EF0CA9C7840838A2AF5FEDD4DEFCBA770C763D7509703C8702203C8D831BFF8A8BC2CC993BECB4E6C7BE1EA9D394AB7CE7C6F7542B6CDA781467")

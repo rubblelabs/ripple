@@ -36,6 +36,7 @@ var (
 	host         = flags.String("host", "wss://s-east.ripple.com:443", "websockets host")
 	trades       = flag.Bool("t", false, "hide trades")
 	balances     = flag.Bool("b", false, "hide balances")
+	paths        = flag.Bool("p", false, "hide paths")
 	transactions = flag.Bool("tx", false, "hide transactions")
 	pageSize     = flag.Int("page_size", 20, "page size for account_tx requests")
 )
@@ -56,6 +57,11 @@ func checkErr(err error) {
 func explain(txm *data.TransactionWithMetaData, flag terminal.Flag) {
 	if !*transactions {
 		terminal.Println(txm, flag)
+	}
+	if payment, ok := txm.Transaction.(*data.Payment); ok && !*paths && payment.Paths != nil {
+		for _, path := range *payment.Paths {
+			terminal.Println(path, flag|terminal.Indent)
+		}
 	}
 	if !*trades {
 		trades, err := txm.Trades()

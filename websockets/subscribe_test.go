@@ -66,7 +66,7 @@ func (s *MessagesSuite) TestTransactionStreamMsg(c *C) {
 	offer := msg.Transaction.Transaction.(*data.OfferCreate)
 
 	c.Assert(offer.GetType(), Equals, "OfferCreate")
-	c.Assert(offer.GetAccount(), Equals, "rPEZyTnSyQyXBCwMVYyaafSVPL8oMtfG6a")
+	c.Assert(offer.Account.String(), Equals, "rPEZyTnSyQyXBCwMVYyaafSVPL8oMtfG6a")
 	c.Assert(offer.Fee.String(), Equals, "0.00005")
 	c.Assert(offer.Hash().String(), Equals, "25174B56C40B090D4AFCDAC3F07DCCF8A49A096D62CE1CE6864A8624F790F980")
 	c.Assert(offer.SigningPubKey.String(), Equals, "0309AEAA170F651170F85C85237CD25CD4200CF91C1C05A9B8A19E72912C2254DF")
