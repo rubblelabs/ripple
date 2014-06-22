@@ -34,16 +34,6 @@ var LedgerFactory = [...]func() Hashable{
 	func() Hashable { return &Ledger{} },
 }
 
-var FieldsFactory = [...]func() interface{}{
-	ACCOUNT_ROOT:  func() interface{} { return &AccountRootFields{} },
-	DIRECTORY:     func() interface{} { return &DirectoryFields{} },
-	AMENDMENTS:    func() interface{} { return &AmendmentsFields{} },
-	LEDGER_HASHES: func() interface{} { return &LedgerHashesFields{} },
-	OFFER:         func() interface{} { return &OfferFields{} },
-	RIPPLE_STATE:  func() interface{} { return &RippleStateFields{} },
-	FEE_SETTING:   func() interface{} { return &FeeSettingFields{} },
-}
-
 var LedgerEntryFactory = [...]func() LedgerEntry{
 	ACCOUNT_ROOT:  func() LedgerEntry { return &AccountRoot{leBase: leBase{LedgerEntryType: ACCOUNT_ROOT}} },
 	DIRECTORY:     func() LedgerEntry { return &Directory{leBase: leBase{LedgerEntryType: DIRECTORY}} },

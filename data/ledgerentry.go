@@ -8,7 +8,8 @@ type leBase struct {
 	LedgerIndex     *Hash256 `json:",omitempty"`
 }
 
-type AccountRootFields struct {
+type AccountRoot struct {
+	leBase
 	Flags             *LedgerEntryFlag `json:",omitempty"`
 	Account           *Account         `json:",omitempty"`
 	Sequence          *uint32          `json:",omitempty"`
@@ -27,12 +28,8 @@ type AccountRootFields struct {
 	Signers           *VariableLength  `json:",omitempty"`
 }
 
-type AccountRoot struct {
+type RippleState struct {
 	leBase
-	AccountRootFields
-}
-
-type RippleStateFields struct {
 	Flags             *LedgerEntryFlag `json:",omitempty"`
 	LowLimit          *Amount          `json:",omitempty"`
 	HighLimit         *Amount          `json:",omitempty"`
@@ -47,12 +44,8 @@ type RippleStateFields struct {
 	HighQualityOut    *uint32          `json:",omitempty"`
 }
 
-type RippleState struct {
+type Offer struct {
 	leBase
-	RippleStateFields
-}
-
-type OfferFields struct {
 	Flags             *LedgerEntryFlag `json:",omitempty"`
 	Account           *Account         `json:",omitempty"`
 	Sequence          *uint32          `json:",omitempty"`
@@ -66,12 +59,8 @@ type OfferFields struct {
 	Expiration        *uint32          `json:",omitempty"`
 }
 
-type Offer struct {
+type Directory struct {
 	leBase
-	OfferFields
-}
-
-type DirectoryFields struct {
 	Flags             *LedgerEntryFlag `json:",omitempty"`
 	RootIndex         *Hash256         `json:",omitempty"`
 	Indexes           *Vector256       `json:",omitempty"`
@@ -85,44 +74,27 @@ type DirectoryFields struct {
 	IndexPrevious     *NodeIndex       `json:",omitempty"`
 }
 
-type Directory struct {
+type LedgerHashes struct {
 	leBase
-	DirectoryFields
-}
-
-type LedgerHashesFields struct {
 	Flags               *LedgerEntryFlag `json:",omitempty"`
 	FirstLedgerSequence uint32
 	LastLedgerSequence  uint32
 	Hashes              Vector256
 }
 
-type LedgerHashes struct {
+type Amendments struct {
 	leBase
-	LedgerHashesFields
-}
-
-type AmendmentsFields struct {
 	Flags      *LedgerEntryFlag `json:",omitempty"`
 	Amendments Hash256
 }
 
-type Amendments struct {
+type FeeSetting struct {
 	leBase
-	AmendmentsFields
-}
-
-type FeeSettingFields struct {
 	Flags             *LedgerEntryFlag `json:",omitempty"`
 	BaseFee           uint64
 	ReferenceFeeUnits uint32
 	ReserveBase       uint32
 	ReserveIncrement  uint32
-}
-
-type FeeSetting struct {
-	leBase
-	FeeSettingFields
 }
 
 func (le *leBase) GetType() string {
