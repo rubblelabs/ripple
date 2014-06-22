@@ -2,9 +2,18 @@
 
 ##Data
 * Write good tests for metadata interpretation
+* Use Freeform type for _some_ memos and Previous/New/Final fields
+
+##Peers
+* Implement all handlers
+* Clean out ripple.proto
+
+##Ledger
+* Allow subscribing to incoming Proposals/Validations/Transactions for use in listener
 
 ##Terminal
 * Add pathset output
+* Add proposal and validation output
 
 ##Websockets
 * Add missing commands
