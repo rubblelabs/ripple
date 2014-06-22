@@ -94,6 +94,10 @@ func (t *TxBase) MemoSymbol() string {
 	return " "
 }
 
+func (t *TxBase) PathSet() PathSet {
+	return PathSet(nil)
+}
+
 func (t *TransactionWithMetaData) GetType() string {
 	return "TransactionWithMetadata"
 }
@@ -105,4 +109,11 @@ func (o *OfferCreate) Ratio() *Value {
 		return &zeroNonNative
 	}
 	return ratio
+}
+
+func (p *Payment) PathSet() PathSet {
+	if p.Paths == nil {
+		return PathSet(nil)
+	}
+	return *p.Paths
 }

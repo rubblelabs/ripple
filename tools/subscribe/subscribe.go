@@ -8,10 +8,12 @@ import (
 	"os"
 )
 
-func checkErr(err error) {
+func checkErr(err error, quit bool) {
 	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+		terminal.Println(err.Error(), terminal.Default)
+		if quit {
+			os.Exit(1)
+		}
 	}
 }
 
@@ -22,15 +24,13 @@ var (
 func main() {
 	flag.Parse()
 	r, err := websockets.NewRemote(*host)
-	checkErr(err)
+	checkErr(err, true)
 	go r.Run()
+
 	// Subscribe to all streams
 	confirmation, err := r.Subscribe(true, true, true)
-	checkErr(err)
-	fmt.Printf(
-		"Subscribed at %d\n",
-		confirmation.LedgerSequence,
-	)
+	checkErr(err, true)
+	terminal.Println(fmt.Sprint("Subscribed at: ", confirmation.LedgerSequence), terminal.Default)
 
 	// Consume messages as they arrive
 	for {
@@ -44,21 +44,18 @@ func main() {
 			terminal.Println(msg, terminal.Default)
 		case *websockets.TransactionStreamMsg:
 			terminal.Println(msg.Transaction, terminal.Indent)
+			for _, path := range msg.Transaction.PathSet() {
+				terminal.Println(path, terminal.DoubleIndent)
+			}
 			trades, err := msg.Transaction.Trades()
-			if err != nil {
-				terminal.Println(err.Error(), terminal.Default)
-			} else {
-				for _, trade := range trades {
-					terminal.Println(trade, terminal.DoubleIndent)
-				}
+			checkErr(err, false)
+			for _, trade := range trades {
+				terminal.Println(trade, terminal.DoubleIndent)
 			}
 			balances, err := msg.Transaction.Balances()
-			if err != nil {
-				terminal.Println(err.Error(), terminal.Default)
-			} else {
-				for _, balance := range balances {
-					terminal.Println(balance, terminal.DoubleIndent)
-				}
+			checkErr(err, false)
+			for _, balance := range balances {
+				terminal.Println(balance, terminal.DoubleIndent)
 			}
 		case *websockets.ServerStreamMsg:
 			terminal.Println(msg, terminal.Default)

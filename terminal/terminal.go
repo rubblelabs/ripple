@@ -149,12 +149,18 @@ func indent(flag Flag) string {
 	}
 }
 
-func Println(value interface{}, flag Flag) (int, error) {
+func println(value interface{}, flag Flag) (int, error) {
 	b, err := newBundle(value, flag)
 	if err != nil {
 		return 0, err
 	}
 	return b.color.Printf(indent(flag)+b.format+"\n", b.values...)
+}
+
+func Println(value interface{}, flag Flag) {
+	if _, err := println(value, flag); err != nil {
+		infoStyle.Println(err.Error())
+	}
 }
 
 func Sprint(value interface{}, flag Flag) string {

@@ -49,7 +49,7 @@ func showUsage() {
 
 func checkErr(err error) {
 	if err != nil {
-		fmt.Println(err.Error())
+		terminal.Println(err.Error(), terminal.Default)
 		os.Exit(1)
 	}
 }
@@ -58,8 +58,8 @@ func explain(txm *data.TransactionWithMetaData, flag terminal.Flag) {
 	if !*transactions {
 		terminal.Println(txm, flag)
 	}
-	if payment, ok := txm.Transaction.(*data.Payment); ok && !*paths && payment.Paths != nil {
-		for _, path := range *payment.Paths {
+	if !*paths {
+		for _, path := range txm.PathSet() {
 			terminal.Println(path, flag|terminal.Indent)
 		}
 	}

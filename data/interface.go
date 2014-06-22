@@ -27,4 +27,5 @@ type Transaction interface {
 	Hashable
 	GetTransactionType() TransactionType
 	GetBase() *TxBase
+	PathSet() PathSet
 }
