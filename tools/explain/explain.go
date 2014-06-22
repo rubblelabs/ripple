@@ -2,6 +2,9 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
+	"encoding/hex"
 	"flag"
 	"fmt"
 	"github.com/donovanhide/ripple/data"
@@ -13,7 +16,7 @@ import (
 	"strconv"
 )
 
-const usage = `Usage: explain [tx hash|ledger sequence|ripple address] [options]
+const usage = `Usage: explain [tx hash|ledger sequence|ripple address|-] [options]
 
 Examples: 
 
@@ -26,10 +29,13 @@ explain rrpNnNLKrartuEqfJGpqyDwPj1AFPg9vn1
 explain 955A4C0B7C66FC97EA4C72634CDCDBF50BB17AAA647EC6C8C592788E5B95173C
 	Explain transaction 955A4C0B7C66FC97EA4C72634CDCDBF50BB17AAA647EC6C8C592788E5B95173C
 
+explain -
+	Explain binary transactions received through stdin
+
 Options:
 `
 
-var argumentRegex = regexp.MustCompile(`(^[0-9a-fA-F]{64}$)|(^\d+$)|(^[r][a-km-zA-HJ-NP-Z0-9]{26,34}$)`)
+var argumentRegex = regexp.MustCompile(`(^[0-9a-fA-F]{64}$)|(^\d+$)|(^[r][a-km-zA-HJ-NP-Z0-9]{26,34}$)|(-)`)
 
 var (
 	flags        = flag.CommandLine
@@ -114,6 +120,15 @@ func main() {
 		fmt.Println("Getting transactions for: ", account.String())
 		for tx := range r.AccountTx(*account, *pageSize) {
 			explain(tx, terminal.ShowLedgerSequence)
+		}
+	case len(matches[4]) > 0:
+		r := bufio.NewReader(os.Stdin)
+		for line, err := r.ReadString('\n'); err == nil; line, err = r.ReadString('\n') {
+			b, err := hex.DecodeString(line[:len(line)-1])
+			checkErr(err)
+			v, err := data.NewDecoder(bytes.NewReader(b)).Prefix()
+			checkErr(err)
+			terminal.Println(v, terminal.Default)
 		}
 	}
 }
