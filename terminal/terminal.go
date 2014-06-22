@@ -51,8 +51,8 @@ func newTxBundle(txm *data.TransactionWithMetaData, flag Flag) *bundle {
 	}
 	switch tx := txm.Transaction.(type) {
 	case *data.Payment:
-		format += "=> %-34s %-60s"
-		values = append(values, []interface{}{tx.Destination, tx.Amount}...)
+		format += "=> %-34s %-60s %-60s"
+		values = append(values, []interface{}{tx.Destination, tx.Amount, tx.SendMax}...)
 	case *data.OfferCreate:
 		format += "%-60s %-60s %-18s"
 		values = append(values, []interface{}{tx.TakerPays, tx.TakerGets, tx.Ratio()}...)
