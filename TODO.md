@@ -3,6 +3,7 @@
 ##Data
 * Write good tests for metadata interpretation
 * Use Freeform type for _some_ memos and Previous/New/Final fields
+* Implement canonical signatures
 
 ##Peers
 * Implement all handlers
@@ -12,7 +13,6 @@
 * Allow subscribing to incoming Proposals/Validations/Transactions for use in listener
 
 ##Terminal
-* Add pathset output
 * Add proposal and validation output
 
 ##Websockets
