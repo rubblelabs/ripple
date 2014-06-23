@@ -99,14 +99,6 @@ func (m *TMGetObjectByHash) Log() string {
 	return fmt.Sprintf("GetObjectByHash: %d %s", m.GetSeq(), strings.Join(objects, ","))
 }
 
-func (m *TMErrorMsg) Log() string          { return m.String() }
-func (m *TMProofWork) Log() string         { return m.String() }
-func (m *TMCluster) Log() string           { return m.String() }
-func (m *TMContact) Log() string           { return m.String() }
-func (m *TMPeers) Log() string             { return m.String() }
-func (m *TMSearchTransaction) Log() string { return m.String() }
-func (m *TMAccount) Log() string           { return m.String() }
-
-func (m *TMGetContacts) Log() string    { return m.String() }
-func (m *TMGetAccount) Log() string     { return m.String() }
-func (m *TMGetValidations) Log() string { return m.String() }
+func (m *TMProofWork) Log() string { return m.String() }
+func (m *TMCluster) Log() string   { return m.String() }
+func (m *TMPeers) Log() string     { return m.String() }

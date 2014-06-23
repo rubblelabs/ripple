@@ -121,18 +121,9 @@ func (m *TMTransaction) Extend() (ExtendedMessage, error)        { return m, nil
 func (m *TMLedgerData) Extend() (ExtendedMessage, error)         { return m, nil }
 func (m *TMStatusChange) Extend() (ExtendedMessage, error)       { return m, nil }
 func (m *TMHaveTransactionSet) Extend() (ExtendedMessage, error) { return m, nil }
+func (m *TMValidation) Extend() (ExtendedMessage, error)         { return m, nil }
 
 // Commands
 func (m *TMGetPeers) Extend() (ExtendedMessage, error)        { return m, nil }
 func (m *TMGetLedger) Extend() (ExtendedMessage, error)       { return m, nil }
 func (m *TMGetObjectByHash) Extend() (ExtendedMessage, error) { return m, nil }
-
-//Not implemented in rippled
-func (m *TMSearchTransaction) Extend() (ExtendedMessage, error) { return m, nil }
-func (m *TMErrorMsg) Extend() (ExtendedMessage, error)          { return m, nil }
-func (m *TMGetAccount) Extend() (ExtendedMessage, error)        { return m, nil }
-func (m *TMAccount) Extend() (ExtendedMessage, error)           { return m, nil }
-func (m *TMGetValidations) Extend() (ExtendedMessage, error)    { return m, nil }
-func (m *TMValidation) Extend() (ExtendedMessage, error)        { return m, nil }
-func (m *TMGetContacts) Extend() (ExtendedMessage, error)       { return m, nil }
-func (m *TMContact) Extend() (ExtendedMessage, error)           { return m, nil }

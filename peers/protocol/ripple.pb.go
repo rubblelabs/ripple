@@ -16,87 +16,56 @@ var _ = math.Inf
 type MessageType int32
 
 const (
-	// core
-	MessageType_mtHELLO       MessageType = 1
-	MessageType_mtERROR_MSG   MessageType = 2
-	MessageType_mtPING        MessageType = 3
-	MessageType_mtPROOFOFWORK MessageType = 4
-	MessageType_mtCLUSTER     MessageType = 5
-	// network presence detection
-	MessageType_mtGET_CONTACTS MessageType = 10
-	MessageType_mtCONTACT      MessageType = 11
-	MessageType_mtGET_PEERS    MessageType = 12
-	MessageType_mtPEERS        MessageType = 13
-	// This field was previous used for PeerFinder ENDPOINTS messages. Since the
-	// structure's required fields changed, the message number was changed.
-	MessageType_mtUNUSED_FIELD MessageType = 14
-	MessageType_mtENDPOINTS    MessageType = 15
-	// operations for 'small' nodes
-	MessageType_mtSEARCH_TRANSACTION MessageType = 20
-	MessageType_mtGET_ACCOUNT        MessageType = 21
-	MessageType_mtACCOUNT            MessageType = 22
-	// transaction and ledger processing
+	MessageType_mtHELLO          MessageType = 1
+	MessageType_mtPING           MessageType = 3
+	MessageType_mtPROOFOFWORK    MessageType = 4
+	MessageType_mtCLUSTER        MessageType = 5
+	MessageType_mtGET_PEERS      MessageType = 12
+	MessageType_mtPEERS          MessageType = 13
+	MessageType_mtENDPOINTS      MessageType = 15
 	MessageType_mtTRANSACTION    MessageType = 30
 	MessageType_mtGET_LEDGER     MessageType = 31
 	MessageType_mtLEDGER_DATA    MessageType = 32
 	MessageType_mtPROPOSE_LEDGER MessageType = 33
 	MessageType_mtSTATUS_CHANGE  MessageType = 34
 	MessageType_mtHAVE_SET       MessageType = 35
-	// data replication and synchronization
-	MessageType_mtGET_VALIDATIONS MessageType = 40
-	MessageType_mtVALIDATION      MessageType = 41
-	MessageType_mtGET_OBJECTS     MessageType = 42
+	MessageType_mtVALIDATION     MessageType = 41
+	MessageType_mtGET_OBJECTS    MessageType = 42
 )
 
 var MessageType_name = map[int32]string{
 	1:  "mtHELLO",
-	2:  "mtERROR_MSG",
 	3:  "mtPING",
 	4:  "mtPROOFOFWORK",
 	5:  "mtCLUSTER",
-	10: "mtGET_CONTACTS",
-	11: "mtCONTACT",
 	12: "mtGET_PEERS",
 	13: "mtPEERS",
-	14: "mtUNUSED_FIELD",
 	15: "mtENDPOINTS",
-	20: "mtSEARCH_TRANSACTION",
-	21: "mtGET_ACCOUNT",
-	22: "mtACCOUNT",
 	30: "mtTRANSACTION",
 	31: "mtGET_LEDGER",
 	32: "mtLEDGER_DATA",
 	33: "mtPROPOSE_LEDGER",
 	34: "mtSTATUS_CHANGE",
 	35: "mtHAVE_SET",
-	40: "mtGET_VALIDATIONS",
 	41: "mtVALIDATION",
 	42: "mtGET_OBJECTS",
 }
 var MessageType_value = map[string]int32{
-	"mtHELLO":              1,
-	"mtERROR_MSG":          2,
-	"mtPING":               3,
-	"mtPROOFOFWORK":        4,
-	"mtCLUSTER":            5,
-	"mtGET_CONTACTS":       10,
-	"mtCONTACT":            11,
-	"mtGET_PEERS":          12,
-	"mtPEERS":              13,
-	"mtUNUSED_FIELD":       14,
-	"mtENDPOINTS":          15,
-	"mtSEARCH_TRANSACTION": 20,
-	"mtGET_ACCOUNT":        21,
-	"mtACCOUNT":            22,
-	"mtTRANSACTION":        30,
-	"mtGET_LEDGER":         31,
-	"mtLEDGER_DATA":        32,
-	"mtPROPOSE_LEDGER":     33,
-	"mtSTATUS_CHANGE":      34,
-	"mtHAVE_SET":           35,
-	"mtGET_VALIDATIONS":    40,
-	"mtVALIDATION":         41,
-	"mtGET_OBJECTS":        42,
+	"mtHELLO":          1,
+	"mtPING":           3,
+	"mtPROOFOFWORK":    4,
+	"mtCLUSTER":        5,
+	"mtGET_PEERS":      12,
+	"mtPEERS":          13,
+	"mtENDPOINTS":      15,
+	"mtTRANSACTION":    30,
+	"mtGET_LEDGER":     31,
+	"mtLEDGER_DATA":    32,
+	"mtPROPOSE_LEDGER": 33,
+	"mtSTATUS_CHANGE":  34,
+	"mtHAVE_SET":       35,
+	"mtVALIDATION":     41,
+	"mtGET_OBJECTS":    42,
 }
 
 func (x MessageType) Enum() *MessageType {
@@ -1069,127 +1038,6 @@ func (m *TMValidation) GetCheckedSignature() bool {
 	return false
 }
 
-type TMGetValidations struct {
-	LedgerIndex      *uint32  `protobuf:"varint,1,req,name=ledgerIndex" json:"ledgerIndex,omitempty"`
-	Hanko            [][]byte `protobuf:"bytes,2,rep,name=hanko" json:"hanko,omitempty"`
-	Count            *uint32  `protobuf:"varint,3,opt,name=count" json:"count,omitempty"`
-	XXX_unrecognized []byte   `json:"-"`
-}
-
-func (m *TMGetValidations) Reset()         { *m = TMGetValidations{} }
-func (m *TMGetValidations) String() string { return proto.CompactTextString(m) }
-func (*TMGetValidations) ProtoMessage()    {}
-
-func (m *TMGetValidations) GetLedgerIndex() uint32 {
-	if m != nil && m.LedgerIndex != nil {
-		return *m.LedgerIndex
-	}
-	return 0
-}
-
-func (m *TMGetValidations) GetHanko() [][]byte {
-	if m != nil {
-		return m.Hanko
-	}
-	return nil
-}
-
-func (m *TMGetValidations) GetCount() uint32 {
-	if m != nil && m.Count != nil {
-		return *m.Count
-	}
-	return 0
-}
-
-type TMContact struct {
-	PubKey           []byte   `protobuf:"bytes,1,req,name=pubKey" json:"pubKey,omitempty"`
-	SoftwareVersion  *uint32  `protobuf:"varint,2,req,name=softwareVersion" json:"softwareVersion,omitempty"`
-	ProtoVersion     *uint32  `protobuf:"varint,3,req,name=protoVersion" json:"protoVersion,omitempty"`
-	NodeFlags        *uint64  `protobuf:"varint,4,req,name=nodeFlags" json:"nodeFlags,omitempty"`
-	Timestamp        *uint64  `protobuf:"varint,5,req,name=timestamp" json:"timestamp,omitempty"`
-	NodeInfo         [][]byte `protobuf:"bytes,6,rep,name=nodeInfo" json:"nodeInfo,omitempty"`
-	Signature        []byte   `protobuf:"bytes,7,req,name=signature" json:"signature,omitempty"`
-	XXX_unrecognized []byte   `json:"-"`
-}
-
-func (m *TMContact) Reset()         { *m = TMContact{} }
-func (m *TMContact) String() string { return proto.CompactTextString(m) }
-func (*TMContact) ProtoMessage()    {}
-
-func (m *TMContact) GetPubKey() []byte {
-	if m != nil {
-		return m.PubKey
-	}
-	return nil
-}
-
-func (m *TMContact) GetSoftwareVersion() uint32 {
-	if m != nil && m.SoftwareVersion != nil {
-		return *m.SoftwareVersion
-	}
-	return 0
-}
-
-func (m *TMContact) GetProtoVersion() uint32 {
-	if m != nil && m.ProtoVersion != nil {
-		return *m.ProtoVersion
-	}
-	return 0
-}
-
-func (m *TMContact) GetNodeFlags() uint64 {
-	if m != nil && m.NodeFlags != nil {
-		return *m.NodeFlags
-	}
-	return 0
-}
-
-func (m *TMContact) GetTimestamp() uint64 {
-	if m != nil && m.Timestamp != nil {
-		return *m.Timestamp
-	}
-	return 0
-}
-
-func (m *TMContact) GetNodeInfo() [][]byte {
-	if m != nil {
-		return m.NodeInfo
-	}
-	return nil
-}
-
-func (m *TMContact) GetSignature() []byte {
-	if m != nil {
-		return m.Signature
-	}
-	return nil
-}
-
-// request node information
-type TMGetContacts struct {
-	NodeIDs          [][]byte `protobuf:"bytes,1,rep,name=nodeIDs" json:"nodeIDs,omitempty"`
-	NodeCount        *uint32  `protobuf:"varint,2,opt,name=nodeCount" json:"nodeCount,omitempty"`
-	XXX_unrecognized []byte   `json:"-"`
-}
-
-func (m *TMGetContacts) Reset()         { *m = TMGetContacts{} }
-func (m *TMGetContacts) String() string { return proto.CompactTextString(m) }
-func (*TMGetContacts) ProtoMessage()    {}
-
-func (m *TMGetContacts) GetNodeIDs() [][]byte {
-	if m != nil {
-		return m.NodeIDs
-	}
-	return nil
-}
-
-func (m *TMGetContacts) GetNodeCount() uint32 {
-	if m != nil && m.NodeCount != nil {
-		return *m.NodeCount
-	}
-	return 0
-}
-
 type TMGetPeers struct {
 	DoWeNeedThis     *uint32 `protobuf:"varint,1,req,name=doWeNeedThis" json:"doWeNeedThis,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
@@ -1299,150 +1147,6 @@ func (m *TMEndpoints) GetEndpoints() []*TMEndpoint {
 		return m.Endpoints
 	}
 	return nil
-}
-
-type TMSearchTransaction struct {
-	MaxTrans         *uint32  `protobuf:"varint,1,req,name=maxTrans" json:"maxTrans,omitempty"`
-	ToAccount        []byte   `protobuf:"bytes,2,opt,name=toAccount" json:"toAccount,omitempty"`
-	FromAccount      []byte   `protobuf:"bytes,3,opt,name=fromAccount" json:"fromAccount,omitempty"`
-	MinLedger        *uint32  `protobuf:"varint,4,opt,name=minLedger" json:"minLedger,omitempty"`
-	FromAcctSeq      []byte   `protobuf:"bytes,5,opt,name=fromAcctSeq" json:"fromAcctSeq,omitempty"`
-	TransID          [][]byte `protobuf:"bytes,6,rep,name=transID" json:"transID,omitempty"`
-	XXX_unrecognized []byte   `json:"-"`
-}
-
-func (m *TMSearchTransaction) Reset()         { *m = TMSearchTransaction{} }
-func (m *TMSearchTransaction) String() string { return proto.CompactTextString(m) }
-func (*TMSearchTransaction) ProtoMessage()    {}
-
-func (m *TMSearchTransaction) GetMaxTrans() uint32 {
-	if m != nil && m.MaxTrans != nil {
-		return *m.MaxTrans
-	}
-	return 0
-}
-
-func (m *TMSearchTransaction) GetToAccount() []byte {
-	if m != nil {
-		return m.ToAccount
-	}
-	return nil
-}
-
-func (m *TMSearchTransaction) GetFromAccount() []byte {
-	if m != nil {
-		return m.FromAccount
-	}
-	return nil
-}
-
-func (m *TMSearchTransaction) GetMinLedger() uint32 {
-	if m != nil && m.MinLedger != nil {
-		return *m.MinLedger
-	}
-	return 0
-}
-
-func (m *TMSearchTransaction) GetFromAcctSeq() []byte {
-	if m != nil {
-		return m.FromAcctSeq
-	}
-	return nil
-}
-
-func (m *TMSearchTransaction) GetTransID() [][]byte {
-	if m != nil {
-		return m.TransID
-	}
-	return nil
-}
-
-type TMGetAccount struct {
-	AcctID           [][]byte `protobuf:"bytes,1,rep,name=acctID" json:"acctID,omitempty"`
-	Seq              *uint32  `protobuf:"varint,2,opt,name=seq" json:"seq,omitempty"`
-	XXX_unrecognized []byte   `json:"-"`
-}
-
-func (m *TMGetAccount) Reset()         { *m = TMGetAccount{} }
-func (m *TMGetAccount) String() string { return proto.CompactTextString(m) }
-func (*TMGetAccount) ProtoMessage()    {}
-
-func (m *TMGetAccount) GetAcctID() [][]byte {
-	if m != nil {
-		return m.AcctID
-	}
-	return nil
-}
-
-func (m *TMGetAccount) GetSeq() uint32 {
-	if m != nil && m.Seq != nil {
-		return *m.Seq
-	}
-	return 0
-}
-
-type Account struct {
-	AccountID        []byte  `protobuf:"bytes,1,req,name=accountID" json:"accountID,omitempty"`
-	Balance          *uint64 `protobuf:"varint,2,req,name=balance" json:"balance,omitempty"`
-	AccountSeq       *uint32 `protobuf:"varint,3,req,name=accountSeq" json:"accountSeq,omitempty"`
-	LedgerSeq        *uint32 `protobuf:"varint,4,req,name=ledgerSeq" json:"ledgerSeq,omitempty"`
-	XXX_unrecognized []byte  `json:"-"`
-}
-
-func (m *Account) Reset()         { *m = Account{} }
-func (m *Account) String() string { return proto.CompactTextString(m) }
-func (*Account) ProtoMessage()    {}
-
-func (m *Account) GetAccountID() []byte {
-	if m != nil {
-		return m.AccountID
-	}
-	return nil
-}
-
-func (m *Account) GetBalance() uint64 {
-	if m != nil && m.Balance != nil {
-		return *m.Balance
-	}
-	return 0
-}
-
-func (m *Account) GetAccountSeq() uint32 {
-	if m != nil && m.AccountSeq != nil {
-		return *m.AccountSeq
-	}
-	return 0
-}
-
-func (m *Account) GetLedgerSeq() uint32 {
-	if m != nil && m.LedgerSeq != nil {
-		return *m.LedgerSeq
-	}
-	return 0
-}
-
-type TMAccount struct {
-	Accounts         []*Account `protobuf:"bytes,1,rep,name=accounts" json:"accounts,omitempty"`
-	Seq              *uint32    `protobuf:"varint,2,opt,name=seq" json:"seq,omitempty"`
-	XXX_unrecognized []byte     `json:"-"`
-}
-
-func (m *TMAccount) Reset()         { *m = TMAccount{} }
-func (m *TMAccount) String() string { return proto.CompactTextString(m) }
-func (*TMAccount) ProtoMessage()    {}
-
-func (m *TMAccount) GetAccounts() []*Account {
-	if m != nil {
-		return m.Accounts
-	}
-	return nil
-}
-
-func (m *TMAccount) GetSeq() uint32 {
-	if m != nil && m.Seq != nil {
-		return *m.Seq
-	}
-	return 0
 }
 
 type TMIndexedObject struct {
@@ -1731,30 +1435,6 @@ func (m *TMPing) GetNetTime() uint64 {
 		return *m.NetTime
 	}
 	return 0
-}
-
-type TMErrorMsg struct {
-	ErrorCode        *int32  `protobuf:"varint,1,opt,name=errorCode" json:"errorCode,omitempty"`
-	Message          *string `protobuf:"bytes,2,opt,name=message" json:"message,omitempty"`
-	XXX_unrecognized []byte  `json:"-"`
-}
-
-func (m *TMErrorMsg) Reset()         { *m = TMErrorMsg{} }
-func (m *TMErrorMsg) String() string { return proto.CompactTextString(m) }
-func (*TMErrorMsg) ProtoMessage()    {}
-
-func (m *TMErrorMsg) GetErrorCode() int32 {
-	if m != nil && m.ErrorCode != nil {
-		return *m.ErrorCode
-	}
-	return 0
-}
-
-func (m *TMErrorMsg) GetMessage() string {
-	if m != nil && m.Message != nil {
-		return *m.Message
-	}
-	return ""
 }
 
 func init() {
