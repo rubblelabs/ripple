@@ -56,7 +56,7 @@ func newLeBundle(v interface{}, flag Flag) (*bundle, error) {
 	case *data.Offer:
 		format += "%-34s %-60s %-60s %-18s"
 		values = append(values, []interface{}{le.Account, le.TakerPays, le.TakerGets, le.Ratio()}...)
-	case *data.FeeSetting:
+	case *data.FeeSettings:
 		format += "%d %d %d %d"
 		values = append(values, []interface{}{le.BaseFee, le.ReferenceFeeUnits, le.ReserveBase, le.ReserveIncrement}...)
 	case *data.Amendments:

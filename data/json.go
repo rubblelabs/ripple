@@ -434,11 +434,26 @@ func (v *VariableLength) UnmarshalText(b []byte) error {
 }
 
 func (p PublicKey) MarshalText() ([]byte, error) {
+	if p.IsZero() {
+		return []byte{}, nil
+	}
 	return b2h(p[:]), nil
 }
 
 // Expects public key hex
 func (p *PublicKey) UnmarshalText(b []byte) error {
 	_, err := hex.Decode(p[:], b)
+	return err
+}
+
+// A uint64 which gets represented as a hex string in json
+type Uint64Hex uint64
+
+func (h Uint64Hex) MarshalText() ([]byte, error) {
+	return []byte(fmt.Sprintf("%0.16X", h)), nil
+}
+
+func (h *Uint64Hex) UnmarshalText(b []byte) error {
+	_, err := fmt.Sscanf(string(b), "%X", h)
 	return err
 }

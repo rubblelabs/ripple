@@ -88,10 +88,10 @@ type Amendments struct {
 	Amendments Hash256
 }
 
-type FeeSetting struct {
+type FeeSettings struct {
 	leBase
 	Flags             *LedgerEntryFlag `json:",omitempty"`
-	BaseFee           uint64
+	BaseFee           Uint64Hex
 	ReferenceFeeUnits uint32
 	ReserveBase       uint32
 	ReserveIncrement  uint32

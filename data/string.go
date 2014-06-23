@@ -93,7 +93,7 @@ func (h *LedgerHashes) String() string {
 	return format(h, "%d", len(h.Hashes))
 }
 
-func (s *FeeSetting) String() string {
+func (s *FeeSettings) String() string {
 	return format(s, "%d", s.BaseFee)
 }
 
