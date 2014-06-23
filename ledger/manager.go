@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/donovanhide/ripple/data"
 	"github.com/donovanhide/ripple/storage"
+	"github.com/donovanhide/ripple/terminal"
 	"github.com/golang/glog"
 	"time"
 )
@@ -50,6 +51,7 @@ func (m *Manager) Start() {
 			}
 		case in := <-m.incoming:
 			for _, item := range in {
+				terminal.Println(item, terminal.Default)
 				switch v := item.(type) {
 				case *data.Validation:
 					continue
@@ -69,7 +71,6 @@ func (m *Manager) Start() {
 					}
 				case data.Transaction:
 					held.Add(v)
-					fmt.Println(item.String(), held.Len())
 				}
 			}
 		case missing := <-m.missing:

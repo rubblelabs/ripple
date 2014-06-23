@@ -208,11 +208,18 @@ func (p *Peer) handleHello(m *Manager, hello *protocol.Hello) {
 }
 
 func (p *Peer) handleProposeSet(proposeSet *protocol.TMProposeSet) {
-
+	proposal := &data.Proposal{
+		Sequence:  proposeSet.GetProposeSeq(),
+		CloseTime: *data.NewRippleTime(proposeSet.GetCloseTime()),
+		Signature: proposeSet.GetSignature(),
+	}
+	copy(proposal.LedgerHash[:], proposeSet.CurrentTxHash)
+	copy(proposal.PreviousLedger[:], proposeSet.GetPreviousledger())
+	copy(proposal.PublicKey[:], proposeSet.GetNodePubKey())
+	p.sync.Submit([]data.Hashable{proposal})
 }
 
 func (p *Peer) handleValidation(validation *protocol.TMValidation) {
-	glog.Infof("%X", validation.GetValidation())
 	v, err := data.NewDecoder(bytes.NewReader(validation.GetValidation())).Validation()
 	if err != nil {
 		glog.Errorln(err.Error())

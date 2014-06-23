@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/donovanhide/ripple/crypto"
+	"strings"
 )
 
 type Hash128 [16]byte
@@ -87,6 +88,14 @@ func (h Hash256) TruncatedString(length int) string {
 	return string(b2h(h[:length]))
 }
 
+func (v Vector256) String() string {
+	var s []string
+	for _, h := range v {
+		s = append(s, h.String())
+	}
+	return fmt.Sprintf("[%s]", strings.Join(s, ","))
+}
+
 func (v *VariableLength) String() string {
 	if v != nil {
 		b, _ := v.MarshalText()
@@ -100,6 +109,14 @@ func (v *VariableLength) Bytes() []byte {
 		return []byte(*v)
 	}
 	return []byte(nil)
+}
+
+func (p PublicKey) NodePublicKey() string {
+	hash, err := crypto.NewRipplePublicNode(p[:])
+	if err != nil {
+		return "Bad node public key"
+	}
+	return hash.String()
 }
 
 func (p PublicKey) String() string {

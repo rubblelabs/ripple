@@ -5,6 +5,13 @@ import (
 	"github.com/donovanhide/ripple/crypto"
 )
 
+func CheckSymbol(h Hashable) string {
+	if valid, err := CheckSignature(h); !valid || err != nil {
+		return "✗"
+	}
+	return "✓"
+}
+
 func CheckSignature(h Hashable) (bool, error) {
 	switch v := h.(type) {
 	case *Validation:
@@ -12,6 +19,11 @@ func CheckSignature(h Hashable) (bool, error) {
 			return false, err
 		}
 		return crypto.Verify(v.SigningPubKey.Bytes(), v.Signature.Bytes(), v.Hash().Bytes())
+	case *Proposal:
+		if err := NewEncoder().SigningProposal(v); err != nil {
+			return false, err
+		}
+		return crypto.Verify(v.PublicKey.Bytes(), v.Signature.Bytes(), v.Hash().Bytes())
 	case *SetFee, *Amendment:
 		return true, nil
 	case Transaction:

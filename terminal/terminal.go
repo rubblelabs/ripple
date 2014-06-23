@@ -22,13 +22,15 @@ const (
 var Default Flag
 
 var (
-	ledgerStyle  = color.New(color.FgRed, color.Underline)
-	leStyle      = color.New(color.FgWhite)
-	txStyle      = color.New(color.FgGreen)
-	tradeStyle   = color.New(color.FgBlue)
-	balanceStyle = color.New(color.FgMagenta)
-	pathStyle    = color.New(color.FgYellow)
-	infoStyle    = color.New(color.FgRed)
+	ledgerStyle     = color.New(color.FgRed, color.Underline)
+	leStyle         = color.New(color.FgWhite)
+	txStyle         = color.New(color.FgGreen)
+	proposalStyle   = color.New(color.FgYellow)
+	validationStyle = color.New(color.FgYellow, color.Bold)
+	tradeStyle      = color.New(color.FgBlue)
+	balanceStyle    = color.New(color.FgMagenta)
+	pathStyle       = color.New(color.FgYellow)
+	infoStyle       = color.New(color.FgRed)
 )
 
 type bundle struct {
@@ -129,13 +131,6 @@ func newBundle(value interface{}, flag Flag) (*bundle, error) {
 		return newLeBundle(v, flag)
 	}
 	switch v := reflect.Indirect(reflect.ValueOf(value)).Interface().(type) {
-	case data.Ledger:
-		return &bundle{
-			color:  ledgerStyle,
-			format: "Ledger %d closed at %s",
-			values: []interface{}{v.LedgerSequence, v.CloseTime.String()},
-			flag:   flag,
-		}, nil
 	case websockets.LedgerStreamMsg:
 		return &bundle{
 			color:  ledgerStyle,
@@ -150,11 +145,32 @@ func newBundle(value interface{}, flag Flag) (*bundle, error) {
 			values: []interface{}{v.Status, v.LoadFactor, v.LoadBase},
 			flag:   flag,
 		}, nil
+	case data.Ledger:
+		return &bundle{
+			color:  ledgerStyle,
+			format: "Ledger %d closed at %s",
+			values: []interface{}{v.LedgerSequence, v.CloseTime.String()},
+			flag:   flag,
+		}, nil
 	case data.InnerNode:
 		return &bundle{
 			color:  leStyle,
 			format: "%s: %d hashes",
 			values: []interface{}{v.Type, v.Count()},
+			flag:   flag,
+		}, nil
+	case data.Proposal:
+		return &bundle{
+			color:  proposalStyle,
+			format: "%s Proposal:   %s %s %s %s",
+			values: []interface{}{data.CheckSymbol(&v), v.PublicKey.NodePublicKey(), v.CloseTime.String(), v.PreviousLedger, v.LedgerHash},
+			flag:   flag,
+		}, nil
+	case data.Validation:
+		return &bundle{
+			color:  validationStyle,
+			format: "%s Validation: %s %s %s %-8d %08X %s",
+			values: []interface{}{data.CheckSymbol(&v), v.SigningPubKey.NodePublicKey(), v.SigningTime.String(), v.LedgerHash, v.LedgerSequence, v.Flags, v.Amendments},
 			flag:   flag,
 		}, nil
 	case data.Trade:

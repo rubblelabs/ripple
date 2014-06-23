@@ -29,8 +29,6 @@ func (m *TMProposeSet) Log() string {
 	closeTime := data.NewRippleTime(m.GetCloseTime())
 	fmt.Fprintf(buf, "Proposal: %d Closed: %s Hash: %s ", m.GetProposeSeq(), closeTime.Short(), short(b2h(m.GetCurrentTxHash())))
 	fmt.Fprintf(buf, "Sig: %s ", short(b2h(m.GetSignature())))
-	// fmt.Fprintf(buf, "Node: %v ", short(crypto.new m.NodePublic.ToJSON()))
-	// fmt.Fprintf(buf, "Checked: %t", m.GetCheckedSignature())
 	for _, tx := range m.GetAddedTransactions() {
 		fmt.Fprintf(buf, "\nAdded: %s", short(b2h(tx)))
 	}
