@@ -106,6 +106,8 @@ func (p *Peer) handle(m *Manager) {
 				ready.Do(func() {
 					go p.fillQueue()
 				})
+			case *protocol.TMHaveTransactionSet:
+				go p.handleHaveTransactionSet(msg)
 			case *protocol.TMProposeSet:
 				go p.handleProposeSet(msg)
 			case *protocol.TMValidation:
@@ -230,6 +232,7 @@ func (p *Peer) handleValidation(validation *protocol.TMValidation) {
 
 func (p *Peer) handleTransaction(tx *protocol.TMTransaction) {
 	node, err := data.NewDecoder(bytes.NewReader(tx.GetRawTransaction())).Transaction()
+	glog.Infof("%X", tx.GetRawTransaction())
 	if err != nil {
 		glog.Errorln(err.Error())
 		return
@@ -251,6 +254,10 @@ func (p *Peer) handleStatusChange(state *protocol.TMStatusChange) {
 	p.sync.Current(state.GetLedgerSeq())
 }
 
+func (p *Peer) handleHaveTransactionSet(txSet *protocol.TMHaveTransactionSet) {
+	// glog.Infof("%s %X", txSet.GetStatus(), txSet.GetHash())
+}
+
 func (p *Peer) handleGetObjectByHashReply(reply *protocol.TMGetObjectByHash) {
 	var nodes []data.Hashable
 	typ := data.NT_ACCOUNT_NODE
@@ -266,25 +273,11 @@ func (p *Peer) handleGetObjectByHashReply(reply *protocol.TMGetObjectByHash) {
 		}
 		glog.Infoln(node)
 		nodes = append(nodes, node)
-		// if tx, ok := node.Value.(data.Transaction); ok {
-		// 	tx.SetLedgerSequence(reply.GetSeq())
-		// 	var hash data.Hash256
-		// 	copy(hash[:], obj.GetData()[len(obj.GetData())-32:])
-		// 	tx.SetHash(&hash)
-		// 	l.Incoming <- tx
-		// }
-		// if node.InnerNode != nil {
-		// 	nodes = append(nodes, node.InnerNode)
-		// }
 	}
 	p.sync.Submit(nodes)
-	// if len(nodes) > 0 {
-	// 	p.synchronous <- protocol.NewGetObjects(reply.GetSeq(), nodes)
-	// }
 }
 
 func (p *Peer) handleLedgerData(ledgerData *protocol.TMLedgerData) {
-	//msg.AverageLatency = ((msg.AverageLatency * Latency(msg.Successful)) + Latency(m.Time.Sub(msg.Inflight[i].Sent))) / Latency(msg.Successful+1)
 	if ledgerData.GetType() != protocol.TMLedgerInfoType_liBASE {
 		glog.Infof("%s: Ignoring: %s", ledgerData.Log())
 		return
@@ -296,13 +289,6 @@ func (p *Peer) handleLedgerData(ledgerData *protocol.TMLedgerData) {
 	}
 	glog.Infoln(ledger)
 	p.sync.Submit([]data.Hashable{ledger})
-	// var hash data.Hash256
-	// copy(hash[:], ledgerData.GetLedgerHash())
-	// ledger.SetHash(&hash)
-	// l.Incoming <- ledger
-	// if ledger.TransactionHash.IsZero() {
-	// 	return
-	// }
 	// transactions, err := encoding.ParseUnknownInnerNode(ledgerData.Nodes[2].Nodedata)
 	// if err != nil {
 	// 	glog.Errorf("%s: %s", p.String(), err.Error())
