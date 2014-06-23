@@ -73,21 +73,13 @@ func newLeBundle(v interface{}, flag Flag) (*bundle, error) {
 	}, nil
 }
 
-func newTxBundle(txm *data.TransactionWithMetaData, flag Flag) (*bundle, error) {
+func newTxBundle(v data.Transaction, insert string, flag Flag) (*bundle, error) {
 	var (
-		base   = txm.GetBase()
+		base   = v.GetBase()
 		format = "%-11s %-8s %s%s %-34s "
-		values = []interface{}{base.GetType(), base.Fee, txm.MetaData.TransactionResult.Symbol(), base.MemoSymbol(), base.Account}
-		style  = txStyle
+		values = []interface{}{base.GetType(), base.Fee, insert, base.MemoSymbol(), base.Account}
 	)
-	if !txm.MetaData.TransactionResult.Success() {
-		style = infoStyle
-	}
-	if flag&ShowLedgerSequence > 0 {
-		format = "%-9d " + format
-		values = append([]interface{}{txm.LedgerSequence}, values...)
-	}
-	switch tx := txm.Transaction.(type) {
+	switch tx := v.(type) {
 	case *data.Payment:
 		format += "=> %-34s %-60s %-60s"
 		values = append(values, []interface{}{tx.Destination, tx.Amount, tx.SendMax}...)
@@ -105,14 +97,37 @@ func newTxBundle(txm *data.TransactionWithMetaData, flag Flag) (*bundle, error) 
 		values = append(values, tx.LimitAmount, tx.QualityIn, tx.QualityOut)
 	}
 	return &bundle{
-		color:  style,
+		color:  txStyle,
 		format: format,
 		values: values,
 		flag:   flag,
 	}, nil
 }
 
+func newTxmBundle(txm *data.TransactionWithMetaData, flag Flag) (*bundle, error) {
+	insert := fmt.Sprintf("%s ", txm.MetaData.TransactionResult.Symbol())
+	if flag&ShowLedgerSequence > 0 {
+		insert = fmt.Sprintf("%-9d %s", txm.LedgerSequence, insert)
+	}
+	b, err := newTxBundle(txm.Transaction, insert, flag)
+	if err != nil {
+		return nil, err
+	}
+	if !txm.MetaData.TransactionResult.Success() {
+		b.color = infoStyle
+	}
+	return b, nil
+}
+
 func newBundle(value interface{}, flag Flag) (*bundle, error) {
+	switch v := value.(type) {
+	case *data.TransactionWithMetaData:
+		return newTxmBundle(v, flag)
+	case data.Transaction:
+		return newTxBundle(v, "", flag)
+	case data.LedgerEntry:
+		return newLeBundle(v, flag)
+	}
 	switch v := reflect.Indirect(reflect.ValueOf(value)).Interface().(type) {
 	case data.Ledger:
 		return &bundle{
@@ -142,10 +157,6 @@ func newBundle(value interface{}, flag Flag) (*bundle, error) {
 			values: []interface{}{v.Type, v.Count()},
 			flag:   flag,
 		}, nil
-	case data.TransactionWithMetaData:
-		return newTxBundle(&v, flag)
-	case data.AccountRoot, data.LedgerHashes, data.RippleState, data.Offer, data.Directory, data.Amendments, data.FeeSetting:
-		return newLeBundle(value, flag)
 	case data.Trade:
 		return &bundle{
 			color:  tradeStyle,

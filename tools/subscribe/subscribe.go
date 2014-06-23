@@ -43,7 +43,7 @@ func main() {
 		case *websockets.LedgerStreamMsg:
 			terminal.Println(msg, terminal.Default)
 		case *websockets.TransactionStreamMsg:
-			terminal.Println(msg.Transaction, terminal.Indent)
+			terminal.Println(&msg.Transaction, terminal.Indent)
 			for _, path := range msg.Transaction.PathSet() {
 				terminal.Println(path, terminal.DoubleIndent)
 			}

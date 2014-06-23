@@ -111,15 +111,15 @@ func main() {
 		ledger, err := r.Ledger(seq, true)
 		checkErr(err)
 		fmt.Println("Getting transactions for: ", seq)
-		for _, tx := range ledger.Ledger.Transactions {
-			explain(tx, terminal.Default)
+		for _, txm := range ledger.Ledger.Transactions {
+			explain(txm, terminal.Default)
 		}
 	case len(matches[3]) > 0:
 		account, err := data.NewAccountFromAddress(matches[3])
 		checkErr(err)
 		fmt.Println("Getting transactions for: ", account.String())
-		for tx := range r.AccountTx(*account, *pageSize) {
-			explain(tx, terminal.ShowLedgerSequence)
+		for txm := range r.AccountTx(*account, *pageSize) {
+			explain(txm, terminal.ShowLedgerSequence)
 		}
 	case len(matches[4]) > 0:
 		r := bufio.NewReader(os.Stdin)
