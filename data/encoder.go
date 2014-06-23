@@ -18,6 +18,13 @@ type Encoder struct {
 	multi io.Writer
 }
 
+func TransactionId(tx Transaction) Hash256 {
+	if NewEncoder().Transaction(tx, false) != nil {
+		return zero256
+	}
+	return tx.Hash()
+}
+
 func NewEncoder() *Encoder {
 	enc := &Encoder{
 		hash: sha512.New(),

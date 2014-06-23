@@ -17,6 +17,7 @@ const (
 	TripleIndent
 
 	ShowLedgerSequence
+	ShowTransactionId
 )
 
 var Default Flag
@@ -78,9 +79,13 @@ func newLeBundle(v interface{}, flag Flag) (*bundle, error) {
 func newTxBundle(v data.Transaction, insert string, flag Flag) (*bundle, error) {
 	var (
 		base   = v.GetBase()
-		format = "%-11s %-8s %s%s %-34s "
-		values = []interface{}{base.GetType(), base.Fee, insert, base.MemoSymbol(), base.Account}
+		format = "%s %-11s %-8s %s%s %-34s "
+		values = []interface{}{data.CheckSymbol(v), base.GetType(), base.Fee, insert, base.MemoSymbol(), base.Account}
 	)
+	if flag&ShowTransactionId > 0 {
+		format = "%s " + format
+		values = append([]interface{}{data.TransactionId(v)}, values...)
+	}
 	switch tx := v.(type) {
 	case *data.Payment:
 		format += "=> %-34s %-60s %-60s"

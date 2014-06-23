@@ -51,7 +51,7 @@ func (m *Manager) Start() {
 			}
 		case in := <-m.incoming:
 			for _, item := range in {
-				terminal.Println(item, terminal.Default)
+				terminal.Println(item, terminal.ShowTransactionId)
 				switch v := item.(type) {
 				case *data.Validation:
 					continue
