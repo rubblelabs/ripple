@@ -78,6 +78,12 @@ type MetaData struct {
 
 type TransactionSlice []*TransactionWithMetaData
 
+func (s TransactionSlice) Len() int      { return len(s) }
+func (s TransactionSlice) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+func (s TransactionSlice) Less(i, j int) bool {
+	return s[i].MetaData.TransactionIndex < s[j].MetaData.TransactionIndex
+}
+
 type TransactionWithMetaData struct {
 	Transaction
 	MetaData       MetaData `json:"meta"`
