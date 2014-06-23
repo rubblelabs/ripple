@@ -10,7 +10,6 @@ type Hashable interface {
 	Raw() []byte
 	SetHash([]byte)
 	SetRaw([]byte)
-	String() string
 }
 
 type Wire interface {
