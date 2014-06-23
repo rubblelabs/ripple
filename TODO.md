@@ -4,16 +4,20 @@
 * Write good tests for metadata interpretation
 * Use Freeform type for _some_ memos and Previous/New/Final fields
 * Implement canonical signatures
+* Consider adding SuppressionId, NodeId, SigningHash and Hash to hashable interface and make the encoder do all four in one pass. Raw is the full encoded value with every field included.
 
 ##Peers
 * Implement all handlers
-* Clean out ripple.proto
 
 ##Ledger
 * Allow subscribing to incoming Proposals/Validations/Transactions for use in listener
 
+##Storage
+* Add Register() function to storage package
+* Move RocksDB and MemDB down a further level and make them Register in init()
+* Change listener to use MemDB only (make it easier to go get...)
+
 ##Terminal
-* Add proposal and validation output
 
 ##Websockets
 * Add missing commands
