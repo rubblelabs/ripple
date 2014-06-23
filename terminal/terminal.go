@@ -56,7 +56,7 @@ func newLeBundle(v interface{}, flag Flag) (*bundle, error) {
 	case *data.Offer:
 		format += "%-34s %-60s %-60s %-18s"
 		values = append(values, []interface{}{le.Account, le.TakerPays, le.TakerGets, le.Ratio()}...)
-	case *data.FeeSetting:
+	case *data.FeeSettings:
 		format += "%d %d %d %d"
 		values = append(values, []interface{}{le.BaseFee, le.ReferenceFeeUnits, le.ReserveBase, le.ReserveIncrement}...)
 	case *data.Amendments:
@@ -144,7 +144,7 @@ func newBundle(value interface{}, flag Flag) (*bundle, error) {
 		}, nil
 	case data.TransactionWithMetaData:
 		return newTxBundle(&v, flag)
-	case data.AccountRoot, data.LedgerHashes, data.RippleState, data.Offer, data.Directory, data.Amendments, data.FeeSetting:
+	case data.AccountRoot, data.LedgerHashes, data.RippleState, data.Offer, data.Directory, data.Amendments, data.FeeSettings:
 		return newLeBundle(value, flag)
 	case data.Trade:
 		return &bundle{
