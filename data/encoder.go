@@ -42,11 +42,11 @@ func (enc *Encoder) Hex(w io.Writer, h Hashable) error {
 }
 
 func (enc *Encoder) SigningHash(tx Transaction) ([]byte, error) {
-	if err := enc.Transaction(tx, true); err != nil {
+	enc.reset()
+	if err := write(enc.hash, HP_TRANSACTION_SIGN); err != nil {
 		return nil, err
 	}
-	enc.reset()
-	if err := write(enc.hash, append(HP_TRANSACTION_SIGN.Bytes(), tx.Raw()...)); err != nil {
+	if err := enc.raw(enc.hash, tx, true); err != nil {
 		return nil, err
 	}
 	return enc.hash.Sum(nil), nil
@@ -158,6 +158,7 @@ func (enc *Encoder) Node(h Hashable) error {
 	h.SetRaw(enc.buf.Bytes())
 	return nil
 }
+
 func (enc *Encoder) reset() {
 	enc.buf.Reset()
 	enc.hash.Reset()
@@ -206,7 +207,7 @@ func (enc *Encoder) HashPrefix(w io.Writer, h Hashable) error {
 	case *TransactionWithMetaData:
 		return write(w, HP_TRANSACTION_NODE)
 	case Transaction:
-		return write(w, HP_TRANSACTION_SIGN)
+		return write(w, HP_TRANSACTION_ID)
 	case LedgerEntry:
 		return write(w, HP_LEAF_NODE)
 	case *Proposal:

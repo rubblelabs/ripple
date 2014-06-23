@@ -27,11 +27,12 @@ func CheckSignature(h Hashable) (bool, error) {
 	case *SetFee, *Amendment:
 		return true, nil
 	case Transaction:
-		if err := NewEncoder().Transaction(v, true); err != nil {
+		signingHash, err := NewEncoder().SigningHash(v)
+		if err != nil {
 			return false, err
 		}
 		base := v.GetBase()
-		return crypto.Verify(base.SigningPubKey.Bytes(), base.TxnSignature.Bytes(), v.Hash().Bytes())
+		return crypto.Verify(base.SigningPubKey.Bytes(), base.TxnSignature.Bytes(), signingHash)
 	default:
 		return false, fmt.Errorf("Not a signed type")
 	}
