@@ -18,7 +18,7 @@ const (
 	LEDGER_HASHES LedgerEntryType = 0x68 // 'h'
 	OFFER         LedgerEntryType = 0x6f // 'o'
 	RIPPLE_STATE  LedgerEntryType = 0x72 // 'r'
-	FEE_SETTING   LedgerEntryType = 0x73 // 's'
+	FEE_SETTINGS  LedgerEntryType = 0x73 // 's'
 
 	PAYMENT         TransactionType = 0
 	ACCOUNT_SET     TransactionType = 3
@@ -41,7 +41,7 @@ var LedgerEntryFactory = [...]func() LedgerEntry{
 	LEDGER_HASHES: func() LedgerEntry { return &LedgerHashes{leBase: leBase{LedgerEntryType: LEDGER_HASHES}} },
 	OFFER:         func() LedgerEntry { return &Offer{leBase: leBase{LedgerEntryType: OFFER}} },
 	RIPPLE_STATE:  func() LedgerEntry { return &RippleState{leBase: leBase{LedgerEntryType: RIPPLE_STATE}} },
-	FEE_SETTING:   func() LedgerEntry { return &FeeSetting{leBase: leBase{LedgerEntryType: FEE_SETTING}} },
+	FEE_SETTINGS:  func() LedgerEntry { return &FeeSettings{leBase: leBase{LedgerEntryType: FEE_SETTINGS}} },
 }
 
 var TxFactory = [...]func() Transaction{
@@ -62,7 +62,7 @@ var ledgerEntryNames = [...]string{
 	LEDGER_HASHES: "LedgerHashes",
 	OFFER:         "Offer",
 	RIPPLE_STATE:  "RippleState",
-	FEE_SETTING:   "Fee",
+	FEE_SETTINGS:  "FeeSettings",
 }
 
 var ledgerEntryTypes = map[string]LedgerEntryType{
@@ -72,7 +72,7 @@ var ledgerEntryTypes = map[string]LedgerEntryType{
 	"LedgerHashes":  LEDGER_HASHES,
 	"Offer":         OFFER,
 	"RippleState":   RIPPLE_STATE,
-	"Fee":           FEE_SETTING,
+	"FeeSettings":   FEE_SETTINGS,
 }
 
 var txNames = [...]string{

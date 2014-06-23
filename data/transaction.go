@@ -64,7 +64,7 @@ type TrustSet struct {
 
 type SetFee struct {
 	TxBase
-	BaseFee           uint64
+	BaseFee           Uint64Hex
 	ReferenceFeeUnits uint32
 	ReserveBase       uint32
 	ReserveIncrement  uint32

@@ -5,7 +5,7 @@ type Fields struct {
 	AccountTxnID        *Hash256         `json:",omitempty"`
 	Amendments          *Hash256         `json:",omitempty"`
 	Balance             *Amount          `json:",omitempty"`
-	BaseFee             *uint64          `json:",omitempty"`
+	BaseFee             *Uint64Hex       `json:",omitempty"`
 	BookDirectory       *Hash256         `json:",omitempty"`
 	BookNode            *NodeIndex       `json:",omitempty"`
 	Domain              *VariableLength  `json:",omitempty"`
