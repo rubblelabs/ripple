@@ -48,13 +48,10 @@ func (p *PowSuite) TestProofOfWork(c *C) {
 			continue
 		}
 		pow := NewProofOfWork(hexToBytes(t.challenge), hexToBytes(t.target), t.iterations)
-		nonce, err := pow.Solve()
-		c.Check(err, IsNil)
-		found, err := pow.Check(nonce)
-		c.Check(err, IsNil)
+		nonce := pow.Solve()
+		found := pow.Check(nonce)
 		c.Check(found, Equals, true)
-		solution, err := pow.Check(hexToBytes(t.solution))
-		c.Check(err, IsNil)
+		solution := pow.Check(hexToBytes(t.solution))
 		c.Check(solution, Equals, true)
 	}
 }

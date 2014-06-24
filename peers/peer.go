@@ -241,12 +241,9 @@ func (p *Peer) handleTransaction(tx *protocol.TMTransaction) {
 }
 
 func (p *Peer) handleProofOfWork(pow *protocol.TMProofWork) {
-	glog.Infoln("POW!!!", pow)
-	// work := crypto.NewProofOfWork(pow.Challenge, pow.Target, pow.GetIterations())
-	// proof, err := work.Solve()
-	// if err != nil {
-	// 	glog.Errorf("%s:%s", p.String(), err.Error())
-	// }
+	work := crypto.NewProofOfWork(pow.Challenge, pow.Target, pow.GetIterations())
+	proof := work.Solve()
+	glog.Infof("POW!!! Challenge:%X Proof:%X", work.Challenge, proof)
 }
 
 func (p *Peer) handleStatusChange(state *protocol.TMStatusChange) {
