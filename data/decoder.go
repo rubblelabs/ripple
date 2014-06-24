@@ -1,7 +1,6 @@
 package data
 
 import (
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
@@ -61,7 +60,7 @@ func (dec *Decoder) Prefix() (Hashable, error) {
 
 func (dec *Decoder) Ledger() (*Ledger, error) {
 	ledger := new(Ledger)
-	return ledger, dec.read(&ledger.LedgerHeader)
+	return ledger, read(dec.r, &ledger.LedgerHeader)
 }
 
 func (dec *Decoder) Validation() (*Validation, error) {
@@ -75,12 +74,12 @@ func (dec *Decoder) Validation() (*Validation, error) {
 
 func (dec *Decoder) HashPrefix() (HashPrefix, error) {
 	var version HashPrefix
-	return version, dec.read(&version)
+	return version, read(dec.r, &version)
 }
 
 func (dec *Decoder) Header() (*NodeHeader, error) {
 	header := new(NodeHeader)
-	return header, dec.read(header)
+	return header, read(dec.r, header)
 }
 
 func (dec *Decoder) Hash() (*Hash256, error) {
@@ -111,7 +110,7 @@ func (dec *Decoder) CompressedInnerNode(typ NodeType) (*InnerNode, error) {
 	var inner InnerNode
 	inner.Type = typ
 	var entry CompressedNodeEntry
-	for dec.read(&entry) == nil {
+	for read(dec.r, &entry) == nil {
 		inner.Children[entry.Pos] = entry.Hash
 	}
 	return &inner, nil
@@ -211,11 +210,7 @@ func (dec *Decoder) expectType(expected string) (uint16, error) {
 		return 0, fmt.Errorf("Unexpected type: %s expected: %s", name, expected)
 	}
 	var typ uint16
-	return typ, dec.read(&typ)
-}
-
-func (dec *Decoder) read(dest interface{}) error {
-	return binary.Read(dec.r, binary.BigEndian, dest)
+	return typ, read(dec.r, &typ)
 }
 
 var (
@@ -284,7 +279,7 @@ func (dec *Decoder) readObject(v *reflect.Value) error {
 					return err
 				}
 			} else {
-				if err := dec.read(field.Addr().Interface()); err != nil {
+				if err := read(dec.r, field.Addr().Interface()); err != nil {
 					return err
 				}
 			}

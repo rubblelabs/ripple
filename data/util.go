@@ -1,5 +1,10 @@
 package data
 
+import (
+	"encoding/binary"
+	"io"
+)
+
 const hextable = "0123456789ABCDEF"
 
 //faster than fmt and need upper case!
@@ -45,4 +50,12 @@ func abs(a int64) uint64 {
 		return uint64(-a)
 	}
 	return uint64(a)
+}
+
+func write(w io.Writer, v interface{}) error {
+	return binary.Write(w, binary.BigEndian, v)
+}
+
+func read(r Reader, dest interface{}) error {
+	return binary.Read(r, binary.BigEndian, dest)
 }

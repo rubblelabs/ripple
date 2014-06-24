@@ -3,7 +3,6 @@ package data
 import (
 	"bytes"
 	"crypto/sha512"
-	"encoding/binary"
 	"fmt"
 	"hash"
 	"io"
@@ -162,10 +161,6 @@ func (enc *Encoder) Node(h Hashable) error {
 func (enc *Encoder) reset() {
 	enc.buf.Reset()
 	enc.hash.Reset()
-}
-
-func write(w io.Writer, v interface{}) error {
-	return binary.Write(w, binary.BigEndian, v)
 }
 
 func (enc *Encoder) Ledger(w io.Writer, h Hashable) error {
