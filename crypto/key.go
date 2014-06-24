@@ -59,13 +59,13 @@ var order = btcec.S256().N
 
 type genFunc func(*big.Int) bool
 
-func newKey(priv, inc *big.Int, f genFunc) (*baseKey, error) {
+func newKey(priv, inc *big.Int, f genFunc) *baseKey {
 	pk := big.NewInt(0).Set(priv)
 	for ; f(pk); inc.Add(inc, one) {
 		pk.SetBytes(Sha512Half(inc.Bytes()))
 	}
 	privKey, _ := btcec.PrivKeyFromBytes(btcec.S256(), pk.Bytes())
-	return &baseKey{*privKey}, nil
+	return &baseKey{*privKey}
 }
 
 func ParsePublicKey(b []byte) (*btcec.PublicKey, error) {
@@ -97,10 +97,7 @@ func GenerateRootDeterministicKey(seed []byte) (*RootDeterministicKey, error) {
 	inc := big.NewInt(0).SetBytes(seed)
 	inc.Lsh(inc, 32)
 	f := func(priv *big.Int) bool { return priv.Cmp(order) >= 0 }
-	key, err := newKey(order, inc, f)
-	if err != nil {
-		return nil, err
-	}
+	key := newKey(order, inc, f)
 	key.priv.X, key.priv.Y = key.priv.ScalarBaseMult(key.PrivateBytes())
 	return &RootDeterministicKey{
 		baseKey: *key,
@@ -112,10 +109,7 @@ func (r *RootDeterministicKey) GenerateAccountId(sequence int32) (Hash, error) {
 	inc := big.NewInt(0).SetBytes(r.PublicCompressed())
 	inc.Lsh(inc, 32).Add(inc, big.NewInt(int64(sequence))).Lsh(inc, 32).Add(inc, zero)
 	f := func(priv *big.Int) bool { return priv.Cmp(order) >= 0 }
-	key, err := newKey(order, inc, f)
-	if err != nil {
-		return nil, err
-	}
+	key := newKey(order, inc, f)
 	key.priv.X, key.priv.Y = key.priv.ScalarBaseMult(key.PrivateBytes())
 	key.priv.X, key.priv.Y = key.priv.Add(key.priv.X, key.priv.Y, r.priv.X, r.priv.Y)
 	b := Sha256RipeMD160(key.PublicCompressed())
@@ -127,10 +121,7 @@ func (r *RootDeterministicKey) GenerateAccountKey(sequence int32) (*AccountKey, 
 	inc := big.NewInt(0).Set(generator)
 	inc.Lsh(inc, 32).Add(inc, big.NewInt(int64(sequence))).Lsh(inc, 32).Add(inc, zero)
 	f := func(priv *big.Int) bool { return priv.Cmp(generator) >= 0 || priv.Cmp(zero) <= 0 }
-	key, err := newKey(zero, inc, f)
-	if err != nil {
-		return nil, err
-	}
+	key := newKey(zero, inc, f)
 	key.priv.D.Add(key.priv.D, r.priv.D).Mod(key.priv.D, order)
 	key.priv.X, key.priv.Y = key.priv.Curve.ScalarBaseMult(key.PrivateBytes())
 	return &AccountKey{baseKey: *key}, nil
