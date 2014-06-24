@@ -33,6 +33,10 @@ func checkHex(b []byte, err error) string {
 	if err != nil {
 		panic(err)
 	}
+	return b2h(b)
+}
+
+func b2h(b []byte) string {
 	return fmt.Sprintf("%X", b)
 }
 
@@ -49,7 +53,7 @@ func (s *KeySuite) TestWikiVectors(c *C) {
 	zero, err := NewRippleHash("0")
 	c.Check(err, IsNil)
 	c.Check(zero.String(), Equals, ACCOUNT_ZERO)
-	c.Check(checkHex(Sha512Half(zero.PayloadTrimmed())), Equals, "B8244D028981D693AF7B456AF8EFA4CAD63D282E19FF14942C246E50D9351D22")
+	c.Check(b2h(Sha512Half(zero.PayloadTrimmed())), Equals, "B8244D028981D693AF7B456AF8EFA4CAD63D282E19FF14942C246E50D9351D22")
 
 	seed := hexToBytes("71ED064155FFADFA38782C5E0158CB26")
 	key, err := GenerateRootDeterministicKey(seed)
@@ -78,8 +82,7 @@ func (s *KeySuite) TestRippledVectors(c *C) {
 	c.Check(err, IsNil)
 	c.Check(checkHash(key.PublicNodeKey()), Equals, "n94a1u4jAz288pZLtw6yFWVbi89YamiC6JBXPVUj5zmExe5fTVg9")
 	c.Check(checkHash(key.PrivateNodeKey()), Equals, "pnen77YEeUd4fFKG7iycBWcwKpTaeFRkW2WFostaATy1DSupwXe")
-	hash, err := Sha512Half(testMessage)
-	c.Check(err, IsNil)
+	hash := Sha512Half(testMessage)
 	c.Check(checkSignature(key, key, hash), Equals, true)
 	c.Check(checkHash(key.PublicGenerator()), Equals, "fhuJKrhSDzV2SkjLn9qbwm5AaRmrxDPfFsHDCP6yfDZWcxDFz4mt")
 	first, err := key.GenerateAccountKey(0)

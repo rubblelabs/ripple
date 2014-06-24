@@ -144,7 +144,7 @@ func (c *Conn) getSessionCookie() ([]byte, error) {
 		return nil, fmt.Errorf("Peer GetSessionCookie: %s", err.Error())
 	}
 	right := big.NewInt(0).SetBytes(hasher.Sum(nil))
-	return crypto.Sha512Half(left.Xor(left, right).Bytes())
+	return crypto.Sha512Half(left.Xor(left, right).Bytes()), nil
 }
 
 func (c *Conn) String() string {

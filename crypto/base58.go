@@ -43,10 +43,7 @@ func Base58Decode(b, alphabet string) ([]byte, error) {
 	copy(val[numZeros:], tmpval)
 
 	// Check checksum
-	checksum, err := DoubleSha256(val[0 : len(val)-4])
-	if err != nil {
-		return nil, err
-	}
+	checksum := DoubleSha256(val[0 : len(val)-4])
 	expected := val[len(val)-4:]
 	if !bytes.Equal(checksum[0:4], expected) {
 		return nil, fmt.Errorf("Bad Base58 checksum: %v expected %v", checksum, expected)

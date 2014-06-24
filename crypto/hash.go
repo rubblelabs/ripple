@@ -76,11 +76,7 @@ func NewRippleFamilySeed(b []byte) (Hash, error) {
 }
 
 func GenerateFamilySeed(password string) (Hash, error) {
-	seed, err := Sha512Quarter([]byte(password))
-	if err != nil {
-		return nil, err
-	}
-	return NewRippleFamilySeed(seed)
+	return NewRippleFamilySeed(Sha512Quarter([]byte(password)))
 }
 
 func NewBitcoinAddress(b []byte) (Hash, error) {
@@ -109,11 +105,8 @@ func newHashFromString(s string, network HashNetwork) (Hash, error) {
 
 func (h hash) string() (string, error) {
 	b := append(hash{byte(h.Version())}, h.Payload()...)
-	sha, err := DoubleSha256(b)
-	if err != nil {
-		return "", fmt.Errorf("Bad Sha256 of Version and Payload: %s", err.Error())
-	}
-	b = append(b, sha[0:4]...)
+	checksum := DoubleSha256(b)
+	b = append(b, checksum[0:4]...)
 	return Base58Encode(b, alphabets[h.Network()]), nil
 }
 

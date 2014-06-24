@@ -6,45 +6,35 @@ import (
 	"crypto/sha512"
 )
 
-func sha512Section(b []byte, n int) ([]byte, error) {
-	hasher := sha512.New()
-	if _, err := hasher.Write(b); err != nil {
-		return nil, err
-	}
-	return hasher.Sum(nil)[:n], nil
-}
+// Write operations in a hash.Hash never return an error
 
 // Returns first 32 bytes of a SHA512 of the input bytes
-func Sha512Half(b []byte) ([]byte, error) {
-	return sha512Section(b, 32)
+func Sha512Half(b []byte) []byte {
+	hasher := sha512.New()
+	hasher.Write(b)
+	return hasher.Sum(nil)[:32]
 }
 
 // Returns first 16 bytes of a SHA512 of the input bytes
-func Sha512Quarter(b []byte) ([]byte, error) {
-	return sha512Section(b, 16)
+func Sha512Quarter(b []byte) []byte {
+	hasher := sha512.New()
+	hasher.Write(b)
+	return hasher.Sum(nil)[:16]
 }
 
-func DoubleSha256(b []byte) ([]byte, error) {
+func DoubleSha256(b []byte) []byte {
 	hasher := sha256.New()
-	if _, err := hasher.Write(b); err != nil {
-		return nil, err
-	}
+	hasher.Write(b)
 	sha := hasher.Sum(nil)
 	hasher.Reset()
-	if _, err := hasher.Write(sha); err != nil {
-		return nil, err
-	}
-	return hasher.Sum(nil), nil
+	hasher.Write(sha)
+	return hasher.Sum(nil)
 }
 
-func Sha256RipeMD160(b []byte) ([]byte, error) {
+func Sha256RipeMD160(b []byte) []byte {
 	ripe := ripemd160.New()
 	sha := sha256.New()
-	if _, err := sha.Write(b); err != nil {
-		return nil, err
-	}
-	if _, err := ripe.Write(sha.Sum(nil)); err != nil {
-		return nil, err
-	}
-	return ripe.Sum(nil), nil
+	sha.Write(b)
+	ripe.Write(sha.Sum(nil))
+	return ripe.Sum(nil)
 }

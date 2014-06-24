@@ -62,11 +62,7 @@ type genFunc func(*big.Int) bool
 func newKey(priv, inc *big.Int, f genFunc) (*baseKey, error) {
 	pk := big.NewInt(0).Set(priv)
 	for ; f(pk); inc.Add(inc, one) {
-		b, err := Sha512Half(inc.Bytes())
-		if err != nil {
-			return nil, err
-		}
-		pk.SetBytes(b)
+		pk.SetBytes(Sha512Half(inc.Bytes()))
 	}
 	privKey, _ := btcec.PrivKeyFromBytes(btcec.S256(), pk.Bytes())
 	return &baseKey{*privKey}, nil
@@ -122,10 +118,7 @@ func (r *RootDeterministicKey) GenerateAccountId(sequence int32) (Hash, error) {
 	}
 	key.priv.X, key.priv.Y = key.priv.ScalarBaseMult(key.PrivateBytes())
 	key.priv.X, key.priv.Y = key.priv.Add(key.priv.X, key.priv.Y, r.priv.X, r.priv.Y)
-	b, err := Sha256RipeMD160(key.PublicCompressed())
-	if err != nil {
-		return nil, err
-	}
+	b := Sha256RipeMD160(key.PublicCompressed())
 	return NewRippleAccount(b)
 }
 
