@@ -103,19 +103,9 @@ func newHashFromString(s string, network HashNetwork) (Hash, error) {
 	return append(hash{byte(network)}, decoded[:len(decoded)-4]...), nil
 }
 
-func (h hash) string() (string, error) {
-	b := append(hash{byte(h.Version())}, h.Payload()...)
-	checksum := DoubleSha256(b)
-	b = append(b, checksum[0:4]...)
-	return Base58Encode(b, alphabets[h.Network()]), nil
-}
-
 func (h hash) String() string {
-	s, err := h.string()
-	if err != nil {
-		return err.Error()
-	}
-	return s
+	b := append(hash{byte(h.Version())}, h.Payload()...)
+	return Base58Encode(b, alphabets[h.Network()])
 }
 
 func (h hash) Network() HashNetwork {
@@ -146,11 +136,7 @@ func (h hash) Value() *big.Int {
 }
 
 func (h hash) MarshalText() ([]byte, error) {
-	s, err := h.string()
-	if err != nil {
-		return nil, err
-	}
-	return []byte(s), nil
+	return []byte(h.String()), nil
 }
 
 func (h hash) Clone() Hash {

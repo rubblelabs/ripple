@@ -53,6 +53,8 @@ func Base58Decode(b, alphabet string) ([]byte, error) {
 
 // Base58Encode encodes a byte slice to a modified base58 string.
 func Base58Encode(b []byte, alphabet string) string {
+	checksum := DoubleSha256(b)
+	b = append(b, checksum[0:4]...)
 	x := new(big.Int)
 	x.SetBytes(b)
 
