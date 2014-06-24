@@ -216,11 +216,11 @@ func newBundle(value interface{}, flag Flag) (*bundle, error) {
 func indent(flag Flag) string {
 	switch {
 	case flag&Indent > 0:
-		return "  "
-	case flag&DoubleIndent > 0:
 		return "    "
+	case flag&DoubleIndent > 0:
+		return "        "
 	case flag&TripleIndent > 0:
-		return "      "
+		return "           "
 	default:
 		return ""
 	}
