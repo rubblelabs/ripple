@@ -91,8 +91,8 @@ func newTxBundle(v data.Transaction, insert string, flag Flag) (*bundle, error) 
 		format += "=> %-34s %-60s %-60s"
 		values = append(values, []interface{}{tx.Destination, tx.Amount, tx.SendMax}...)
 	case *data.OfferCreate:
-		format += "%-60s %-60s %-18s"
-		values = append(values, []interface{}{tx.TakerPays, tx.TakerGets, tx.Ratio()}...)
+		format += "%-9d %-60s %-60s %-18s"
+		values = append(values, []interface{}{tx.Sequence, tx.TakerPays, tx.TakerGets, tx.Ratio()}...)
 	case *data.OfferCancel:
 		format += "%-9d"
 		values = append(values, tx.Sequence)
