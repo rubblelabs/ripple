@@ -90,7 +90,8 @@ type TransactionWithMetaData struct {
 	LedgerSequence uint32   `json:"ledger_index"`
 }
 
-func (m *MetaData) GetType() string { return "Metadata" }
+func (t *TransactionWithMetaData) GetType() string { return "TransactionWithMetadata" }
+func (m *MetaData) GetType() string                { return "Metadata" }
 
 func (m *NodeEffect) Action() string {
 	switch {

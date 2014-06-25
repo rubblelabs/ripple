@@ -1,5 +1,9 @@
 package data
 
+import (
+	"errors"
+)
+
 type TxBase struct {
 	hashable
 	TransactionType    TransactionType
@@ -75,32 +79,29 @@ type Amendment struct {
 	Amendment Hash256
 }
 
-func (t *TxBase) GetBase() *TxBase {
-	return t
-}
+var NotSignableError = errors.New("Not a signable type")
 
-func (t *TxBase) GetTransactionType() TransactionType {
-	return t.TransactionType
-}
+func (t *TxBase) GetBase() *TxBase                    { return t }
+func (t *TxBase) GetTransactionType() TransactionType { return t.TransactionType }
+func (t *TxBase) GetType() string                     { return txNames[t.TransactionType] }
+func (t *TxBase) GetPublicKey() *PublicKey            { return t.SigningPubKey }
+func (t *TxBase) GetSignature() *VariableLength       { return t.TxnSignature }
+func (t *TxBase) PathSet() PathSet                    { return PathSet(nil) }
+func (t *TxBase) SigningHash() (Hash256, error)       { return zero256, NotSignableError }
 
-func (t *TxBase) GetType() string {
-	return txNames[t.TransactionType]
-}
-
-func (t *TxBase) MemoSymbol() string {
-	if len(t.Memos) > 0 {
-		return "✐"
+func txSigningHash(tx Transaction) (Hash256, error) {
+	if err := NewEncoder().Transaction(tx, true); err != nil {
+		return zero256, err
 	}
-	return " "
+	return hashValues([]interface{}{HP_TRANSACTION_SIGN, tx.Raw()})
 }
 
-func (t *TxBase) PathSet() PathSet {
-	return PathSet(nil)
-}
-
-func (t *TransactionWithMetaData) GetType() string {
-	return "TransactionWithMetadata"
-}
+func (p *Payment) SigningHash() (Hash256, error)       { return txSigningHash(p) }
+func (o *OfferCreate) SigningHash() (Hash256, error)   { return txSigningHash(o) }
+func (o *OfferCancel) SigningHash() (Hash256, error)   { return txSigningHash(o) }
+func (a *AccountSet) SigningHash() (Hash256, error)    { return txSigningHash(a) }
+func (t *TrustSet) SigningHash() (Hash256, error)      { return txSigningHash(t) }
+func (r *SetRegularKey) SigningHash() (Hash256, error) { return txSigningHash(r) }
 
 func (o *OfferCreate) Ratio() *Value {
 	return o.TakerPays.Ratio(o.TakerGets)
@@ -111,4 +112,12 @@ func (p *Payment) PathSet() PathSet {
 		return PathSet(nil)
 	}
 	return *p.Paths
+}
+
+// TODO: Move into terminal.go
+func (t *TxBase) MemoSymbol() string {
+	if len(t.Memos) > 0 {
+		return "✐"
+	}
+	return " "
 }

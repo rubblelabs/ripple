@@ -1,6 +1,7 @@
 package data
 
 import (
+	"crypto/sha512"
 	"encoding/binary"
 	"io"
 )
@@ -50,6 +51,18 @@ func abs(a int64) uint64 {
 		return uint64(-a)
 	}
 	return uint64(a)
+}
+
+func hashValues(values []interface{}) (Hash256, error) {
+	var hash Hash256
+	hasher := sha512.New()
+	for _, v := range values {
+		if err := write(hasher, v); err != nil {
+			return hash, err
+		}
+	}
+	copy(hash[:], hasher.Sum(nil))
+	return hash, nil
 }
 
 func write(w io.Writer, v interface{}) error {

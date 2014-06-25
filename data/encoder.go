@@ -78,22 +78,6 @@ func (enc *Encoder) Validation(v *Validation, ignoreSigningFields bool) error {
 	return nil
 }
 
-func (enc *Encoder) SigningProposal(p *Proposal) error {
-	enc.reset()
-	if err := enc.HashPrefix(enc.hash, p); err != nil {
-		return err
-	}
-	values := []interface{}{p.Sequence, p.CloseTime.Uint32(), p.PreviousLedger.Bytes(), p.LedgerHash}
-	for _, v := range values {
-		if err := write(enc.hash, v); err != nil {
-			return err
-		}
-	}
-	p.SetHash(enc.hash.Sum(nil))
-	p.SetRaw(enc.buf.Bytes())
-	return nil
-}
-
 func (enc *Encoder) Node(h Hashable) error {
 	enc.reset()
 	if err := enc.Ledger(&enc.buf, h); err != nil {

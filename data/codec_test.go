@@ -30,9 +30,12 @@ func (s *CodecSuite) TestParseTransactions(c *C) {
 		tx, err := NewDecoder(test.Reader()).Transaction()
 		c.Assert(err, IsNil)
 		msg := dump(test, tx)
+		signable := tx.GetTransactionType() != SET_FEE && tx.GetTransactionType() != AMENDMENT
 		ok, err := CheckSignature(tx)
-		c.Assert(ok, Equals, true, msg)
-		c.Assert(err, IsNil, msg)
+		if signable {
+			c.Assert(err, IsNil, msg)
+		}
+		c.Assert(ok, Equals, signable, msg)
 		c.Assert(NewEncoder().Transaction(tx, false), IsNil, msg)
 		c.Assert(string(b2h(tx.Raw())), Equals, test.Encoded, msg)
 	}
