@@ -3,7 +3,7 @@ package ledger
 import (
 	"bytes"
 	"github.com/donovanhide/ripple/data"
-	"github.com/donovanhide/ripple/storage"
+	"github.com/donovanhide/ripple/storage/memdb"
 	"testing"
 )
 
@@ -28,7 +28,7 @@ var expectedDiff = `0,A,0,2C23D15B6B549123,InnerNode,525
 `
 
 func TestDiff(t *testing.T) {
-	mem, err := storage.NewMemoryDB("testdata/38129-32570.gz")
+	mem, err := memdb.NewMemoryDB("testdata/38129-32570.gz")
 	checkErr(t, err)
 	first, err := data.NewHash256("2C23D15B6B549123FB351E4B5CDE81C564318EB845449CD43C3EA7953C4DB452")
 	checkErr(t, err)
