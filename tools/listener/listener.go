@@ -5,7 +5,7 @@ import (
 	"github.com/donovanhide/ripple/crypto"
 	"github.com/donovanhide/ripple/ledger"
 	"github.com/donovanhide/ripple/peers"
-	"github.com/donovanhide/ripple/storage"
+	"github.com/donovanhide/ripple/storage/memdb"
 	"github.com/golang/glog"
 	metrics "github.com/rcrowley/go-metrics"
 	"github.com/rcrowley/go-metrics/influxdb"
@@ -46,7 +46,7 @@ func main() {
 	signal.Notify(kill, os.Interrupt, os.Kill)
 	key, err := crypto.GenerateRootDeterministicKey(nil)
 	checkErr(err)
-	db := storage.NewEmptyMemoryDB()
+	db := memdb.NewEmptyMemoryDB()
 	mgr, err := ledger.NewManager(db)
 	checkErr(err)
 	go mgr.Start()

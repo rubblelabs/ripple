@@ -1,4 +1,4 @@
-package storage
+package memdb
 
 import (
 	"github.com/donovanhide/ripple/data"

@@ -1,4 +1,4 @@
-package storage
+package memdb
 
 import (
 	"bufio"
@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/donovanhide/ripple/data"
+	"github.com/donovanhide/ripple/storage"
 	"os"
 	"strings"
 	"sync"
@@ -63,7 +64,7 @@ func (mem *MemoryDB) Get(hash data.Hash256) (data.Storer, error) {
 	defer mem.mu.RUnlock()
 	node, ok := mem.nodes[hash]
 	if !ok {
-		return nil, ErrNotFound
+		return nil, storage.ErrNotFound
 	}
 	return node, nil
 }
