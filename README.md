@@ -21,3 +21,8 @@ Please bear in mind that this has been an exercise that has taken a lot of time,
 
 [rGWBfkHZUECBtpSt22donchB263cgAfdhJ](https://ripple.com//contact?to=rGWBfkHZUECBtpSt22donchB263cgAfdhJ&name=donch]rGWBfkHZUECBtpSt22donchB263cgAfdhJ)
 
+## Test Coverage
+
+[crypto package](https://drone.io/github.com/donovanhide/ripple/files/crypto.html)
+[data package](https://drone.io/github.com/donovanhide/ripple/files/data.html)
+[websockets package](https://drone.io/github.com/donovanhide/ripple/files/websockets.html)
