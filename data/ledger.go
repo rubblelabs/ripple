@@ -29,6 +29,7 @@ func NewEmptyLedger(sequence uint32) *Ledger {
 	}
 }
 
-func (l *Ledger) GetType() string {
-	return "LedgerMaster"
-}
+func (l Ledger) GetType() string    { return "LedgerMaster" }
+func (l Ledger) Prefix() HashPrefix { return HP_LEDGER_MASTER }
+func (l Ledger) NodeType() NodeType { return NT_LEDGER }
+func (l Ledger) Ledger() uint32     { return l.LedgerSequence }

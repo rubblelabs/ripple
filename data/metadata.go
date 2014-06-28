@@ -85,21 +85,13 @@ func (s TransactionSlice) Less(i, j int) bool {
 }
 
 type TransactionWithMetaData struct {
+	hashable
 	Transaction
 	MetaData       MetaData `json:"meta"`
 	LedgerSequence uint32   `json:"ledger_index"`
 }
 
-func (t *TransactionWithMetaData) GetType() string { return "TransactionWithMetadata" }
-func (m *MetaData) GetType() string                { return "Metadata" }
-
-func (m *NodeEffect) Action() string {
-	switch {
-	case m.ModifiedNode != nil:
-		return "Modified"
-	case m.DeletedNode != nil:
-		return "Deleted"
-	default:
-		return "Created"
-	}
-}
+func (t TransactionWithMetaData) GetType() string    { return "TransactionWithMetadata" }
+func (t TransactionWithMetaData) Prefix() HashPrefix { return HP_TRANSACTION_NODE }
+func (t TransactionWithMetaData) NodeType() NodeType { return NT_TRANSACTION_NODE }
+func (t TransactionWithMetaData) Ledger() uint32     { return t.LedgerSequence }

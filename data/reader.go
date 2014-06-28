@@ -23,6 +23,14 @@ func (l *LimitByteReader) Len() int {
 	return int(l.N)
 }
 
+func NewVariableByteReader(r Reader) (Reader, error) {
+	if length, err := readVariableLength(r); err != nil {
+		return nil, err
+	} else {
+		return LimitedByteReader(r, int64(length)), nil
+	}
+}
+
 func (l *LimitByteReader) Read(p []byte) (n int, err error) {
 	if l.N <= 0 {
 		return 0, io.EOF

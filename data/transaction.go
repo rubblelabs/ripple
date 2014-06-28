@@ -1,11 +1,6 @@
 package data
 
-import (
-	"errors"
-)
-
 type TxBase struct {
-	hashable
 	TransactionType    TransactionType
 	Flags              *TransactionFlag `json:",omitempty"`
 	SourceTag          *uint32          `json:",omitempty"`
@@ -79,29 +74,14 @@ type Amendment struct {
 	Amendment Hash256
 }
 
-var NotSignableError = errors.New("Not a signable type")
-
 func (t *TxBase) GetBase() *TxBase                    { return t }
-func (t *TxBase) GetTransactionType() TransactionType { return t.TransactionType }
 func (t *TxBase) GetType() string                     { return txNames[t.TransactionType] }
+func (t *TxBase) GetTransactionType() TransactionType { return t.TransactionType }
+func (t *TxBase) Prefix() HashPrefix                  { return HP_TRANSACTION_ID }
 func (t *TxBase) GetPublicKey() *PublicKey            { return t.SigningPubKey }
 func (t *TxBase) GetSignature() *VariableLength       { return t.TxnSignature }
+func (t *TxBase) SigningPrefix() HashPrefix           { return HP_TRANSACTION_SIGN }
 func (t *TxBase) PathSet() PathSet                    { return PathSet(nil) }
-func (t *TxBase) SigningHash() (Hash256, error)       { return zero256, NotSignableError }
-
-func txSigningHash(tx Transaction) (Hash256, error) {
-	if err := NewEncoder().Transaction(tx, true); err != nil {
-		return zero256, err
-	}
-	return hashValues([]interface{}{HP_TRANSACTION_SIGN, tx.Raw()})
-}
-
-func (p *Payment) SigningHash() (Hash256, error)       { return txSigningHash(p) }
-func (o *OfferCreate) SigningHash() (Hash256, error)   { return txSigningHash(o) }
-func (o *OfferCancel) SigningHash() (Hash256, error)   { return txSigningHash(o) }
-func (a *AccountSet) SigningHash() (Hash256, error)    { return txSigningHash(a) }
-func (t *TrustSet) SigningHash() (Hash256, error)      { return txSigningHash(t) }
-func (r *SetRegularKey) SigningHash() (Hash256, error) { return txSigningHash(r) }
 
 func (o *OfferCreate) Ratio() *Value {
 	return o.TakerPays.Ratio(o.TakerGets)

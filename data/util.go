@@ -2,8 +2,6 @@ package data
 
 import (
 	"crypto/sha512"
-	"encoding/binary"
-	"io"
 )
 
 const hextable = "0123456789ABCDEF"
@@ -63,12 +61,4 @@ func hashValues(values []interface{}) (Hash256, error) {
 	}
 	copy(hash[:], hasher.Sum(nil))
 	return hash, nil
-}
-
-func write(w io.Writer, v interface{}) error {
-	return binary.Write(w, binary.BigEndian, v)
-}
-
-func read(r Reader, dest interface{}) error {
-	return binary.Read(r, binary.BigEndian, dest)
 }

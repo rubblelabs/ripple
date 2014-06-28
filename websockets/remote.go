@@ -166,9 +166,13 @@ func (r *Remote) AccountTx(account data.Account, pageSize int) chan *data.Transa
 
 // Synchronously submit a single transaction
 func (r *Remote) Submit(tx data.Transaction) (*SubmitResult, error) {
+	_, raw, err := data.Raw(tx)
+	if err != nil {
+		return nil, err
+	}
 	cmd := &SubmitCommand{
 		Command: newCommand("submit"),
-		TxBlob:  fmt.Sprintf("%X", tx.Raw()),
+		TxBlob:  fmt.Sprintf("%X", raw),
 	}
 	r.Outgoing <- cmd
 	<-cmd.Ready

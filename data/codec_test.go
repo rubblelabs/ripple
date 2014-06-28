@@ -17,17 +17,19 @@ func dump(test internal.TestData, v interface{}) CommentInterface {
 
 func (s *CodecSuite) TestParseLedgerHeaders(c *C) {
 	for _, test := range internal.LedgerHeaders {
-		ledger, err := NewDecoder(test.Reader()).Ledger()
+		ledger, err := ReadLedger(test.Reader())
 		c.Assert(err, IsNil)
 		msg := dump(test, ledger)
-		c.Assert(NewEncoder().Node(ledger), IsNil, msg)
-		c.Assert(string(b2h(ledger.Raw())[26:]), Equals, test.Encoded, msg)
+		_, value, err := Node(ledger)
+		c.Assert(err, IsNil, msg)
+		c.Assert(string(b2h(value)[26:]), Equals, test.Encoded, msg)
+		// c.Assert(key, Equals, ledger.Hash())
 	}
 }
 
 func (s *CodecSuite) TestParseTransactions(c *C) {
 	for _, test := range internal.Transactions {
-		tx, err := NewDecoder(test.Reader()).Transaction()
+		tx, err := ReadTransaction(test.Reader())
 		c.Assert(err, IsNil)
 		msg := dump(test, tx)
 		signable := tx.GetTransactionType() != SET_FEE && tx.GetTransactionType() != AMENDMENT
@@ -36,30 +38,33 @@ func (s *CodecSuite) TestParseTransactions(c *C) {
 			c.Assert(err, IsNil, msg)
 		}
 		c.Assert(ok, Equals, signable, msg)
-		c.Assert(NewEncoder().Transaction(tx, false), IsNil, msg)
-		c.Assert(string(b2h(tx.Raw())), Equals, test.Encoded, msg)
+		_, raw, err := Raw(tx)
+		c.Assert(err, IsNil, msg)
+		c.Assert(string(b2h(raw)), Equals, test.Encoded, msg)
 	}
 }
 
 func (s *CodecSuite) TestValidations(c *C) {
 	for _, test := range internal.Validations {
-		v, err := NewDecoder(test.Reader()).Validation()
+		v, err := ReadValidation(test.Reader())
 		c.Assert(err, IsNil)
 		msg := dump(test, v)
 		ok, err := CheckSignature(v)
 		c.Assert(ok, Equals, true, msg)
 		c.Assert(err, IsNil, msg)
-		c.Assert(NewEncoder().Validation(v, false), IsNil, msg)
-		c.Assert(string(b2h(v.Raw())), Equals, test.Encoded, msg)
+		_, raw, err := Raw(v)
+		c.Assert(err, IsNil, msg)
+		c.Assert(string(b2h(raw)), Equals, test.Encoded, msg)
 	}
 }
 
 func (s *CodecSuite) TestParseNodes(c *C) {
 	for _, test := range internal.Nodes {
-		n, err := NewDecoder(test.Reader()).Prefix()
+		n, err := ReadPrefix(test.Reader())
 		msg := dump(test, n)
 		c.Assert(err, IsNil, msg)
-		c.Assert(NewEncoder().Node(n), IsNil, msg)
-		c.Assert(string(b2h(n.Raw()))[16:], Equals, test.Encoded[16:], msg)
+		_, value, err := Node(n)
+		c.Assert(err, IsNil, msg)
+		c.Assert(string(b2h(value))[16:], Equals, test.Encoded[16:], msg)
 	}
 }

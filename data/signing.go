@@ -13,7 +13,7 @@ func CheckSymbol(s Signer) string {
 }
 
 func Sign(s Signer, key crypto.Key) error {
-	signingHash, err := s.SigningHash()
+	signingHash, err := SigningHash(s)
 	if err != nil {
 		return err
 	}
@@ -27,7 +27,7 @@ func Sign(s Signer, key crypto.Key) error {
 }
 
 func CheckSignature(s Signer) (bool, error) {
-	signingHash, err := s.SigningHash()
+	signingHash, err := SigningHash(s)
 	if err != nil {
 		return false, err
 	}

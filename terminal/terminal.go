@@ -79,20 +79,24 @@ func newLeBundle(v interface{}, flag Flag) (*bundle, error) {
 func newTxBundle(v data.Transaction, insert string, flag Flag) (*bundle, error) {
 	var (
 		base   = v.GetBase()
-		format = "%s %-11s %-8s %s%s %-34s "
-		values = []interface{}{data.CheckSymbol(v), base.GetType(), base.Fee, insert, base.MemoSymbol(), base.Account}
+		format = "%s %-11s %-8s %s%s %-34s %-9d "
+		values = []interface{}{data.CheckSymbol(v), base.GetType(), base.Fee, insert, base.MemoSymbol(), base.Account, base.Sequence}
 	)
 	if flag&ShowTransactionId > 0 {
+		txId, err := data.Hash(v)
+		if err != nil {
+			return nil, err
+		}
 		format = "%s " + format
-		values = append([]interface{}{data.TransactionId(v)}, values...)
+		values = append([]interface{}{txId}, values...)
 	}
 	switch tx := v.(type) {
 	case *data.Payment:
 		format += "=> %-34s %-60s %-60s"
 		values = append(values, []interface{}{tx.Destination, tx.Amount, tx.SendMax}...)
 	case *data.OfferCreate:
-		format += "%-9d %-60s %-60s %-18s"
-		values = append(values, []interface{}{tx.Sequence, tx.TakerPays, tx.TakerGets, tx.Ratio()}...)
+		format += "%-60s %-60s %-18s"
+		values = append(values, []interface{}{tx.TakerPays, tx.TakerGets, tx.Ratio()}...)
 	case *data.OfferCancel:
 		format += "%-9d"
 		values = append(values, tx.Sequence)

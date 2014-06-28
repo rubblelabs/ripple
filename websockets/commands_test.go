@@ -64,7 +64,7 @@ func (s *MessagesSuite) TestTxResponse(c *C) {
 	c.Assert(msg.Result.MetaData.TransactionResult.String(), Equals, "tesSUCCESS")
 
 	offer := msg.Result.Transaction.(*data.OfferCreate)
-	c.Assert(offer.Hash().String(), Equals, "2D0CE11154B655A2BFE7F3F857AAC344622EC7DAB11B1EBD920DCDB00E8646FF")
+	c.Assert(msg.Result.Hash().String(), Equals, "2D0CE11154B655A2BFE7F3F857AAC344622EC7DAB11B1EBD920DCDB00E8646FF")
 	c.Assert(offer.GetType(), Equals, "OfferCreate")
 	c.Assert(offer.Account.String(), Equals, "rwpxNWdpKu2QVgrh5LQXEygYLshhgnRL1Y")
 	c.Assert(offer.Fee.String(), Equals, "0.00001")

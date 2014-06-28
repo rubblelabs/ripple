@@ -7,84 +7,86 @@ import (
 	"reflect"
 )
 
-type Decoder struct {
-	r Reader
-}
-
-func NewDecoder(r Reader) *Decoder {
-	return &Decoder{r}
-}
-
-func (dec *Decoder) Wire(typ NodeType) (Hashable, error) {
-	version, err := dec.HashPrefix()
+func ReadWire(r Reader, typ NodeType, ledgerSequence uint32) (Hashable, error) {
+	version, err := readHashPrefix(r)
 	if err != nil {
 		return nil, err
 	}
 	switch version {
 	case HP_LEAF_NODE:
-		return dec.LedgerEntry()
+		return readLedgerEntry(r)
 	case HP_TRANSACTION_NODE:
-		// TODO: What is the correct ledger sequence?
-		return dec.TransactionWithMetadata(0)
+		return readTransactionWithMetadata(r, ledgerSequence)
 	case HP_INNER_NODE:
-		return dec.CompressedInnerNode(typ)
+		return readCompressedInnerNode(r, typ)
 	default:
 		return nil, fmt.Errorf("Unknown hash prefix: %s", version.String())
 	}
 }
 
-func (dec *Decoder) Prefix() (Hashable, error) {
-	header, err := dec.Header()
+func ReadPrefix(r Reader) (Storer, error) {
+	header, err := readHeader(r)
 	if err != nil {
 		return nil, err
 	}
-	version, err := dec.HashPrefix()
+	version, err := readHashPrefix(r)
 	if err != nil {
 		return nil, err
 	}
 	switch {
 	case version == HP_INNER_NODE:
-		return dec.InnerNode(header.NodeType)
+		return readInnerNode(r, header.NodeType)
 	case header.NodeType == NT_LEDGER:
-		return dec.Ledger()
-	case header.NodeType == NT_TRANSACTION:
-		return dec.Transaction()
+		return ReadLedger(r)
 	case header.NodeType == NT_TRANSACTION_NODE:
-		return dec.TransactionWithMetadata(header.LedgerIndex)
+		return readTransactionWithMetadata(r, header.LedgerIndex)
 	case header.NodeType == NT_ACCOUNT_NODE:
-		return dec.LedgerEntry()
+		return readLedgerEntry(r)
 	default:
 		return nil, fmt.Errorf("Unknown node type")
 	}
 }
 
-func (dec *Decoder) Ledger() (*Ledger, error) {
+func ReadLedger(r Reader) (*Ledger, error) {
 	ledger := new(Ledger)
-	return ledger, read(dec.r, &ledger.LedgerHeader)
+	return ledger, read(r, &ledger.LedgerHeader)
 }
 
-func (dec *Decoder) Validation() (*Validation, error) {
+func ReadValidation(r Reader) (*Validation, error) {
 	validation := new(Validation)
 	v := reflect.ValueOf(validation)
-	if err := dec.readObject(&v); err != nil {
+	if err := readObject(r, &v); err != nil {
 		return nil, err
 	}
 	return validation, nil
 }
 
-func (dec *Decoder) HashPrefix() (HashPrefix, error) {
+func ReadTransaction(r Reader) (Transaction, error) {
+	txType, err := expectType(r, "TransactionType")
+	if err != nil {
+		return nil, err
+	}
+	tx := TxFactory[txType]()
+	v := reflect.ValueOf(tx)
+	if err := readObject(r, &v); err != nil {
+		return nil, err
+	}
+	return tx, nil
+}
+
+func readHashPrefix(r Reader) (HashPrefix, error) {
 	var version HashPrefix
-	return version, read(dec.r, &version)
+	return version, read(r, &version)
 }
 
-func (dec *Decoder) Header() (*NodeHeader, error) {
+func readHeader(r Reader) (*NodeHeader, error) {
 	header := new(NodeHeader)
-	return header, read(dec.r, header)
+	return header, read(r, header)
 }
 
-func (dec *Decoder) Hash() (*Hash256, error) {
+func readHash(r Reader) (*Hash256, error) {
 	var h Hash256
-	n, err := dec.r.Read(h[:])
+	n, err := r.Read(h[:])
 	switch {
 	case err != nil:
 		return nil, err
@@ -95,33 +97,33 @@ func (dec *Decoder) Hash() (*Hash256, error) {
 	}
 }
 
-func (dec *Decoder) InnerNode(typ NodeType) (*InnerNode, error) {
+func readInnerNode(r Reader, typ NodeType) (*InnerNode, error) {
 	var inner InnerNode
 	inner.Type = typ
 	for i := range inner.Children {
-		if _, err := dec.r.Read(inner.Children[i][:]); err != nil {
+		if _, err := r.Read(inner.Children[i][:]); err != nil {
 			return nil, err
 		}
 	}
 	return &inner, nil
 }
 
-func (dec *Decoder) CompressedInnerNode(typ NodeType) (*InnerNode, error) {
+func readCompressedInnerNode(r Reader, typ NodeType) (*InnerNode, error) {
 	var inner InnerNode
 	inner.Type = typ
 	var entry CompressedNodeEntry
-	for read(dec.r, &entry) == nil {
+	for read(r, &entry) == nil {
 		inner.Children[entry.Pos] = entry.Hash
 	}
 	return &inner, nil
 }
 
-func (dec *Decoder) TransactionWithMetadata(ledger uint32) (*TransactionWithMetaData, error) {
-	br, err := NewVariableByteReader(dec.r)
+func readTransactionWithMetadata(r Reader, ledger uint32) (*TransactionWithMetaData, error) {
+	br, err := NewVariableByteReader(r)
 	if err != nil {
 		return nil, err
 	}
-	tx, err := NewDecoder(br).Transaction()
+	tx, err := ReadTransaction(br)
 	if err != nil {
 		return nil, err
 	}
@@ -129,16 +131,16 @@ func (dec *Decoder) TransactionWithMetadata(ledger uint32) (*TransactionWithMeta
 		Transaction:    tx,
 		LedgerSequence: ledger,
 	}
-	br, err = NewVariableByteReader(dec.r)
+	br, err = NewVariableByteReader(r)
 	if err != nil {
 		return nil, err
 	}
 	meta := reflect.ValueOf(&txMeta.MetaData)
-	if err := NewDecoder(br).readObject(&meta); err != nil {
+	if err := readObject(br, &meta); err != nil {
 		return nil, err
 	}
 	hash := make([]byte, 32)
-	n, err := dec.r.Read(hash)
+	n, err := r.Read(hash)
 	if err != nil {
 		return nil, err
 	}
@@ -149,21 +151,8 @@ func (dec *Decoder) TransactionWithMetadata(ledger uint32) (*TransactionWithMeta
 	return txMeta, nil
 }
 
-func (dec *Decoder) Transaction() (Transaction, error) {
-	txType, err := dec.expectType("TransactionType")
-	if err != nil {
-		return nil, err
-	}
-	tx := TxFactory[txType]()
-	v := reflect.ValueOf(tx)
-	if err := dec.readObject(&v); err != nil {
-		return nil, err
-	}
-	return tx, nil
-}
-
-func (dec *Decoder) LedgerEntry() (LedgerEntry, error) {
-	leType, err := dec.expectType("LedgerEntryType")
+func readLedgerEntry(r Reader) (LedgerEntry, error) {
+	leType, err := expectType(r, "LedgerEntryType")
 	if err != nil {
 		return nil, err
 	}
@@ -171,37 +160,15 @@ func (dec *Decoder) LedgerEntry() (LedgerEntry, error) {
 	v := reflect.ValueOf(le)
 	// LedgerEntries have 32 bytes of index suffixed
 	// but don't have a variable bytes indicator
-	lr := LimitedByteReader(dec.r, int64(dec.r.Len()-32))
-	if err := NewDecoder(lr).readObject(&v); err != nil {
+	lr := LimitedByteReader(r, int64(r.Len()-32))
+	if err := readObject(lr, &v); err != nil {
 		return nil, err
 	}
 	return le, nil
 }
 
-func (dec *Decoder) next() (*enc, error) {
-	var e enc
-	if b, err := dec.r.ReadByte(); err != nil {
-		return nil, err
-	} else {
-		e.typ = b >> 4
-		e.field = b & 0xF
-	}
-	var err error
-	if e.typ == 0 {
-		if e.typ, err = dec.r.ReadByte(); err != nil {
-			return nil, err
-		}
-	}
-	if e.field == 0 {
-		if e.field, err = dec.r.ReadByte(); err != nil {
-			return nil, err
-		}
-	}
-	return &e, nil
-}
-
-func (dec *Decoder) expectType(expected string) (uint16, error) {
-	enc, err := dec.next()
+func expectType(r Reader, expected string) (uint16, error) {
+	enc, err := readEncoding(r)
 	if err != nil {
 		return 0, err
 	}
@@ -210,7 +177,7 @@ func (dec *Decoder) expectType(expected string) (uint16, error) {
 		return 0, fmt.Errorf("Unexpected type: %s expected: %s", name, expected)
 	}
 	var typ uint16
-	return typ, read(dec.r, &typ)
+	return typ, read(r, &typ)
 }
 
 var (
@@ -218,9 +185,9 @@ var (
 	errorEndOfArray  = errors.New("EndOfArray")
 )
 
-func (dec *Decoder) readObject(v *reflect.Value) error {
+func readObject(r Reader, v *reflect.Value) error {
 	var err error
-	for enc, err := dec.next(); err == nil; enc, err = dec.next() {
+	for enc, err := readEncoding(r); err == nil; enc, err = readEncoding(r) {
 		name := encodings[*enc]
 		// fmt.Println(name, v, v.IsValid(), enc.typ, enc.field)
 		if name == "EndOfArray" {
@@ -235,7 +202,7 @@ func (dec *Decoder) readObject(v *reflect.Value) error {
 		loop:
 			for {
 				child := reflect.New(array.Type().Elem()).Elem()
-				err := dec.readObject(&child)
+				err := readObject(r, &child)
 				switch err {
 				case errorEndOfArray:
 					break loop
@@ -251,7 +218,7 @@ func (dec *Decoder) readObject(v *reflect.Value) error {
 				var fields Fields
 				f := reflect.ValueOf(&fields)
 				v.Elem().FieldByName(name).Set(f)
-				if dec.readObject(&f); err != nil && err != errorEndOfObject {
+				if readObject(r, &f); err != nil && err != errorEndOfObject {
 					return err
 				}
 			case "ModifiedNode", "DeletedNode", "CreatedNode":
@@ -261,12 +228,12 @@ func (dec *Decoder) readObject(v *reflect.Value) error {
 				e := reflect.ValueOf(&effect)
 				e.Elem().FieldByName(name).Set(n)
 				v.Set(e.Elem())
-				return dec.readObject(&n)
+				return readObject(r, &n)
 			case "Memo":
 				var memo Memo
 				m := reflect.ValueOf(&memo)
 				inner := reflect.ValueOf(&memo.Memo)
-				err := dec.readObject(&inner)
+				err := readObject(r, &inner)
 				v.Set(m.Elem())
 				return err
 			default:
@@ -275,11 +242,11 @@ func (dec *Decoder) readObject(v *reflect.Value) error {
 		default:
 			field := getField(v, enc)
 			if w, ok := field.Addr().Interface().(Wire); ok {
-				if err := w.Unmarshal(dec.r); err != nil {
+				if err := w.Unmarshal(r); err != nil {
 					return err
 				}
 			} else {
-				if err := read(dec.r, field.Addr().Interface()); err != nil {
+				if err := read(r, field.Addr().Interface()); err != nil {
 					return err
 				}
 			}

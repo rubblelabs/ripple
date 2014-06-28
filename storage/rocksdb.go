@@ -56,7 +56,7 @@ func (db *RocksDB) Get(hash data.Hash256) (data.Hashable, error) {
 	if value.Size() == 0 {
 		return nil, ErrNotFound
 	}
-	node, err := data.NewDecoder(bytes.NewReader(value.Data())).Prefix()
+	node, err := data.ReadPrefix(bytes.NewReader(value.Data()))
 	if err != nil {
 		return nil, err
 	}

@@ -68,7 +68,7 @@ func (s *MessagesSuite) TestTransactionStreamMsg(c *C) {
 	c.Assert(offer.GetType(), Equals, "OfferCreate")
 	c.Assert(offer.Account.String(), Equals, "rPEZyTnSyQyXBCwMVYyaafSVPL8oMtfG6a")
 	c.Assert(offer.Fee.String(), Equals, "0.00005")
-	c.Assert(offer.Hash().String(), Equals, "25174B56C40B090D4AFCDAC3F07DCCF8A49A096D62CE1CE6864A8624F790F980")
+	c.Assert(msg.Transaction.Hash().String(), Equals, "25174B56C40B090D4AFCDAC3F07DCCF8A49A096D62CE1CE6864A8624F790F980")
 	c.Assert(offer.SigningPubKey.String(), Equals, "0309AEAA170F651170F85C85237CD25CD4200CF91C1C05A9B8A19E72912C2254DF")
 	c.Assert(offer.TxnSignature.String(), Equals, "304402201480DBC8253B2E5CCB24001C6E6A0AE73C8FC8D6237B0AA1A5B1CADA92306070022013B02C3CE6E7AFD5F8F348BC40975D15056D414BBC11AD2EA04A65496482212E")
 	c.Assert(offer.Sequence, Equals, uint32(753273))

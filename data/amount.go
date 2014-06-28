@@ -174,6 +174,13 @@ func (a Amount) Ratio(b Amount) *Value {
 	}
 }
 
+func (a Amount) Bytes() []byte {
+	if a.Native {
+		return a.Value.Bytes()
+	}
+	return append(a.Value.Bytes(), append(a.Currency.Bytes(), a.Issuer.Bytes()...)...)
+}
+
 // Amount in human parsable form
 // with demurrage applied
 func (a Amount) String() string {

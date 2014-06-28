@@ -7,49 +7,6 @@ import (
 	"math"
 )
 
-func NewVariableByteReader(r Reader) (Reader, error) {
-	if length, err := readVariableLength(r); err != nil {
-		return nil, err
-	} else {
-		return LimitedByteReader(r, int64(length)), nil
-	}
-}
-
-func unmarshalSlice(s []byte, r Reader, prefix string) error {
-	n, err := r.Read(s)
-	if n != len(s) {
-		return fmt.Errorf("%s: short read: %d expected: %d", prefix, n, len(s))
-	}
-	if err != nil {
-		return fmt.Errorf("%s: %s", prefix, err.Error())
-	}
-	return nil
-}
-
-func (v *Value) Bytes() []byte {
-	var u uint64
-	if !v.Negative {
-		u |= 1 << 62
-	}
-	if !v.Native {
-		u |= 1 << 63
-		u |= v.Num & ((1 << 54) - 1)
-		u |= uint64(v.Offset+97) << 54
-	} else {
-		u |= v.Num & ((1 << 62) - 1)
-	}
-	var b [8]byte
-	binary.BigEndian.PutUint64(b[:], u)
-	return b[:]
-}
-
-func (a *Amount) Bytes() []byte {
-	if a.Native {
-		return a.Value.Bytes()
-	}
-	return append(a.Value.Bytes(), append(a.Currency.Bytes(), a.Issuer.Bytes()...)...)
-}
-
 func (v *Value) Unmarshal(r Reader) error {
 	var u uint64
 	if err := binary.Read(r, binary.BigEndian, &u); err != nil {
@@ -122,54 +79,6 @@ func (h *Hash256) Unmarshal(r Reader) error {
 
 func (h *Hash256) Marshal(w io.Writer) error {
 	return binary.Write(w, binary.BigEndian, h.Bytes())
-}
-
-func writeVariableLength(w io.Writer, b []byte) error {
-	n := len(b)
-	var err error
-	switch {
-	case n < 0 || n > 918744:
-		return fmt.Errorf("Unsupported Variable Length encoding: %d", n)
-	case n <= 192:
-		err = binary.Write(w, binary.BigEndian, uint8(n))
-	case n <= 12480:
-		n -= 193
-		err = binary.Write(w, binary.BigEndian, [2]uint8{193 + uint8(n>>8), uint8(n)})
-	case n <= 918744:
-		n -= 12481
-		v := [3]uint8{uint8(241 + (n >> 16)), uint8(n >> 8), uint8(n)}
-		err = binary.Write(w, binary.BigEndian, v)
-	}
-	if err != nil {
-		return err
-	}
-	return binary.Write(w, binary.BigEndian, b)
-}
-
-func readVariableLength(r Reader) (int, error) {
-	var first, second, third byte
-	var err error
-	if first, err = r.ReadByte(); err != nil {
-		return 0, err
-	}
-	switch {
-	case first <= 192:
-		return int(first), nil
-	case first <= 240:
-		if second, err = r.ReadByte(); err != nil {
-			return 0, nil
-		}
-		return 193 + int(first-193)*256 + int(second), nil
-	case first <= 254:
-		if second, err = r.ReadByte(); err != nil {
-			return 0, nil
-		}
-		if third, err = r.ReadByte(); err != nil {
-			return 0, nil
-		}
-		return 12481 + int(first-241)*65536 + int(second)*256 + int(third), nil
-	}
-	return 0, fmt.Errorf("Unsupported Variable Length encoding")
 }
 
 func (v *Vector256) Unmarshal(r Reader) error {

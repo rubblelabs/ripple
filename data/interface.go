@@ -6,33 +6,32 @@ import (
 
 type Hashable interface {
 	GetType() string
-	Hash() Hash256
-	Raw() []byte
-	SetHash([]byte)
-	SetRaw([]byte)
+	Prefix() HashPrefix
 }
 
 type Signer interface {
-	SigningHash() (Hash256, error)
+	SigningPrefix() HashPrefix
 	GetPublicKey() *PublicKey
 	GetSignature() *VariableLength
 }
 
 type Router interface {
+	Hashable
 	SuppressionId() Hash256
 }
 
 type Storer interface {
-	NodeId() Hash256
-}
-
-type Wire interface {
-	Unmarshal(Reader) error
-	Marshal(io.Writer) error
+	Hashable
+	Hash() Hash256
+	Raw() []byte
+	SetHash([]byte)
+	SetRaw([]byte)
+	Ledger() uint32
+	NodeType() NodeType
 }
 
 type LedgerEntry interface {
-	Hashable
+	Storer
 	GetLedgerEntryType() LedgerEntryType
 }
 
@@ -42,4 +41,9 @@ type Transaction interface {
 	GetTransactionType() TransactionType
 	GetBase() *TxBase
 	PathSet() PathSet
+}
+
+type Wire interface {
+	Unmarshal(Reader) error
+	Marshal(io.Writer) error
 }

@@ -2,6 +2,8 @@ package data
 
 import (
 	"encoding/binary"
+	"fmt"
+	"io"
 	"strings"
 )
 
@@ -231,15 +233,6 @@ func init() {
 	}
 }
 
-func (e enc) Priority() uint32 {
-	return uint32(e.typ)<<16 | uint32(e.field)
-}
-
-func (e enc) SigningField() bool {
-	_, ok := signingFields[e]
-	return ok
-}
-
 func (h HashPrefix) String() string {
 	return string(h.Bytes())
 }
@@ -252,4 +245,124 @@ func (h HashPrefix) Bytes() []byte {
 
 func (n NodeType) String() string {
 	return nodeTypes[n]
+}
+
+func (e enc) Priority() uint32 {
+	return uint32(e.typ)<<16 | uint32(e.field)
+}
+
+func (e enc) SigningField() bool {
+	_, ok := signingFields[e]
+	return ok
+}
+
+func readEncoding(r Reader) (*enc, error) {
+	var e enc
+	if b, err := r.ReadByte(); err != nil {
+		return nil, err
+	} else {
+		e.typ = b >> 4
+		e.field = b & 0xF
+	}
+	var err error
+	if e.typ == 0 {
+		if e.typ, err = r.ReadByte(); err != nil {
+			return nil, err
+		}
+	}
+	if e.field == 0 {
+		if e.field, err = r.ReadByte(); err != nil {
+			return nil, err
+		}
+	}
+	return &e, nil
+}
+
+func writeEncoding(w io.Writer, e enc) error {
+	switch {
+	case e.typ < 16 && e.field < 16:
+		return write(w, e.typ<<4|e.field)
+	case e.typ < 16:
+		return write(w, [2]uint8{e.typ << 4, e.field})
+	case e.field < 16:
+		return write(w, [2]uint8{e.field, e.typ})
+	default:
+		return write(w, [3]uint8{0, e.typ, e.field})
+	}
+}
+
+func write(w io.Writer, v interface{}) error {
+	return binary.Write(w, binary.BigEndian, v)
+}
+
+func writeValues(w io.Writer, values []interface{}) error {
+	for _, v := range values {
+		if err := binary.Write(w, binary.BigEndian, v); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func read(r Reader, dest interface{}) error {
+	return binary.Read(r, binary.BigEndian, dest)
+}
+
+func writeVariableLength(w io.Writer, b []byte) error {
+	n := len(b)
+	var err error
+	switch {
+	case n < 0 || n > 918744:
+		return fmt.Errorf("Unsupported Variable Length encoding: %d", n)
+	case n <= 192:
+		err = binary.Write(w, binary.BigEndian, uint8(n))
+	case n <= 12480:
+		n -= 193
+		err = binary.Write(w, binary.BigEndian, [2]uint8{193 + uint8(n>>8), uint8(n)})
+	case n <= 918744:
+		n -= 12481
+		v := [3]uint8{uint8(241 + (n >> 16)), uint8(n >> 8), uint8(n)}
+		err = binary.Write(w, binary.BigEndian, v)
+	}
+	if err != nil {
+		return err
+	}
+	return binary.Write(w, binary.BigEndian, b)
+}
+
+func readVariableLength(r Reader) (int, error) {
+	var first, second, third byte
+	var err error
+	if first, err = r.ReadByte(); err != nil {
+		return 0, err
+	}
+	switch {
+	case first <= 192:
+		return int(first), nil
+	case first <= 240:
+		if second, err = r.ReadByte(); err != nil {
+			return 0, nil
+		}
+		return 193 + int(first-193)*256 + int(second), nil
+	case first <= 254:
+		if second, err = r.ReadByte(); err != nil {
+			return 0, nil
+		}
+		if third, err = r.ReadByte(); err != nil {
+			return 0, nil
+		}
+		return 12481 + int(first-241)*65536 + int(second)*256 + int(third), nil
+	}
+	return 0, fmt.Errorf("Unsupported Variable Length encoding")
+}
+
+func unmarshalSlice(s []byte, r Reader, prefix string) error {
+	n, err := r.Read(s)
+	if n != len(s) {
+		return fmt.Errorf("%s: short read: %d expected: %d", prefix, n, len(s))
+	}
+	if err != nil {
+		return fmt.Errorf("%s: %s", prefix, err.Error())
+	}
+	return nil
 }

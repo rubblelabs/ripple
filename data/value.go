@@ -1,6 +1,7 @@
 package data
 
 import (
+	"encoding/binary"
 	"fmt"
 	"math/big"
 	"regexp"
@@ -341,6 +342,23 @@ func (v Value) IsScientific() bool {
 
 func (v Value) IsZero() bool {
 	return v.Num == 0
+}
+
+func (v Value) Bytes() []byte {
+	var u uint64
+	if !v.Negative {
+		u |= 1 << 62
+	}
+	if !v.Native {
+		u |= 1 << 63
+		u |= v.Num & ((1 << 54) - 1)
+		u |= uint64(v.Offset+97) << 54
+	} else {
+		u |= v.Num & ((1 << 62) - 1)
+	}
+	var b [8]byte
+	binary.BigEndian.PutUint64(b[:], u)
+	return b[:]
 }
 
 func (v Value) String() string {

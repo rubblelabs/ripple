@@ -222,7 +222,7 @@ func (p *Peer) handleProposeSet(proposeSet *protocol.TMProposeSet) {
 }
 
 func (p *Peer) handleValidation(validation *protocol.TMValidation) {
-	v, err := data.NewDecoder(bytes.NewReader(validation.GetValidation())).Validation()
+	v, err := data.ReadValidation(bytes.NewReader(validation.GetValidation()))
 	if err != nil {
 		glog.Errorln(err.Error())
 		return
@@ -231,8 +231,7 @@ func (p *Peer) handleValidation(validation *protocol.TMValidation) {
 }
 
 func (p *Peer) handleTransaction(tx *protocol.TMTransaction) {
-	node, err := data.NewDecoder(bytes.NewReader(tx.GetRawTransaction())).Transaction()
-	glog.Infof("%X", tx.GetRawTransaction())
+	node, err := data.ReadTransaction(bytes.NewReader(tx.GetRawTransaction()))
 	if err != nil {
 		glog.Errorln(err.Error())
 		return
@@ -263,7 +262,7 @@ func (p *Peer) handleGetObjectByHashReply(reply *protocol.TMGetObjectByHash) {
 	}
 	for _, obj := range reply.GetObjects() {
 		blob := append(obj.GetData(), obj.GetHash()...)
-		node, err := data.NewDecoder(bytes.NewReader(blob)).Wire(typ)
+		node, err := data.ReadWire(bytes.NewReader(blob), typ, reply.GetSeq())
 		if err != nil {
 			glog.Errorf("%s: %s Ledger: %d Blob: %X", p.String(), err.Error(), reply.GetSeq(), blob)
 			return
@@ -279,7 +278,7 @@ func (p *Peer) handleLedgerData(ledgerData *protocol.TMLedgerData) {
 		glog.Infof("%s: Ignoring: %s", ledgerData.Log())
 		return
 	}
-	ledger, err := data.NewDecoder(bytes.NewReader(ledgerData.Nodes[0].Nodedata)).Ledger()
+	ledger, err := data.ReadLedger(bytes.NewReader(ledgerData.Nodes[0].Nodedata))
 	if err != nil {
 		glog.Errorf("%s: %s", p.String(), err.Error())
 		return

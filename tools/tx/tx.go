@@ -101,7 +101,9 @@ func payment(c *cli.Context) {
 	}
 
 	sign(c, payment, 0)
-	fmt.Printf("%X\n", payment.Raw())
+	hash, raw, err := data.Raw(payment)
+	checkErr(err)
+	fmt.Printf("Hash: %X\nRaw:%X\n", hash, raw)
 
 	// Print it in JSON
 	out, err := json.Marshal(payment)

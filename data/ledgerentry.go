@@ -97,13 +97,11 @@ type FeeSettings struct {
 	ReserveIncrement  uint32
 }
 
-func (le *leBase) GetType() string {
-	return ledgerEntryNames[le.LedgerEntryType]
-}
-
-func (le *leBase) GetLedgerEntryType() LedgerEntryType {
-	return le.LedgerEntryType
-}
+func (le *leBase) GetType() string                     { return ledgerEntryNames[le.LedgerEntryType] }
+func (le *leBase) GetLedgerEntryType() LedgerEntryType { return le.LedgerEntryType }
+func (le *leBase) Prefix() HashPrefix                  { return HP_LEAF_NODE }
+func (le *leBase) NodeType() NodeType                  { return NT_ACCOUNT_NODE }
+func (le *leBase) Ledger() uint32                      { return 0 }
 
 func (o *Offer) Ratio() *Value {
 	return o.TakerPays.Ratio(*o.TakerGets)

@@ -13,13 +13,13 @@ import (
 )
 
 type MemoryDB struct {
-	nodes map[data.Hash256]data.Hashable
+	nodes map[data.Hash256]data.Storer
 	mu    sync.RWMutex
 }
 
 func NewEmptyMemoryDB() *MemoryDB {
 	return &MemoryDB{
-		nodes: make(map[data.Hash256]data.Hashable),
+		nodes: make(map[data.Hash256]data.Storer),
 	}
 }
 
@@ -46,7 +46,7 @@ func NewMemoryDB(path string) (*MemoryDB, error) {
 		if err != nil {
 			return nil, err
 		}
-		node, err := data.NewDecoder(bytes.NewReader(value)).Prefix()
+		node, err := data.ReadPrefix(bytes.NewReader(value))
 		if err != nil {
 			return nil, err
 		}
@@ -58,7 +58,7 @@ func NewMemoryDB(path string) (*MemoryDB, error) {
 	return mem, nil
 }
 
-func (mem *MemoryDB) Get(hash data.Hash256) (data.Hashable, error) {
+func (mem *MemoryDB) Get(hash data.Hash256) (data.Storer, error) {
 	mem.mu.RLock()
 	defer mem.mu.RUnlock()
 	node, ok := mem.nodes[hash]
@@ -68,7 +68,7 @@ func (mem *MemoryDB) Get(hash data.Hash256) (data.Hashable, error) {
 	return node, nil
 }
 
-func (mem *MemoryDB) Insert(item data.Hashable) error {
+func (mem *MemoryDB) Insert(item data.Storer) error {
 	if item.Hash().IsZero() {
 		return fmt.Errorf("Cannot insert unhashed item")
 	}
