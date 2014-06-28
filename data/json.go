@@ -15,7 +15,7 @@ type ledgerJSON Ledger
 // adds all the legacy fields
 type ledgerExtraJSON struct {
 	ledgerJSON
-	HumanCloseTime *RippleHumanTime `json:"close_time_human"`
+	HumanCloseTime *rippleHumanTime `json:"close_time_human"`
 	Hash           Hash256          `json:"hash"`
 	LedgerHash     Hash256          `json:"ledger_hash"`
 	TotalCoins     uint64           `json:"totalCoins,string"`
@@ -25,7 +25,7 @@ type ledgerExtraJSON struct {
 func (l Ledger) MarshalJSON() ([]byte, error) {
 	return json.Marshal(ledgerExtraJSON{
 		ledgerJSON:     ledgerJSON(l),
-		HumanCloseTime: l.CloseTime.Human(),
+		HumanCloseTime: l.CloseTime.human(),
 		Hash:           l.Hash(),
 		LedgerHash:     l.Hash(),
 		TotalCoins:     l.TotalXRP,
@@ -282,12 +282,11 @@ func (t *RippleTime) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (t RippleHumanTime) MarshalJSON() ([]byte, error) {
+func (t rippleHumanTime) MarshalJSON() ([]byte, error) {
 	return []byte(`"` + t.String() + `"`), nil
 }
 
-func (t *RippleHumanTime) UnmarshalJSON(b []byte) error {
-	t.RippleTime = &RippleTime{}
+func (t *rippleHumanTime) UnmarshalJSON(b []byte) error {
 	return t.SetString(string(b[1 : len(b)-1]))
 }
 
