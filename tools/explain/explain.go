@@ -126,7 +126,7 @@ func main() {
 		for line, err := r.ReadString('\n'); err == nil; line, err = r.ReadString('\n') {
 			b, err := hex.DecodeString(line[:len(line)-1])
 			checkErr(err)
-			v, err := data.NewDecoder(bytes.NewReader(b)).Prefix()
+			v, err := data.ReadPrefix(bytes.NewReader(b))
 			checkErr(err)
 			terminal.Println(v, terminal.Default)
 		}
