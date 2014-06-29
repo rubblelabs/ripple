@@ -321,12 +321,24 @@ func (a Value) Equals(b Value) bool {
 //Compare returns an integer comparing two Values. The result will be 0 if a==b, -1 if a < b, and +1 if a > b.
 func (a Value) Compare(b Value) int {
 	switch {
-	case a.Negative != b.Negative, a.Offset > b.Offset, a.Num > b.Num:
+	case a.Negative != b.Negative, a.Offset > b.Offset:
 		if a.Negative {
 			return -1
 		}
 		return 1
-	case a.Offset < b.Offset, a.Num < b.Num:
+	case a.Offset < b.Offset:
+		if a.Negative {
+			return 1
+		}
+		return -1
+	}
+	switch {
+	case a.Num > b.Num:
+		if a.Negative {
+			return -1
+		}
+		return 1
+	case a.Num < b.Num:
 		if a.Negative {
 			return 1
 		}
