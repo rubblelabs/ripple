@@ -85,8 +85,7 @@ func ParsePublicKeyFromHash(hash []byte) (*btcec.PublicKey, error) {
 func GenerateRootDeterministicKey(seed []byte) (*RootDeterministicKey, error) {
 	if seed == nil {
 		seed = make([]byte, 16)
-		_, err := rand.Read(seed)
-		if err != nil {
+		if _, err := rand.Read(seed); err != nil {
 			return nil, err
 		}
 	}
