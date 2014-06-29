@@ -7,6 +7,7 @@ import (
 	"reflect"
 )
 
+// ReadWire parses types received via the peer network
 func ReadWire(r Reader, typ NodeType, ledgerSequence uint32) (Hashable, error) {
 	version, err := readHashPrefix(r)
 	if err != nil {
@@ -24,6 +25,7 @@ func ReadWire(r Reader, typ NodeType, ledgerSequence uint32) (Hashable, error) {
 	}
 }
 
+// ReadPrefix parses types received from the nodestore
 func ReadPrefix(r Reader) (Storer, error) {
 	header, err := readHeader(r)
 	if err != nil {
