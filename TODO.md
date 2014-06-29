@@ -12,10 +12,6 @@
 ##Ledger
 * Allow subscribing to incoming Proposals/Validations/Transactions for use in listener
 
-##Storage
-* Add Register() function to storage package
-* Move RocksDB and MemDB down a further level and make them Register in init()
-* Change listener to use MemDB only (make it easier to go get...)
 
 ##Terminal
 
