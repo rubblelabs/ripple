@@ -60,7 +60,7 @@ var amountTests = TestSlice{
 	{mulCheck("200", "-10/USD/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh").String(), Equals, "-0.002/XRP", "Multiply XRP with USD, neg"},
 	{mulCheck("-6000", "37/USD/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh").String(), Equals, "-0.222/XRP", "Multiply XRP with USD, neg, frac"},
 	{mulCheck("2000/USD/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh", "10/USD/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh").String(), Equals, "20000/USD/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh", "Multiply USD with USD"},
-	{mulCheck("2000000/USD/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh", "100000/USD/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh").String(), Equals, "200000000000/USD/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh", "Multiply USD with USD"},
+	{mulCheck("2000000/USD/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh", "100000/USD/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh").String(), Equals, "2e11/USD/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh", "Multiply USD with USD"},
 	{mulCheck("100/EUR/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh", "1000/USD/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh").String(), Equals, "100000/EUR/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh", "Multiply EUR with USD, result < 1"},
 	{mulCheck("-24000/EUR/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh", "2000/USD/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh").String(), Equals, "-48000000/EUR/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh", "Multiply EUR with USD, neg"},
 	{mulCheck("0.1/EUR/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh", "-1000/USD/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh").String(), Equals, "-100/EUR/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh", "Multiply EUR with USD, neg, <1"},
