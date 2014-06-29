@@ -16,7 +16,7 @@ var valueTests = TestSlice{
 	{valueCheck("-0").String(), Equals, "0", "Parse -0"},
 	{valueCheck("-1").String(), Equals, "-1", "Parse -1"},
 	{valueCheck("-0.01").String(), Equals, "-0.01", "Parse -0.01"},
-	//{valueCheck("9999999999999999e80").String(), Equals, "9999999999999999e80", "Parse 9999999999999999e80"},
+	{valueCheck("9999999999999999e80").String(), Equals, "9999999999999999e80", "Parse 9999999999999999e80"},
 	{valueCheck("1e-96").String(), Equals, "0", "Parse 1e-96"},
 	{ErrorCheck(NewValue("10000000000000000e80", false)), ErrorMatches, "Value overflow: .*", "Parse 10000000000000000e80"},
 	{ErrorCheck(NewValue("9999999999999999e81", false)), ErrorMatches, "Value overflow: .*", "Parse 9999999999999999e81"},

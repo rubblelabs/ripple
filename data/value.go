@@ -349,7 +349,7 @@ func (a Value) Compare(b Value) int {
 }
 
 func (v Value) IsScientific() bool {
-	return v.Offset != 0 && (v.Offset < -25 || v.Offset > -5)
+	return v.Offset != 0 && (v.Offset < -25 || v.Offset > 5)
 }
 
 func (v Value) IsZero() bool {
@@ -377,7 +377,7 @@ func (v Value) String() string {
 	if v.IsZero() {
 		return "0"
 	}
-	if v.Native && v.IsScientific() {
+	if !v.Native && v.IsScientific() {
 		value := strconv.FormatUint(v.Num, 10)
 		offset := strconv.FormatInt(v.Offset, 10)
 		if v.Negative {
