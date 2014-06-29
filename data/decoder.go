@@ -39,7 +39,7 @@ func ReadPrefix(r Reader) (Storer, error) {
 	case header.NodeType == NT_LEDGER:
 		return ReadLedger(r)
 	case header.NodeType == NT_TRANSACTION_NODE:
-		return readTransactionWithMetadata(r, header.LedgerIndex)
+		return readTransactionWithMetadata(r, header.LedgerSequence)
 	case header.NodeType == NT_ACCOUNT_NODE:
 		return readLedgerEntry(r)
 	default:
@@ -72,6 +72,58 @@ func ReadTransaction(r Reader) (Transaction, error) {
 		return nil, err
 	}
 	return tx, nil
+}
+
+// ReadTransactionAndMetadata combines the inputs from the two
+// readers into a TransactionWithMetaData
+func ReadTransactionAndMetadata(tx, meta Reader, ledger uint32) (*TransactionWithMetaData, error) {
+	t, err := ReadTransaction(tx)
+	if err != nil {
+		return nil, err
+	}
+	txm := &TransactionWithMetaData{
+		Transaction:    t,
+		LedgerSequence: ledger,
+	}
+	m := reflect.ValueOf(&txm.MetaData)
+	if err := readObject(meta, &m); err != nil {
+		return nil, err
+	}
+	return txm, nil
+}
+
+// For internal use when reading Prefix format
+func readTransactionWithMetadata(r Reader, ledger uint32) (*TransactionWithMetaData, error) {
+	br, err := NewVariableByteReader(r)
+	if err != nil {
+		return nil, err
+	}
+	tx, err := ReadTransaction(br)
+	if err != nil {
+		return nil, err
+	}
+	txm := &TransactionWithMetaData{
+		Transaction:    tx,
+		LedgerSequence: ledger,
+	}
+	br, err = NewVariableByteReader(r)
+	if err != nil {
+		return nil, err
+	}
+	meta := reflect.ValueOf(&txm.MetaData)
+	if err := readObject(br, &meta); err != nil {
+		return nil, err
+	}
+	hash := make([]byte, 32)
+	n, err := r.Read(hash)
+	if err != nil {
+		return nil, err
+	}
+	if n != 32 {
+		return nil, fmt.Errorf("Bad hash")
+	}
+	txm.SetHash(hash)
+	return txm, nil
 }
 
 func readHashPrefix(r Reader) (HashPrefix, error) {
@@ -116,39 +168,6 @@ func readCompressedInnerNode(r Reader, typ NodeType) (*InnerNode, error) {
 		inner.Children[entry.Pos] = entry.Hash
 	}
 	return &inner, nil
-}
-
-func readTransactionWithMetadata(r Reader, ledger uint32) (*TransactionWithMetaData, error) {
-	br, err := NewVariableByteReader(r)
-	if err != nil {
-		return nil, err
-	}
-	tx, err := ReadTransaction(br)
-	if err != nil {
-		return nil, err
-	}
-	txMeta := &TransactionWithMetaData{
-		Transaction:    tx,
-		LedgerSequence: ledger,
-	}
-	br, err = NewVariableByteReader(r)
-	if err != nil {
-		return nil, err
-	}
-	meta := reflect.ValueOf(&txMeta.MetaData)
-	if err := readObject(br, &meta); err != nil {
-		return nil, err
-	}
-	hash := make([]byte, 32)
-	n, err := r.Read(hash)
-	if err != nil {
-		return nil, err
-	}
-	if n != 32 {
-		return nil, fmt.Errorf("Bad hash")
-	}
-	txMeta.SetHash(hash)
-	return txMeta, nil
 }
 
 func readLedgerEntry(r Reader) (LedgerEntry, error) {

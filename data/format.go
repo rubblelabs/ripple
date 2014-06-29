@@ -56,9 +56,9 @@ var nodeTypes = [...]string{
 }
 
 type NodeHeader struct {
-	LedgerIndex uint32
-	_           uint32 //padding for repeated LedgerIndex
-	NodeType    NodeType
+	LedgerSequence uint32
+	_              uint32 //padding for repeated LedgerIndex
+	NodeType       NodeType
 }
 
 type enc struct {
