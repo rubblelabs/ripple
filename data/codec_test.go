@@ -68,3 +68,11 @@ func (s *CodecSuite) TestParseNodes(c *C) {
 		c.Assert(string(b2h(value))[16:], Equals, test.Encoded[16:], msg)
 	}
 }
+
+func (s *CodecSuite) TestBadNodes(c *C) {
+	for _, test := range internal.BadNodes {
+		n, err := ReadPrefix(test.Reader())
+		msg := dump(test, n)
+		c.Assert(err, Not(IsNil), msg)
+	}
+}

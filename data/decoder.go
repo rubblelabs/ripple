@@ -3,7 +3,6 @@ package data
 import (
 	"errors"
 	"fmt"
-	"io"
 	"reflect"
 )
 
@@ -117,15 +116,11 @@ func readTransactionWithMetadata(r Reader, ledger uint32) (*TransactionWithMetaD
 	if err := readObject(br, &meta); err != nil {
 		return nil, err
 	}
-	hash := make([]byte, 32)
-	n, err := r.Read(hash)
+	hash, err := readHash(r)
 	if err != nil {
 		return nil, err
 	}
-	if n != 32 {
-		return nil, fmt.Errorf("Bad hash")
-	}
-	txm.SetHash(hash)
+	txm.SetHash(hash[:])
 	return txm, nil
 }
 
@@ -212,14 +207,11 @@ func readObject(r Reader, v *reflect.Value) error {
 	for enc, err := readEncoding(r); err == nil; enc, err = readEncoding(r) {
 		name := encodings[*enc]
 		// fmt.Println(name, v, v.IsValid(), enc.typ, enc.field)
-		if name == "EndOfArray" {
-			return errorEndOfArray
-		}
-		if name == "EndOfObject" {
-			return errorEndOfObject
-		}
 		switch enc.typ {
 		case ST_ARRAY:
+			if name == "EndOfArray" {
+				return errorEndOfArray
+			}
 			array := getField(v, enc)
 		loop:
 			for {
@@ -236,6 +228,8 @@ func readObject(r Reader, v *reflect.Value) error {
 			}
 		case ST_OBJECT:
 			switch name {
+			case "EndOfObject":
+				return errorEndOfObject
 			case "PreviousFields", "NewFields", "FinalFields":
 				var fields Fields
 				f := reflect.ValueOf(&fields)
@@ -262,20 +256,21 @@ func readObject(r Reader, v *reflect.Value) error {
 				panic(fmt.Sprintf("Unknown object: %+v", enc))
 			}
 		default:
+			if v.Kind() == reflect.Struct {
+				return fmt.Errorf("Unexpected object: %s for field: %s", v.Type(), name)
+			}
 			field := getField(v, enc)
-			if w, ok := field.Addr().Interface().(Wire); ok {
-				if err := w.Unmarshal(r); err != nil {
+			switch v := field.Addr().Interface().(type) {
+			case Wire:
+				if err := v.Unmarshal(r); err != nil {
 					return err
 				}
-			} else {
-				if err := read(r, field.Addr().Interface()); err != nil {
+			default:
+				if err := read(r, v); err != nil {
 					return err
 				}
 			}
 		}
-	}
-	if err == io.EOF {
-		return nil
 	}
 	return err
 }
