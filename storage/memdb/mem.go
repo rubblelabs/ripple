@@ -89,4 +89,4 @@ func (mem *MemoryDB) Stats() string {
 	return fmt.Sprintf("Nodes:%d", len(mem.nodes))
 }
 
-func (mem *MemoryDB) Close() {}
+func (mem *MemoryDB) Close() error { return nil }

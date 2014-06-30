@@ -12,7 +12,7 @@ type DB interface {
 	Get(hash data.Hash256) (data.Storer, error)
 	Insert(data.Storer) error
 	Stats() string
-	Close()
+	Close() error
 }
 
 type IndexedDB interface {
