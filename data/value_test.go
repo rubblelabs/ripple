@@ -11,41 +11,41 @@ var _ = Suite(&ValueSuite{})
 
 var valueTests = TestSlice{
 	// Zero
-	{Value{false, false, 0, -15}.String(), Equals, "0", "String 0, -15"},
-	{Value{false, false, 0, -25}.String(), Equals, "0", "String 0, -25"},
-	{Value{false, false, 0, -26}.String(), Equals, "0", "String 0, -26"},
-	{Value{false, false, 0, -5}.String(), Equals, "0", "String 0, -5"},
-	{Value{false, false, 0, -4}.String(), Equals, "0", "String 0, -4"},
-	{Value{false, true, 0, -15}.String(), Equals, "0", "String -0, -15"},
-	{Value{false, true, 0, -25}.String(), Equals, "0", "String -0, -25"},
-	{Value{false, true, 0, -26}.String(), Equals, "0", "String -0, -26"},
-	{Value{false, true, 0, -5}.String(), Equals, "0", "String -0, -5"},
-	{Value{false, true, 0, -4}.String(), Equals, "0", "String -0, -4"},
+	{valueCheckCanonical(false, false, 0, -15).String(), Equals, "0", "String 0, -15"},
+	{valueCheckCanonical(false, false, 0, -25).String(), Equals, "0", "String 0, -25"},
+	{valueCheckCanonical(false, false, 0, -26).String(), Equals, "0", "String 0, -26"},
+	{valueCheckCanonical(false, false, 0, -5).String(), Equals, "0", "String 0, -5"},
+	{valueCheckCanonical(false, false, 0, -4).String(), Equals, "0", "String 0, -4"},
+	{valueCheckCanonical(false, true, 0, -15).String(), Equals, "0", "String -0, -15"},
+	{valueCheckCanonical(false, true, 0, -25).String(), Equals, "0", "String -0, -25"},
+	{valueCheckCanonical(false, true, 0, -26).String(), Equals, "0", "String -0, -26"},
+	{valueCheckCanonical(false, true, 0, -5).String(), Equals, "0", "String -0, -5"},
+	{valueCheckCanonical(false, true, 0, -4).String(), Equals, "0", "String -0, -4"},
 
 	// Canonicalized values
-	{Value{false, false, 1230000000000000, -15}.String(), Equals, "1.23", "String 1230000000000000, -15"},
-	{Value{false, false, 1230000000000000, -25}.String(), Equals, "0.000000000123", "String 1230000000000000, -25"},
-	{Value{false, false, 1230000000000000, -26}.String(), Equals, "123e-13", "String 1230000000000000, -26"},
-	{Value{false, false, 1230000000000000, -5}.String(), Equals, "12300000000", "String 1230000000000000, -5"},
-	{Value{false, false, 1230000000000000, -4}.String(), Equals, "123e9", "String 1230000000000000, -4"},
-	{Value{false, false, 9999999999999999, 80}.String(), Equals, "9999999999999999e80", "String 9999999999999999, 80"},
-	{Value{false, false, 1000000000000000, -96}.String(), Equals, "1e-81", "String 1000000000000000, -96"},
-	{Value{false, true, 1230000000000000, -15}.String(), Equals, "-1.23", "String -1230000000000000, -15"},
-	{Value{false, true, 1230000000000000, -25}.String(), Equals, "-0.000000000123", "String -1230000000000000, -25"},
-	{Value{false, true, 1230000000000000, -26}.String(), Equals, "-123e-13", "String -1230000000000000, -26"},
-	{Value{false, true, 1230000000000000, -5}.String(), Equals, "-12300000000", "String -1230000000000000, -5"},
-	{Value{false, true, 1230000000000000, -4}.String(), Equals, "-123e9", "String -1230000000000000, -4"},
-	{Value{false, true, 9999999999999999, 80}.String(), Equals, "-9999999999999999e80", "String -9999999999999999, 80"},
-	{Value{false, true, 1000000000000000, -96}.String(), Equals, "-1e-81", "String -1000000000000000, -96"},
+	{valueCheckCanonical(false, false, 1230000000000000, -15).String(), Equals, "1.23", "String 1230000000000000, -15"},
+	{valueCheckCanonical(false, false, 1230000000000000, -25).String(), Equals, "0.000000000123", "String 1230000000000000, -25"},
+	{valueCheckCanonical(false, false, 1230000000000000, -26).String(), Equals, "123e-13", "String 1230000000000000, -26"},
+	{valueCheckCanonical(false, false, 1230000000000000, -5).String(), Equals, "12300000000", "String 1230000000000000, -5"},
+	{valueCheckCanonical(false, false, 1230000000000000, -4).String(), Equals, "123e9", "String 1230000000000000, -4"},
+	{valueCheckCanonical(false, false, 9999999999999999, 80).String(), Equals, "9999999999999999e80", "String 9999999999999999, 80"},
+	{valueCheckCanonical(false, false, 1000000000000000, -96).String(), Equals, "1e-81", "String 1000000000000000, -96"},
+	{valueCheckCanonical(false, true, 1230000000000000, -15).String(), Equals, "-1.23", "String -1230000000000000, -15"},
+	{valueCheckCanonical(false, true, 1230000000000000, -25).String(), Equals, "-0.000000000123", "String -1230000000000000, -25"},
+	{valueCheckCanonical(false, true, 1230000000000000, -26).String(), Equals, "-123e-13", "String -1230000000000000, -26"},
+	{valueCheckCanonical(false, true, 1230000000000000, -5).String(), Equals, "-12300000000", "String -1230000000000000, -5"},
+	{valueCheckCanonical(false, true, 1230000000000000, -4).String(), Equals, "-123e9", "String -1230000000000000, -4"},
+	{valueCheckCanonical(false, true, 9999999999999999, 80).String(), Equals, "-9999999999999999e80", "String -9999999999999999, 80"},
+	{valueCheckCanonical(false, true, 1000000000000000, -96).String(), Equals, "-1e-81", "String -1000000000000000, -96"},
 
-	{*valueCheck("0"), Equals, Value{false, false, 0, -100}, "Parse 0"},
-	{*valueCheck("1"), Equals, Value{false, false, 1000000000000000, -15}, "Parse 1"},
-	{*valueCheck("0.01"), Equals, Value{false, false, 1000000000000000, -17}, "Parse 0.01"},
-	{*valueCheck("-0"), Equals, Value{false, false, 0, -100}, "Parse -0"},
-	{*valueCheck("-1"), Equals, Value{false, true, 1000000000000000, -15}, "Parse -1"},
-	{*valueCheck("-0.01"), Equals, Value{false, true, 1000000000000000, -17}, "Parse -0.01"},
-	{*valueCheck("9999999999999999e80"), Equals, Value{false, false, 9999999999999999, 80}, "Parse 9999999999999999e80"},
-	{*valueCheck("1e-81"), Equals, Value{false, false, 1000000000000000, -96}, "Parse 1e-81"},
+	{valueCheck("0"), DeepEquals, valueCheckCanonical(false, false, 0, -100), "Parse 0"},
+	{valueCheck("1"), DeepEquals, valueCheckCanonical(false, false, 1000000000000000, -15), "Parse 1"},
+	{valueCheck("0.01"), DeepEquals, valueCheckCanonical(false, false, 1000000000000000, -17), "Parse 0.01"},
+	{valueCheck("-0"), DeepEquals, valueCheckCanonical(false, false, 0, -100), "Parse -0"},
+	{valueCheck("-1"), DeepEquals, valueCheckCanonical(false, true, 1000000000000000, -15), "Parse -1"},
+	{valueCheck("-0.01"), DeepEquals, valueCheckCanonical(false, true, 1000000000000000, -17), "Parse -0.01"},
+	{valueCheck("9999999999999999e80"), DeepEquals, valueCheckCanonical(false, false, 9999999999999999, 80), "Parse 9999999999999999e80"},
+	{valueCheck("1e-81"), DeepEquals, valueCheckCanonical(false, false, 1000000000000000, -96), "Parse 1e-81"},
 
 	{*valueCheck("1e-82"), Equals, Value{false, false, 0, 0}, "Parse 1e-82 (silent underflow)"},
 	{ErrorCheck(NewValue("1e96", false)), ErrorMatches, "Value overflow: .*", "Parse 1e96 (overflow)"},
@@ -159,6 +159,14 @@ func valueCheck(v string) *Value {
 	} else {
 		return a
 	}
+}
+
+func valueCheckCanonical(native, negative bool, num uint64, offset int64) *Value {
+	v := newValue(native, negative, num, offset)
+	if err := v.canonicalise(); err != nil {
+		panic(err)
+	}
+	return v
 }
 
 func equalValCheck(a, b string) bool {
