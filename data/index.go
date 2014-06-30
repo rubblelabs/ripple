@@ -28,15 +28,15 @@ func (i *NodeIndex) Next() *NodeIndex {
 func LedgerIndex(le LedgerEntry) (*Hash256, error) {
 	switch v := le.(type) {
 	case *AccountRoot:
-		return GetAccountRootIndex(*v.Account)
+		return GetAccountRootIndex(v.Account)
 	case *RippleState:
 		return GetRippleStateIndex(v.LowLimit.Issuer, v.HighLimit.Issuer, v.Balance.Currency)
 	case *Offer:
-		return GetOfferIndex(*v.Account, *v.Sequence)
+		return GetOfferIndex(v.Account, v.Sequence)
 	case *LedgerHashes:
 		return GetLedgerHashIndex()
 	case *Directory:
-		return GetDirectoryNodeIndex(*v.RootIndex, v.IndexPrevious.Next())
+		return GetDirectoryNodeIndex(v.RootIndex, v.IndexPrevious.Next())
 	default:
 		return nil, fmt.Errorf("Unknown LedgerEntry")
 	}
