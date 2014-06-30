@@ -7,9 +7,12 @@ import (
 type Hashable interface {
 	GetType() string
 	Prefix() HashPrefix
+	Hash() Hash256
+	SetHash([]byte)
 }
 
 type Signer interface {
+	Hashable
 	SigningPrefix() HashPrefix
 	GetPublicKey() *PublicKey
 	GetSignature() *VariableLength
@@ -22,10 +25,6 @@ type Router interface {
 
 type Storer interface {
 	Hashable
-	Hash() Hash256
-	Raw() []byte
-	SetHash([]byte)
-	SetRaw([]byte)
 	Ledger() uint32
 	NodeType() NodeType
 }
@@ -36,7 +35,6 @@ type LedgerEntry interface {
 }
 
 type Transaction interface {
-	Hashable
 	Signer
 	GetTransactionType() TransactionType
 	GetBase() *TxBase

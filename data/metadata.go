@@ -85,7 +85,6 @@ func (s TransactionSlice) Less(i, j int) bool {
 }
 
 type TransactionWithMetaData struct {
-	hashable
 	Transaction
 	MetaData       MetaData `json:"meta"`
 	LedgerSequence uint32   `json:"ledger_index"`

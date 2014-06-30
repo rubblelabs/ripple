@@ -1,6 +1,7 @@
 package data
 
 type TxBase struct {
+	hashable
 	TransactionType    TransactionType
 	Flags              *TransactionFlag `json:",omitempty"`
 	SourceTag          *uint32          `json:",omitempty"`

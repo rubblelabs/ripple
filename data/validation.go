@@ -1,6 +1,7 @@
 package data
 
 type Validation struct {
+	hashable
 	Flags            uint32
 	LedgerHash       Hash256
 	LedgerSequence   uint32

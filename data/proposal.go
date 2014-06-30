@@ -1,6 +1,7 @@
 package data
 
 type Proposal struct {
+	hashable
 	LedgerHash     Hash256
 	PreviousLedger Hash256
 	Sequence       uint32
