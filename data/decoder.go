@@ -260,6 +260,9 @@ func readObject(r Reader, v *reflect.Value) error {
 				return fmt.Errorf("Unexpected object: %s for field: %s", v.Type(), name)
 			}
 			field := getField(v, enc)
+			if !field.CanAddr() {
+				return fmt.Errorf("Missing field: %s", name)
+			}
 			switch v := field.Addr().Interface().(type) {
 			case Wire:
 				if err := v.Unmarshal(r); err != nil {
