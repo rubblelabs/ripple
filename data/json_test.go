@@ -2,10 +2,10 @@ package data
 
 import (
 	"encoding/json"
+	"github.com/juju/testing/checkers"
 	"io/ioutil"
 	. "launchpad.net/gocheck"
 	"path/filepath"
-	"reflect"
 )
 
 type JSONSuite struct{}
@@ -20,11 +20,7 @@ func compare(c *C, filename string, expected, obtained []byte) {
 	obtainedFields := make(map[string]interface{})
 	err = json.Unmarshal(obtained, &obtainedFields)
 	c.Assert(err, IsNil)
-
-	if !reflect.DeepEqual(expectedFields, obtainedFields) {
-		c.Logf("Want (%s): %s\n Got: %s\n", filename, expected, obtained)
-		c.Fail()
-	}
+	c.Check(expectedFields, checkers.DeepEquals, obtainedFields)
 }
 
 func (s *JSONSuite) TestTransactionsJSON(c *C) {
