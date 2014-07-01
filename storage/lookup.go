@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"encoding"
+	"fmt"
 	"github.com/donovanhide/ripple/data"
 	"reflect"
 	"sync"
@@ -73,16 +73,12 @@ func (l *lookup) Lookup(value interface{}) (uint32, error) {
 	if ok {
 		return id, nil
 	}
-	human, err := v.Interface().(encoding.TextMarshaler).MarshalText()
-	if err != nil {
-		return id, err
-	}
 	item := &LookupItem{
 		Id:    id,
 		Value: v.Slice(0, v.Len()).Interface(),
-		Human: string(human),
+		Human: value.(fmt.Stringer).String(),
 	}
-	err = l.db.InsertLookup(l.insert, item)
+	err := l.db.InsertLookup(l.insert, item)
 	return id, err
 }
 
