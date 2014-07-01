@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math"
+	"strconv"
 )
 
 type Currency [20]byte
@@ -117,6 +118,12 @@ func (c Currency) Machine() string {
 	case CT_XRP:
 		return "XRP"
 	case CT_STANDARD:
+		// Check for unprintable characters
+		for _, r := range string(c[12:15]) {
+			if !strconv.IsPrint(r) {
+				return string(b2h(c[:]))
+			}
+		}
 		return string(c[12:15])
 	default:
 		return string(b2h(c[:]))
