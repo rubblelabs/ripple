@@ -36,6 +36,9 @@ type Manager struct {
 	// Current websockets.Remote
 	remote *Remote
 
+	// Whether the remote is currently connected
+	remoteConnected bool
+
 	// Next ledger to anticipate
 	nextLedgerSequence uint32
 }
@@ -60,8 +63,9 @@ func (m *Manager) runLedgerBuffer() {
 	for {
 		select {
 		case <-watchdogTimer.C:
-			if m.remote != nil {
+			if m.remoteConnected {
 				m.remote.Close()
+				m.remoteConnected = false
 			}
 			watchdogTimer.Reset(TIMEOUT)
 
@@ -78,7 +82,7 @@ func (m *Manager) runLedgerBuffer() {
 				}
 
 				// If we still have a gap, request the next ledger
-				if len(ledgerBuffer) > 0 {
+				if len(ledgerBuffer) > 0 && m.remoteConnected {
 					go m.getLedger(m.nextLedgerSequence)
 				}
 
@@ -88,7 +92,7 @@ func (m *Manager) runLedgerBuffer() {
 				// Ledger is not the one we need. Stash it.
 
 				// If a gap was just created, start filling it
-				if len(ledgerBuffer) == 0 {
+				if len(ledgerBuffer) == 0 && m.remoteConnected {
 					go m.getLedger(m.nextLedgerSequence)
 				}
 
@@ -98,10 +102,8 @@ func (m *Manager) runLedgerBuffer() {
 			} else {
 				glog.Errorf("Received old ledger: %d", l.LedgerSequence)
 			}
-
 		}
 	}
-
 }
 
 // Runs forever
@@ -129,8 +131,17 @@ func (m *Manager) handleConnection(uri string) {
 		return
 	}
 	go m.remote.Run()
+	m.remoteConnected = true
+	defer func() {
+		m.remoteConnected = false
+	}()
 
 	res, err := m.remote.Subscribe(true, true, false)
+	if err != nil {
+		glog.Errorf(err.Error())
+		m.remote.Close()
+		return
+	}
 	glog.Infof(
 		"Subscribed at %d\n",
 		res.LedgerSequence,
@@ -151,7 +162,7 @@ func (m *Manager) handleConnection(uri string) {
 
 		switch msg := msg.(type) {
 		case *LedgerStreamMsg:
-			glog.V(1).Infof("Ledger %d", msg.LedgerSequence)
+			glog.V(2).Infof("Ledger %d", msg.LedgerSequence)
 			currLedger = &ManagedLedger{
 				LedgerSequence: msg.LedgerSequence,
 				CloseTime:      msg.LedgerTime,
@@ -160,7 +171,7 @@ func (m *Manager) handleConnection(uri string) {
 			currLedgerTxnCount = msg.TxnCount
 
 		case *TransactionStreamMsg:
-			glog.V(1).Infof("Txn %s", msg.Transaction.Hash())
+			glog.V(2).Infof("Txn %s", msg.Transaction.Hash())
 			currLedger.Transactions = append(currLedger.Transactions, &msg.Transaction)
 
 			if len(currLedger.Transactions) == int(currLedgerTxnCount) {
