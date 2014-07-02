@@ -66,6 +66,7 @@ func (mem *MemoryDB) Get(hash data.Hash256) (data.Storer, error) {
 	if !ok {
 		return nil, storage.ErrNotFound
 	}
+	*node.GetHash() = hash
 	return node, nil
 }
 

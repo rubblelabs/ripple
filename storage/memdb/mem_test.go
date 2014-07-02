@@ -21,4 +21,7 @@ func TestMemStore(t *testing.T) {
 	if _, ok := n1.(data.LedgerEntry); !ok {
 		t.Fatalf("Expected LedgerEntry Got:%+v", n1)
 	}
+	if h1.Compare(*n1.GetHash()) != 0 {
+		t.Fatalf("Expected Hash: %s Got:%s", h1, n1.GetHash())
+	}
 }

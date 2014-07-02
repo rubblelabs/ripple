@@ -31,7 +31,6 @@ type Storer interface {
 type LedgerEntry interface {
 	Storer
 	GetLedgerEntryType() LedgerEntryType
-	SetIndex(Hash256)
 }
 
 type Transaction interface {
