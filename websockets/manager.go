@@ -171,7 +171,7 @@ func (m *Manager) handleConnection(uri string) {
 			currLedgerTxnCount = msg.TxnCount
 
 		case *TransactionStreamMsg:
-			glog.V(2).Infof("Txn %s", msg.Transaction.Hash())
+			glog.V(2).Infof("Txn %s", msg.Transaction.GetHash())
 			currLedger.Transactions = append(currLedger.Transactions, &msg.Transaction)
 
 			if len(currLedger.Transactions) == int(currLedgerTxnCount) {

@@ -7,8 +7,7 @@ import (
 type Hashable interface {
 	GetType() string
 	Prefix() HashPrefix
-	Hash() Hash256
-	SetHash([]byte)
+	GetHash() *Hash256
 }
 
 type Signer interface {
@@ -32,6 +31,7 @@ type Storer interface {
 type LedgerEntry interface {
 	Storer
 	GetLedgerEntryType() LedgerEntryType
+	SetIndex(Hash256)
 }
 
 type Transaction interface {

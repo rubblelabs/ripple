@@ -1,8 +1,7 @@
 package data
 
 type hashable struct {
-	hash Hash256
+	Hash Hash256 `json:"hash"`
 }
 
-func (h *hashable) Hash() Hash256       { return h.hash }
-func (h *hashable) SetHash(hash []byte) { copy(h.hash[:], hash[:]) }
+func (h *hashable) GetHash() *Hash256 { return &h.Hash }

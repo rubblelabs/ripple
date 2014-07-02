@@ -16,7 +16,6 @@ type ledgerJSON Ledger
 type ledgerExtraJSON struct {
 	ledgerJSON
 	HumanCloseTime *rippleHumanTime `json:"close_time_human"`
-	Hash           Hash256          `json:"hash"`
 	LedgerHash     Hash256          `json:"ledger_hash"`
 	TotalCoins     uint64           `json:"totalCoins,string"`
 	SequenceNumber uint32           `json:"seqNum,string"`
@@ -26,8 +25,7 @@ func (l Ledger) MarshalJSON() ([]byte, error) {
 	return json.Marshal(ledgerExtraJSON{
 		ledgerJSON:     ledgerJSON(l),
 		HumanCloseTime: l.CloseTime.human(),
-		Hash:           l.Hash(),
-		LedgerHash:     l.Hash(),
+		LedgerHash:     l.Hash,
 		TotalCoins:     l.TotalXRP,
 		SequenceNumber: l.LedgerSequence,
 	})
@@ -39,7 +37,6 @@ func (l *Ledger) UnmarshalJSON(b []byte) error {
 		return err
 	}
 	*l = Ledger(ledger.ledgerJSON)
-	l.SetHash(ledger.Hash[:])
 	return nil
 }
 
@@ -101,7 +98,7 @@ func (txm *TransactionWithMetaData) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		return fmt.Errorf("Bad hash: %s", hash)
 	}
-	txm.SetHash(h)
+	copy(txm.GetBase().Hash[:], h)
 	if err := json.Unmarshal(b, txm.Transaction); err != nil {
 		return err
 	}
@@ -155,7 +152,7 @@ func (txm TransactionWithMetaData) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	out := fmt.Sprintf(txmFormat, string(tx[:len(tx)-1]), txm.Hash().String(), txm.LedgerSequence, txm.LedgerSequence, string(meta))
+	out := fmt.Sprintf(txmFormat, string(tx[:len(tx)-1]), txm.GetHash().String(), txm.LedgerSequence, txm.LedgerSequence, string(meta))
 	return []byte(out), nil
 }
 
@@ -169,7 +166,7 @@ func (s TransactionSlice) MarshalJSON() ([]byte, error) {
 		if tx, meta, err = txm.marshalJSON(); err != nil {
 			return nil, err
 		}
-		extra := fmt.Sprintf(txmSliceFormat, string(tx[:len(tx)-1]), txm.Hash().String(), meta)
+		extra := fmt.Sprintf(txmSliceFormat, string(tx[:len(tx)-1]), txm.GetHash().String(), meta)
 		raw[i] = json.RawMessage(extra)
 	}
 	return json.Marshal(raw)
@@ -195,32 +192,12 @@ func (l *LedgerEntrySlice) UnmarshalJSON(b []byte) error {
 			return fmt.Errorf("Missing LedgerEntry index")
 		}
 		le := GetLedgerEntryFactoryByType(leTypeMatch[1])()
-		index, err := hex.DecodeString(indexMatch[1])
-		if err != nil {
-			return fmt.Errorf("Bad index: %s", index)
-		}
-		le.SetHash(index)
 		if err := json.Unmarshal(raw, &le); err != nil {
 			return err
 		}
 		*l = append(*l, le)
 	}
 	return nil
-}
-
-const leSliceFormat = `%s,"index":"%s"}`
-
-func (s LedgerEntrySlice) MarshalJSON() ([]byte, error) {
-	raw := make([]json.RawMessage, len(s))
-	var err error
-	for i, le := range s {
-		if raw[i], err = json.Marshal(le); err != nil {
-			return nil, err
-		}
-		extra := fmt.Sprintf(leSliceFormat, string(raw[i][:len(raw[i])-1]), le.Hash().String())
-		raw[i] = json.RawMessage(extra)
-	}
-	return json.Marshal(raw)
 }
 
 func (i NodeIndex) MarshalText() ([]byte, error) {

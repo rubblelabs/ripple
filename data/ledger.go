@@ -13,8 +13,8 @@ type LedgerHeader struct {
 }
 
 type Ledger struct {
-	hashable
 	LedgerHeader
+	hashable
 	Closed       bool             `json:"closed"`
 	Accepted     bool             `json:"accepted"`
 	Transactions TransactionSlice `json:"transactions"`

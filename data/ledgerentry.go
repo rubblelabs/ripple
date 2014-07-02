@@ -3,10 +3,9 @@ package data
 type LedgerEntrySlice []LedgerEntry
 
 type leBase struct {
-	hashable
 	LedgerEntryType LedgerEntryType
 	Flags           *LedgerEntryFlag `json:",omitempty"`
-	LedgerIndex     *Hash256         `json:",omitempty"`
+	LedgerIndex     *Hash256         `json:"index,omitempty"`
 }
 
 type AccountRoot struct {
@@ -96,6 +95,8 @@ func (le *leBase) GetLedgerEntryType() LedgerEntryType { return le.LedgerEntryTy
 func (le *leBase) Prefix() HashPrefix                  { return HP_LEAF_NODE }
 func (le *leBase) NodeType() NodeType                  { return NT_ACCOUNT_NODE }
 func (le *leBase) Ledger() uint32                      { return 0 }
+func (le *leBase) SetIndex(index Hash256)              { *le.LedgerIndex = index }
+func (le *leBase) GetHash() *Hash256                   { return nil }
 
 func (o *Offer) Ratio() *Value {
 	return o.TakerPays.Ratio(o.TakerGets)

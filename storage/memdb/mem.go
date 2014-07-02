@@ -70,11 +70,11 @@ func (mem *MemoryDB) Get(hash data.Hash256) (data.Storer, error) {
 }
 
 func (mem *MemoryDB) Insert(item data.Storer) error {
-	if item.Hash().IsZero() {
+	if item.GetHash().IsZero() {
 		return fmt.Errorf("Cannot insert unhashed item")
 	}
 	mem.mu.Lock()
-	mem.nodes[item.Hash()] = item
+	mem.nodes[*item.GetHash()] = item
 	mem.mu.Unlock()
 	return nil
 }

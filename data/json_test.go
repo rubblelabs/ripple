@@ -20,7 +20,7 @@ func compare(c *C, filename string, expected, obtained []byte) {
 	obtainedFields := make(map[string]interface{})
 	err = json.Unmarshal(obtained, &obtainedFields)
 	c.Assert(err, IsNil)
-	c.Check(expectedFields, checkers.DeepEquals, obtainedFields)
+	c.Check(obtainedFields, checkers.DeepEquals, expectedFields)
 }
 
 func (s *JSONSuite) TestTransactionsJSON(c *C) {

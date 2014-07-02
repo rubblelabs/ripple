@@ -148,6 +148,9 @@ func getFields(v *reflect.Value) fieldSlice {
 	for i, length := 0, v.NumField(); i < length; i++ {
 		f := v.Field(i)
 		fieldName := v.Type().Field(i).Name
+		if fieldName == "Hash" {
+			continue
+		}
 		encoding := reverseEncodings[fieldName]
 		// fmt.Println(fieldName, encoding, f, f.Kind())
 		if f.Kind() == reflect.Interface {

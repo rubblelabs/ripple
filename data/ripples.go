@@ -176,10 +176,7 @@ func (txm *TransactionWithMetaData) Trades() (TradeSlice, error) {
 			trades.Add(&account, current.Account, paid, got)
 		}
 		if reason != "" {
-			fmt.Println(txm.LedgerSequence, txm.Hash().String(), reason)
-			// fmt.Println(reason)
-			// out, _ := json.MarshalIndent(node, "", "  ")
-			// fmt.Println(string(out))
+			fmt.Println(txm.LedgerSequence, txm.GetHash().String(), reason)
 		}
 	}
 	sort.Sort(trades)
