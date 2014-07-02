@@ -21,7 +21,7 @@ func main() {
 		for _, tx := range ledger.Transactions {
 			fmt.Printf(
 				"    %s\n",
-				tx.Hash(),
+				tx.GetHash(),
 			)
 		}
 	}
