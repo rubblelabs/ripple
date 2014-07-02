@@ -88,6 +88,10 @@ func (h Hash256) TruncatedString(length int) string {
 	return string(b2h(h[:length]))
 }
 
+func (h *Hash256) Scan(src interface{}) error {
+	return scan(h[:], src, "Hash256")
+}
+
 func (v Vector256) String() string {
 	var s []string
 	for _, h := range v {

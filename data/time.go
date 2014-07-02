@@ -1,6 +1,7 @@
 package data
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -41,6 +42,15 @@ func (t *RippleTime) SetString(s string) error {
 		return err
 	}
 	t.SetUint32(convertToRippleTime(v))
+	return nil
+}
+
+func (t *RippleTime) Scan(src interface{}) error {
+	v, ok := src.(int64)
+	if !ok {
+		return fmt.Errorf("Cannot scan %+v into RippleTime", src)
+	}
+	t.T = uint32(v)
 	return nil
 }
 
