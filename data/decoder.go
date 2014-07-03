@@ -90,7 +90,7 @@ func ReadTransactionAndMetadata(tx, meta Reader, hash Hash256, ledger uint32) (*
 	if err := readObject(meta, &m); err != nil {
 		return nil, err
 	}
-	txm.Transaction.GetBase().Hash = hash
+	*txm.GetHash() = hash
 	return txm, nil
 }
 
