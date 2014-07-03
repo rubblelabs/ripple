@@ -160,7 +160,7 @@ func (k *RegularKey) Marshal(w io.Writer) error {
 
 func (p *PathSet) Unmarshal(r Reader) error {
 	for i := 0; ; i++ {
-		*p = append(*p, Paths{})
+		*p = append(*p, Path{})
 		for b, err := r.ReadByte(); ; b, err = r.ReadByte() {
 			entry := pathEntry(b)
 			if entry == PATH_BOUNDARY {
@@ -172,26 +172,26 @@ func (p *PathSet) Unmarshal(r Reader) error {
 			if entry == PATH_END {
 				return nil
 			}
-			var path Path
+			var pe pathElem
 			if entry&PATH_ACCOUNT > 0 {
-				path.Account = new(Account)
-				if _, err := r.Read(path.Account.Bytes()); err != nil {
+				pe.Account = new(Account)
+				if _, err := r.Read(pe.Account.Bytes()); err != nil {
 					return err
 				}
 			}
 			if entry&PATH_CURRENCY > 0 {
-				path.Currency = new(Currency)
-				if _, err := r.Read(path.Currency.Bytes()); err != nil {
+				pe.Currency = new(Currency)
+				if _, err := r.Read(pe.Currency.Bytes()); err != nil {
 					return err
 				}
 			}
 			if entry&PATH_ISSUER > 0 {
-				path.Issuer = new(Account)
-				if _, err := r.Read(path.Issuer.Bytes()); err != nil {
+				pe.Issuer = new(Account)
+				if _, err := r.Read(pe.Issuer.Bytes()); err != nil {
 					return err
 				}
 			}
-			(*p)[i] = append((*p)[i], path)
+			(*p)[i] = append((*p)[i], pe)
 		}
 	}
 }
