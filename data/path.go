@@ -19,16 +19,65 @@ const (
 	PATH_ISSUER   pathEntry = 0x20
 )
 
-type Path struct {
+// pathElem represents one link in a path.
+type pathElem struct {
 	Account  *Account
 	Currency *Currency
 	Issuer   *Account
 }
 
-type PathSet []Paths
-type Paths []Path
+func newPathElem(s string) (pathElem, error) {
+	var err error
+	pe := pathElem{}
 
-func (p Path) pathEntry() pathEntry {
+	parts := strings.Split(s, "/")
+	switch {
+	case len(parts) == 1:
+		pe.Account, err = NewAccountFromAddress(parts[0])
+		if err != nil {
+			return pe, err
+		}
+
+	case len(parts) == 2:
+		pe.Currency = &Currency{}
+		*pe.Currency, err = NewCurrency(parts[0])
+		if err != nil {
+			return pe, err
+		}
+
+		pe.Issuer, err = NewAccountFromAddress(parts[1])
+		if err != nil {
+			return pe, err
+		}
+
+	default:
+		return pe, fmt.Errorf("Bad pathElem: %s", s)
+	}
+	return pe, nil
+}
+
+// Path represents a single path of liquidity that a transaction may use.
+type Path []pathElem
+
+// NewPath accepts a path consisting of hops delimited by "=>" where each hop
+// is either "<currency>/<issuer>" or "<account>". Whitespace around the delimiter
+// is acceptable and is ignored.
+func NewPath(s string) (Path, error) {
+	p := Path{}
+	for _, part := range strings.Split(s, "=>") {
+		pe, err := newPathElem(strings.TrimSpace(part))
+		if err != nil {
+			return nil, err
+		}
+		p = append(p, pe)
+	}
+	return p, nil
+}
+
+// PathSet represents a collection of possible paths that a transaction may use.
+type PathSet []Path
+
+func (p pathElem) pathEntry() pathEntry {
 	var entry pathEntry
 	if p.Account != nil {
 		entry |= PATH_ACCOUNT
@@ -42,7 +91,7 @@ func (p Path) pathEntry() pathEntry {
 	return entry
 }
 
-func (p Paths) Signature() (uint32, error) {
+func (p Path) Signature() (uint32, error) {
 	checksum := crc32.NewIEEE()
 	for _, path := range p {
 		b := append(path.Account.Bytes(), append(path.Currency.Bytes(), path.Issuer.Bytes()...)...)
@@ -53,7 +102,7 @@ func (p Paths) Signature() (uint32, error) {
 	return checksum.Sum32(), nil
 }
 
-func (p Paths) String() string {
+func (p Path) String() string {
 	var s []string
 	for _, path := range p {
 		s = append(s, path.String())
@@ -61,7 +110,7 @@ func (p Paths) String() string {
 	return strings.Join(s, " => ")
 }
 
-func (p Path) String() string {
+func (p pathElem) String() string {
 	var s []string
 	if p.Account != nil {
 		s = append(s, p.Account.String())
@@ -75,7 +124,7 @@ func (p Path) String() string {
 	return strings.Join(s, "/")
 }
 
-func (p Path) MarshalJSON() ([]byte, error) {
+func (p pathElem) MarshalJSON() ([]byte, error) {
 	typ := p.pathEntry()
 	return json.Marshal(struct {
 		Account  *Account  `json:"account,omitempty"`

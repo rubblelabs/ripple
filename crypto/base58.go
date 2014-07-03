@@ -14,6 +14,9 @@ var bigZero = big.NewInt(0)
 
 // Base58Decode decodes a modified base58 string to a byte slice and checks checksum.
 func Base58Decode(b, alphabet string) ([]byte, error) {
+	if len(b) < 5 {
+		return nil, fmt.Errorf("Base58 string too short: %s", b)
+	}
 	answer := big.NewInt(0)
 	j := big.NewInt(1)
 

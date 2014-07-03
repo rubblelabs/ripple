@@ -196,7 +196,7 @@ func newBundle(value interface{}, flag Flag) (*bundle, error) {
 			values: []interface{}{v.Account, v.Currency, v.Balance, v.Change},
 			flag:   flag,
 		}, nil
-	case data.Paths:
+	case data.Path:
 		sig, err := v.Signature()
 		if err != nil {
 			return nil, err

@@ -8,6 +8,7 @@ import (
 	"github.com/donovanhide/ripple/data"
 	"github.com/donovanhide/ripple/websockets"
 	"os"
+	"strings"
 )
 
 func checkErr(err error) {
@@ -37,6 +38,16 @@ func parseAmount(s string) *data.Amount {
 	return amount
 }
 
+func parsePaths(s string) *data.PathSet {
+	ps := data.PathSet{}
+	for _, pathStr := range strings.Split(s, ",") {
+		path, err := data.NewPath(pathStr)
+		checkErr(err)
+		ps = append(ps, path)
+	}
+	return &ps
+}
+
 func sign(c *cli.Context, tx data.Transaction, sequence int32) {
 	priv, err := key.GenerateAccountKey(sequence)
 	checkErr(err)
@@ -61,6 +72,7 @@ func sign(c *cli.Context, tx data.Transaction, sequence int32) {
 		checkErr(err)
 		base.Fee = *fee
 	}
+	tx.GetBase().TxnSignature = &data.VariableLength{}
 	checkErr(data.Sign(tx, priv))
 }
 
@@ -88,6 +100,14 @@ func payment(c *cli.Context) {
 		Amount:      *amount,
 	}
 	payment.TransactionType = data.PAYMENT
+
+	if c.String("paths") != "" {
+		payment.Paths = parsePaths(c.String("paths"))
+	}
+
+	if c.String("sendmax") != "" {
+		payment.SendMax = parseAmount(c.String("sendmax"))
+	}
 
 	payment.Flags = new(data.TransactionFlag)
 	if c.Bool("nodirect") {
