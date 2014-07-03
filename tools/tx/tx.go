@@ -61,6 +61,7 @@ func sign(c *cli.Context, tx data.Transaction, sequence int32) {
 		checkErr(err)
 		base.Fee = *fee
 	}
+	tx.GetBase().TxnSignature = &data.VariableLength{}
 	checkErr(data.Sign(tx, priv))
 }
 
