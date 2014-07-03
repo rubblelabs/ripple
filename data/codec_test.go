@@ -15,18 +15,6 @@ func dump(test internal.TestData, v interface{}) CommentInterface {
 	return Commentf("Test: %s\nJSON:%s\n", test.Description, string(out))
 }
 
-func (s *CodecSuite) TestParseLedgerHeaders(c *C) {
-	for _, test := range internal.LedgerHeaders {
-		ledger, err := ReadLedger(test.Reader())
-		c.Assert(err, IsNil)
-		msg := dump(test, ledger)
-		_, value, err := Node(ledger)
-		c.Assert(err, IsNil, msg)
-		c.Assert(string(b2h(value)[26:]), Equals, test.Encoded, msg)
-		// c.Assert(key, Equals, ledger.Hash())
-	}
-}
-
 func (s *CodecSuite) TestParseTransactions(c *C) {
 	for _, test := range internal.Transactions {
 		tx, err := ReadTransaction(test.Reader())
@@ -63,9 +51,10 @@ func (s *CodecSuite) TestParseNodes(c *C) {
 		n, err := ReadPrefix(test.Reader())
 		msg := dump(test, n)
 		c.Assert(err, IsNil, msg)
-		_, value, err := Node(n)
+		hash, value, err := Node(n)
 		c.Assert(err, IsNil, msg)
 		c.Assert(string(b2h(value))[16:], Equals, test.Encoded[16:], msg)
+		c.Assert(hash.String(), Equals, test.NodeId)
 	}
 }
 
