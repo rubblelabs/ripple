@@ -31,11 +31,19 @@ var (
 	bigTen        = big.NewInt(10)
 	bigTenTo14    = big.NewInt(0).SetUint64(tenTo14)
 	bigTenTo17    = big.NewInt(0).SetUint64(tenTo17)
-	zeroNative    Value
-	zeroNonNative Value
+	zeroNative    = *newValue(true, false, 0, 0)
+	zeroNonNative = *newValue(false, false, 0, 0)
 	xrpMultipler  = newValue(true, false, xrpPrecision, 0)
 )
 
+// Value is the numeric type in Ripple. It can store numbers in two different
+// representations: native and non-native.
+// Non-native numbers are stored as a mantissa (Num) in the range [1e15,1e16)
+// plus an exponent (Offset) in the range [-96,80].
+// Native values are stored as an integer number of "drips" each representing
+// 1/1000000.
+// Throughout the library, native values are interpreted as drips unless
+// otherwise specified.
 type Value struct {
 	Native   bool
 	Negative bool
@@ -44,8 +52,6 @@ type Value struct {
 }
 
 func init() {
-	zeroNative.Native = true
-	zeroNonNative.Native = false
 	if err := zeroNative.canonicalise(); err != nil {
 		panic(err)
 	}
@@ -84,6 +90,9 @@ func NewNativeValue(n int64) (*Value, error) {
 // 7 = exponent number
 var valueRegex = regexp.MustCompile("([+-]?)(\\d*)(\\.(\\d*))?([eE]([+-]?)(\\d+))?")
 
+// NewValue accepts a string representation of a value and a flag to indicate if it
+// should be stored as native. If the native flag is set AND a decimal is used, the
+// number is interpreted as XRP. If no decimal is used, it is interpreted as drips.
 func NewValue(s string, native bool) (*Value, error) {
 	var err error
 	v := Value{
@@ -182,12 +191,12 @@ func (v Value) Clone() *Value {
 // ZeroClone returns a zero Value, native or non-native depending on v's setting.
 func (v Value) ZeroClone() *Value {
 	if v.Native {
-		return &zeroNative
+		return zeroNative.Clone()
 	}
-	return &zeroNonNative
+	return zeroNonNative.Clone()
 }
 
-// Abs returns a copy of v with a positive sign
+// Abs returns a copy of v with a positive sign.
 func (v Value) Abs() *Value {
 	return newValue(v.Native, false, v.Num, v.Offset)
 }
@@ -206,6 +215,15 @@ func (a Value) factor(b Value) (int64, int64, int64) {
 	if b.Negative {
 		bv = -bv
 	}
+
+	if a.IsZero() {
+		return av, bv, bo
+	}
+	if b.IsZero() {
+		return av, bv, ao
+	}
+
+	// FIXME: This can silently underflow
 	for ; ao < bo; ao++ {
 		av /= 10
 	}
@@ -308,47 +326,22 @@ func (num Value) Ratio(den Value) (*Value, error) {
 	return quotient, nil
 }
 
-// Less compares values and returns true
-// if v is less than other
+// Less compares values and returns true if a is less than b.
 func (a Value) Less(b Value) bool {
 	return a.Compare(b) < 0
 }
 
 func (a Value) Equals(b Value) bool {
-	return a.Native == b.Native && a.Compare(b) == 0
+	return a.Compare(b) == 0
 }
 
-//Compare returns an integer comparing two Values. The result will be 0 if a==b, -1 if a < b, and +1 if a > b.
+// Compare returns an integer comparing two Values.
+// The result will be 0 if a==b, -1 if a < b, and +1 if a > b.
 func (a Value) Compare(b Value) int {
-	switch {
-	case a.Negative != b.Negative, a.Offset > b.Offset:
-		if a.Negative {
-			return -1
-		}
-		return 1
-	case a.Offset < b.Offset:
-		if a.Negative {
-			return 1
-		}
-		return -1
-	}
-	switch {
-	case a.Num > b.Num:
-		if a.Negative {
-			return -1
-		}
-		return 1
-	case a.Num < b.Num:
-		if a.Negative {
-			return 1
-		}
-		return -1
-	default:
-		return 0
-	}
+	return a.Rat().Cmp(b.Rat())
 }
 
-// Indicates when value should be String()ed in scientific notation.
+// isScientific indicates when the value should be String()ed in scientific notation.
 func (v Value) isScientific() bool {
 	return v.Offset != 0 && (v.Offset < -25 || v.Offset > -5)
 }
@@ -374,6 +367,29 @@ func (v Value) Bytes() []byte {
 	return b[:]
 }
 
+// Rat returns the value as a big.Rat.
+func (v Value) Rat() *big.Rat {
+	n := big.NewInt(int64(v.Num))
+	if v.Negative {
+		n.Neg(n)
+	}
+
+	d := big.NewInt(1)
+	if v.Offset < 0 {
+		d.Exp(big.NewInt(10), big.NewInt(-v.Offset), nil)
+	} else if v.Offset > 0 {
+		mult := big.NewInt(1)
+		mult.Exp(big.NewInt(10), big.NewInt(v.Offset), nil)
+		n.Mul(n, mult)
+	}
+
+	res := big.NewRat(0, 1)
+	res.SetFrac(n, d)
+	return res
+}
+
+// String returns the Value as a string for human consumption. Native values are
+// represented as decimal XRP rather than drips.
 func (v Value) String() string {
 	if v.IsZero() {
 		return "0"
@@ -388,18 +404,10 @@ func (v Value) String() string {
 		}
 		return value + "e" + offset
 	}
-	value := big.NewInt(int64(v.Num))
-	if v.Negative {
-		value.Neg(value)
-	}
-	var offset *big.Int
+	rat := v.Rat()
 	if v.Native {
-		offset = big.NewInt(-6)
-	} else {
-		offset = big.NewInt(v.Offset)
+		rat.Quo(rat, big.NewRat(int64(xrpPrecision), 1))
 	}
-	exp := offset.Exp(bigTen, offset.Neg(offset), nil)
-	rat := big.NewRat(0, 1).SetFrac(value, exp)
 	left := rat.FloatString(0)
 	if rat.IsInt() {
 		return left
