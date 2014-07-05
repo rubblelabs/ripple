@@ -88,9 +88,15 @@ type TransactionWithMetaData struct {
 	Transaction
 	MetaData       MetaData `json:"meta"`
 	LedgerSequence uint32   `json:"ledger_index"`
+	Id             Hash256  `json:"-"`
 }
 
 func (t TransactionWithMetaData) GetType() string    { return "TransactionWithMetadata" }
 func (t TransactionWithMetaData) Prefix() HashPrefix { return HP_TRANSACTION_NODE }
 func (t TransactionWithMetaData) NodeType() NodeType { return NT_TRANSACTION_NODE }
 func (t TransactionWithMetaData) Ledger() uint32     { return t.LedgerSequence }
+func (t TransactionWithMetaData) NodeId() *Hash256   { return &t.Id }
+
+func NewTransactionWithMetadata(typ TransactionType) *TransactionWithMetaData {
+	return &TransactionWithMetaData{Transaction: TxFactory[typ]()}
+}

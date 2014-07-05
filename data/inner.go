@@ -9,6 +9,7 @@ type InnerNodeFunc func(pos int, child Hash256) error
 
 type InnerNode struct {
 	hashable
+	Id       Hash256
 	Type     NodeType
 	Children [16]Hash256
 }
@@ -22,6 +23,7 @@ func (n InnerNode) GetType() string    { return nodeTypes[n.Type] }
 func (n InnerNode) Prefix() HashPrefix { return HP_INNER_NODE }
 func (n InnerNode) NodeType() NodeType { return n.Type }
 func (n InnerNode) Ledger() uint32     { return 0 }
+func (n InnerNode) NodeId() *Hash256   { return &n.Id }
 
 func (n InnerNode) Each(f InnerNodeFunc) error {
 	for i, node := range n.Children {

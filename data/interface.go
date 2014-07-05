@@ -26,6 +26,7 @@ type Storer interface {
 	Hashable
 	Ledger() uint32
 	NodeType() NodeType
+	NodeId() *Hash256
 }
 
 type LedgerEntry interface {

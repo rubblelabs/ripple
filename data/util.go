@@ -2,7 +2,6 @@ package data
 
 import (
 	"crypto/sha512"
-	"fmt"
 )
 
 const hextable = "0123456789ABCDEF"
@@ -62,14 +61,4 @@ func hashValues(values []interface{}) (Hash256, error) {
 	}
 	copy(hash[:], hasher.Sum(nil))
 	return hash, nil
-}
-
-// support function for satisfying sql.Scanner interface
-func scan(dest []byte, src interface{}, typ string) error {
-	b, ok := src.([]byte)
-	if !ok {
-		return fmt.Errorf("Cannot scan %+v into a %s", src, typ)
-	}
-	copy(dest, b)
-	return nil
 }

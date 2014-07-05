@@ -1,10 +1,5 @@
 package data
 
-import (
-	"fmt"
-	"reflect"
-)
-
 // Horrible look up tables
 // Could all this be one big map?
 
@@ -127,17 +122,4 @@ func GetTxFactoryByType(txType string) func() Transaction {
 
 func GetLedgerEntryFactoryByType(leType string) func() LedgerEntry {
 	return LedgerEntryFactory[ledgerEntryTypes[leType]]
-}
-
-func NewHashable(typ reflect.Type) (Hashable, error) {
-	if leType, ok := ledgerEntryTypes[typ.Name()]; ok {
-		return LedgerEntryFactory[leType](), nil
-	}
-	if txType, ok := txTypes[typ.Name()]; ok {
-		return TxFactory[txType](), nil
-	}
-	if typ.Name() == "Ledger" {
-		return LedgerFactory[0](), nil
-	}
-	return nil, fmt.Errorf("NewHashable: Unknown type: %s ", typ.Name())
 }
