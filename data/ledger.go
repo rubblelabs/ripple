@@ -14,7 +14,7 @@ type LedgerHeader struct {
 
 type Ledger struct {
 	LedgerHeader
-	hashable
+	Hash         Hash256          `json:"hash"`
 	Closed       bool             `json:"closed"`
 	Accepted     bool             `json:"accepted"`
 	Transactions TransactionSlice `json:"transactions"`
@@ -34,3 +34,4 @@ func (l Ledger) Prefix() HashPrefix { return HP_LEDGER_MASTER }
 func (l Ledger) NodeType() NodeType { return NT_LEDGER }
 func (l Ledger) Ledger() uint32     { return l.LedgerSequence }
 func (l Ledger) NodeId() *Hash256   { return &l.Hash }
+func (l Ledger) GetHash() *Hash256  { return &l.Hash }

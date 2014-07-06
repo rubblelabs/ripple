@@ -1,7 +1,6 @@
 package data
 
 type TxBase struct {
-	hashable
 	TransactionType    TransactionType
 	Flags              *TransactionFlag `json:",omitempty"`
 	SourceTag          *uint32          `json:",omitempty"`
@@ -13,6 +12,7 @@ type TxBase struct {
 	Memos              Memos           `json:",omitempty"`
 	PreviousTxnID      *Hash256        `json:",omitempty"`
 	LastLedgerSequence *uint32         `json:",omitempty"`
+	Hash               Hash256         `json:"hash"`
 }
 
 type Payment struct {
@@ -83,6 +83,7 @@ func (t *TxBase) GetPublicKey() *PublicKey            { return t.SigningPubKey }
 func (t *TxBase) GetSignature() *VariableLength       { return t.TxnSignature }
 func (t *TxBase) SigningPrefix() HashPrefix           { return HP_TRANSACTION_SIGN }
 func (t *TxBase) PathSet() PathSet                    { return PathSet(nil) }
+func (t *TxBase) GetHash() *Hash256                   { return &t.Hash }
 
 func (o *OfferCreate) Ratio() *Value {
 	return o.TakerPays.Ratio(o.TakerGets)
