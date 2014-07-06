@@ -124,9 +124,11 @@ func main() {
 	case len(matches[4]) > 0:
 		r := bufio.NewReader(os.Stdin)
 		for line, err := r.ReadString('\n'); err == nil; line, err = r.ReadString('\n') {
+			// TODO: Accept nodeid:nodedata format
 			b, err := hex.DecodeString(line[:len(line)-1])
 			checkErr(err)
-			v, err := data.ReadPrefix(bytes.NewReader(b))
+			var nodeid data.Hash256
+			v, err := data.ReadPrefix(bytes.NewReader(b), nodeid)
 			checkErr(err)
 			terminal.Println(v, terminal.Default)
 		}
