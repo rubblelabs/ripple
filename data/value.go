@@ -183,6 +183,18 @@ func (v *Value) canonicalise() error {
 	return nil
 }
 
+// Native returns a clone of the value in native format.
+func (v Value) Native() (*Value, error) {
+	v.native = true
+	return &v, v.canonicalise()
+}
+
+// NonNative returns a clone of the value in non-native format.
+func (v Value) NonNative() (*Value, error) {
+	v.native = false
+	return &v, v.canonicalise()
+}
+
 // Clone returns a Value which is a copy of v.
 func (v Value) Clone() *Value {
 	return newValue(v.native, v.negative, v.num, v.offset)
@@ -315,13 +327,28 @@ func (num Value) Divide(den Value) (*Value, error) {
 	return v, v.canonicalise()
 }
 
-func (num Value) Ratio(den Value) (*Value, error) {
-	quotient, err := num.Divide(den)
+// Ratio returns the ratio a/b. It works just like Divide, but always returns
+// a non-native Value for additional precision.
+func (a Value) Ratio(b Value) (*Value, error) {
+	var err error
+	num := &a
+	den := &b
+
+	if num.IsNative() {
+		num, err = num.NonNative()
+		if err != nil {
+			return nil, err
+		}
+	}
+	if den.IsNative() {
+		den, err = den.NonNative()
+		if err != nil {
+			return nil, err
+		}
+	}
+	quotient, err := num.Divide(*den)
 	if err != nil {
 		return nil, err
-	}
-	if den.native {
-		return quotient.Multiply(*xrpMultipler)
 	}
 	return quotient, nil
 }
