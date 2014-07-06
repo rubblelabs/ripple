@@ -41,6 +41,20 @@ type bundle struct {
 	flag   Flag
 }
 
+func MemoSymbol(tx data.Transaction) string {
+	if len(tx.GetBase().Memos) > 0 {
+		return "✐"
+	}
+	return " "
+}
+
+func SignSymbol(s data.Signer) string {
+	if valid, err := data.CheckSignature(s); !valid || err != nil {
+		return "✗"
+	}
+	return "✓"
+}
+
 func newLeBundle(v interface{}, flag Flag) (*bundle, error) {
 	var (
 		format = "%-11s "
@@ -80,7 +94,7 @@ func newTxBundle(v data.Transaction, insert string, flag Flag) (*bundle, error) 
 	var (
 		base   = v.GetBase()
 		format = "%s %-11s %-8s %s%s %-34s %-9d "
-		values = []interface{}{data.CheckSymbol(v), base.GetType(), base.Fee, insert, base.MemoSymbol(), base.Account, base.Sequence}
+		values = []interface{}{SignSymbol(v), base.GetType(), base.Fee, insert, MemoSymbol(v), base.Account, base.Sequence}
 	)
 	if flag&ShowTransactionId > 0 {
 		txId, err := data.NodeId(v)
@@ -172,14 +186,14 @@ func newBundle(value interface{}, flag Flag) (*bundle, error) {
 		return &bundle{
 			color:  proposalStyle,
 			format: "%s Proposal:   %s %s %s %s",
-			values: []interface{}{data.CheckSymbol(&v), v.PublicKey.NodePublicKey(), v.CloseTime.String(), v.PreviousLedger, v.LedgerHash},
+			values: []interface{}{SignSymbol(&v), v.PublicKey.NodePublicKey(), v.CloseTime.String(), v.PreviousLedger, v.LedgerHash},
 			flag:   flag,
 		}, nil
 	case data.Validation:
 		return &bundle{
 			color:  validationStyle,
 			format: "%s Validation: %s %s %s %-8d %08X %s",
-			values: []interface{}{data.CheckSymbol(&v), v.SigningPubKey.NodePublicKey(), v.SigningTime.String(), v.LedgerHash, v.LedgerSequence, v.Flags, v.Amendments},
+			values: []interface{}{SignSymbol(&v), v.SigningPubKey.NodePublicKey(), v.SigningTime.String(), v.LedgerHash, v.LedgerSequence, v.Flags, v.Amendments},
 			flag:   flag,
 		}, nil
 	case data.Trade:

@@ -94,11 +94,3 @@ func (p *Payment) PathSet() PathSet {
 	}
 	return *p.Paths
 }
-
-// TODO: Move into terminal.go
-func (t *TxBase) MemoSymbol() string {
-	if len(t.Memos) > 0 {
-		return "✐"
-	}
-	return " "
-}
