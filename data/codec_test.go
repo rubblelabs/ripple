@@ -48,19 +48,26 @@ func (s *CodecSuite) TestValidations(c *C) {
 
 func (s *CodecSuite) TestParseNodes(c *C) {
 	for _, test := range internal.Nodes {
-		n, err := ReadPrefix(test.Reader())
+		nodeId, err := NewHash256(test.NodeId())
+		c.Assert(err, IsNil)
+		n, err := ReadPrefix(test.Reader(), *nodeId)
 		msg := dump(test, n)
 		c.Assert(err, IsNil, msg)
-		hash, value, err := Node(n)
+		c.Check(n.NodeId().String(), Equals, nodeId.String(), Commentf(test.Description))
+		c.Assert(err, IsNil, msg)
+		generatedNodeId, value, err := Node(n)
 		c.Assert(err, IsNil, msg)
 		c.Assert(string(b2h(value))[16:], Equals, test.Encoded[16:], msg)
-		c.Assert(hash.String(), Equals, test.NodeId)
+		c.Assert(generatedNodeId.String(), Equals, nodeId.String(), Commentf(test.Description))
+		c.Assert(n.GetHash().IsZero(), Equals, false)
 	}
 }
 
 func (s *CodecSuite) TestBadNodes(c *C) {
 	for _, test := range internal.BadNodes {
-		n, err := ReadPrefix(test.Reader())
+		nodeid, err := NewHash256(test.NodeId())
+		c.Assert(err, IsNil)
+		n, err := ReadPrefix(test.Reader(), *nodeid)
 		msg := dump(test, n)
 		c.Assert(err, Not(IsNil), msg)
 	}

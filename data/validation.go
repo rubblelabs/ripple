@@ -21,4 +21,4 @@ func (v Validation) GetPublicKey() *PublicKey        { return &v.SigningPubKey }
 func (v Validation) GetSignature() *VariableLength   { return &v.Signature }
 func (v Validation) Prefix() HashPrefix              { return HP_VALIDATION }
 func (v Validation) SigningPrefix() HashPrefix       { return HP_VALIDATION }
-func (v Validation) SuppressionId() (Hash256, error) { return Hash(&v) }
+func (v Validation) SuppressionId() (Hash256, error) { return NodeId(&v) }

@@ -262,7 +262,12 @@ func (p *Peer) handleGetObjectByHashReply(reply *protocol.TMGetObjectByHash) {
 	}
 	for _, obj := range reply.GetObjects() {
 		blob := append(obj.GetData(), obj.GetHash()...)
-		node, err := data.ReadWire(bytes.NewReader(blob), typ, reply.GetSeq())
+		nodeid, err := data.NewHash256(obj.GetIndex())
+		if err != nil {
+			glog.Errorf("%s: %s Ledger: %d Blob: %X", p.String(), err.Error(), reply.GetSeq(), blob)
+			return
+		}
+		node, err := data.ReadWire(bytes.NewReader(blob), typ, reply.GetSeq(), *nodeid)
 		if err != nil {
 			glog.Errorf("%s: %s Ledger: %d Blob: %X", p.String(), err.Error(), reply.GetSeq(), blob)
 			return
@@ -278,7 +283,12 @@ func (p *Peer) handleLedgerData(ledgerData *protocol.TMLedgerData) {
 		glog.Infof("%s: Ignoring: %s", ledgerData.Log())
 		return
 	}
-	ledger, err := data.ReadLedger(bytes.NewReader(ledgerData.Nodes[0].Nodedata))
+	nodeid, err := data.NewHash256(ledgerData.Nodes[0].Nodeid)
+	if err != nil {
+		glog.Errorf("%s: %s", p.String(), err.Error())
+		return
+	}
+	ledger, err := data.ReadLedger(bytes.NewReader(ledgerData.Nodes[0].Nodedata), *nodeid)
 	if err != nil {
 		glog.Errorf("%s: %s", p.String(), err.Error())
 		return

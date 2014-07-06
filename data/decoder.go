@@ -7,25 +7,25 @@ import (
 )
 
 // ReadWire parses types received via the peer network
-func ReadWire(r Reader, typ NodeType, ledgerSequence uint32) (Hashable, error) {
+func ReadWire(r Reader, typ NodeType, ledgerSequence uint32, nodeId Hash256) (Hashable, error) {
 	version, err := readHashPrefix(r)
 	if err != nil {
 		return nil, err
 	}
 	switch version {
 	case HP_LEAF_NODE:
-		return readLedgerEntry(r)
+		return readLedgerEntry(r, nodeId)
 	case HP_TRANSACTION_NODE:
-		return readTransactionWithMetadata(r, ledgerSequence)
+		return readTransactionWithMetadata(r, ledgerSequence, nodeId)
 	case HP_INNER_NODE:
-		return readCompressedInnerNode(r, typ)
+		return readCompressedInnerNode(r, typ, nodeId)
 	default:
 		return nil, fmt.Errorf("Unknown hash prefix: %s", version.String())
 	}
 }
 
 // ReadPrefix parses types received from the nodestore
-func ReadPrefix(r Reader) (Storer, error) {
+func ReadPrefix(r Reader, nodeId Hash256) (Storer, error) {
 	header, err := readHeader(r)
 	if err != nil {
 		return nil, err
@@ -36,21 +36,25 @@ func ReadPrefix(r Reader) (Storer, error) {
 	}
 	switch {
 	case version == HP_INNER_NODE:
-		return readInnerNode(r, header.NodeType)
+		return readInnerNode(r, header.NodeType, nodeId)
 	case header.NodeType == NT_LEDGER:
-		return ReadLedger(r)
+		return ReadLedger(r, nodeId)
 	case header.NodeType == NT_TRANSACTION_NODE:
-		return readTransactionWithMetadata(r, header.LedgerSequence)
+		return readTransactionWithMetadata(r, header.LedgerSequence, nodeId)
 	case header.NodeType == NT_ACCOUNT_NODE:
-		return readLedgerEntry(r)
+		return readLedgerEntry(r, nodeId)
 	default:
 		return nil, fmt.Errorf("Unknown node type")
 	}
 }
 
-func ReadLedger(r Reader) (*Ledger, error) {
+func ReadLedger(r Reader, nodeId Hash256) (*Ledger, error) {
 	ledger := new(Ledger)
-	return ledger, read(r, &ledger.LedgerHeader)
+	if err := read(r, &ledger.LedgerHeader); err != nil {
+		return nil, err
+	}
+	ledger.Hash = nodeId
+	return ledger, nil
 }
 
 func ReadValidation(r Reader) (*Validation, error) {
@@ -91,11 +95,14 @@ func ReadTransactionAndMetadata(tx, meta Reader, hash Hash256, ledger uint32) (*
 		return nil, err
 	}
 	*txm.GetHash() = hash
+	if txm.Id, err = NodeId(txm); err != nil {
+		return nil, err
+	}
 	return txm, nil
 }
 
 // For internal use when reading Prefix format
-func readTransactionWithMetadata(r Reader, ledger uint32) (*TransactionWithMetaData, error) {
+func readTransactionWithMetadata(r Reader, ledger uint32, nodeId Hash256) (*TransactionWithMetaData, error) {
 	br, err := NewVariableByteReader(r)
 	if err != nil {
 		return nil, err
@@ -107,6 +114,7 @@ func readTransactionWithMetadata(r Reader, ledger uint32) (*TransactionWithMetaD
 	txm := &TransactionWithMetaData{
 		Transaction:    tx,
 		LedgerSequence: ledger,
+		Id:             nodeId,
 	}
 	br, err = NewVariableByteReader(r)
 	if err != nil {
@@ -120,8 +128,53 @@ func readTransactionWithMetadata(r Reader, ledger uint32) (*TransactionWithMetaD
 	if err != nil {
 		return nil, err
 	}
-	txm.Transaction.GetBase().Hash = *hash
+	copy(txm.GetHash()[:], hash.Bytes())
 	return txm, nil
+}
+
+func readInnerNode(r Reader, typ NodeType, nodeId Hash256) (*InnerNode, error) {
+	var inner InnerNode
+	inner.Type = typ
+	for i := range inner.Children {
+		if _, err := r.Read(inner.Children[i][:]); err != nil {
+			return nil, err
+		}
+	}
+	copy(inner.Id[:], nodeId.Bytes())
+	return &inner, nil
+}
+
+func readCompressedInnerNode(r Reader, typ NodeType, nodeId Hash256) (*InnerNode, error) {
+	var inner InnerNode
+	inner.Type = typ
+	var entry CompressedNodeEntry
+	for read(r, &entry) == nil {
+		inner.Children[entry.Pos] = entry.Hash
+	}
+	copy(inner.Id[:], nodeId.Bytes())
+	return &inner, nil
+}
+
+func readLedgerEntry(r Reader, nodeId Hash256) (LedgerEntry, error) {
+	leType, err := expectType(r, "LedgerEntryType")
+	if err != nil {
+		return nil, err
+	}
+	le := LedgerEntryFactory[leType]()
+	v := reflect.ValueOf(le)
+	// LedgerEntries have 32 bytes of index suffixed
+	// but don't have a variable bytes indicator
+	lr := LimitedByteReader(r, int64(r.Len()-32))
+	if err := readObject(lr, &v); err != nil {
+		return nil, err
+	}
+	hash, err := readHash(r)
+	if err != nil {
+		return nil, err
+	}
+	copy(le.GetHash()[:], hash.Bytes())
+	copy(le.NodeId()[:], nodeId.Bytes())
+	return le, nil
 }
 
 func readHashPrefix(r Reader) (HashPrefix, error) {
@@ -145,43 +198,6 @@ func readHash(r Reader) (*Hash256, error) {
 	default:
 		return &h, nil
 	}
-}
-
-func readInnerNode(r Reader, typ NodeType) (*InnerNode, error) {
-	var inner InnerNode
-	inner.Type = typ
-	for i := range inner.Children {
-		if _, err := r.Read(inner.Children[i][:]); err != nil {
-			return nil, err
-		}
-	}
-	return &inner, nil
-}
-
-func readCompressedInnerNode(r Reader, typ NodeType) (*InnerNode, error) {
-	var inner InnerNode
-	inner.Type = typ
-	var entry CompressedNodeEntry
-	for read(r, &entry) == nil {
-		inner.Children[entry.Pos] = entry.Hash
-	}
-	return &inner, nil
-}
-
-func readLedgerEntry(r Reader) (LedgerEntry, error) {
-	leType, err := expectType(r, "LedgerEntryType")
-	if err != nil {
-		return nil, err
-	}
-	le := LedgerEntryFactory[leType]()
-	v := reflect.ValueOf(le)
-	// LedgerEntries have 32 bytes of index suffixed
-	// but don't have a variable bytes indicator
-	lr := LimitedByteReader(r, int64(r.Len()-32))
-	if err := readObject(lr, &v); err != nil {
-		return nil, err
-	}
-	return le, nil
 }
 
 func expectType(r Reader, expected string) (uint16, error) {

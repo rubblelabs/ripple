@@ -14,9 +14,9 @@ func Raw(h Hashable) (Hash256, []byte, error) {
 	return raw(h, h.Prefix(), false)
 }
 
-func Hash(h Hashable) (Hash256, error) {
-	hash, _, err := raw(h, h.Prefix(), false)
-	return hash, err
+func NodeId(h Hashable) (Hash256, error) {
+	nodeid, _, err := raw(h, h.Prefix(), false)
+	return nodeid, err
 }
 
 func SigningHash(s Signer) (Hash256, error) {
@@ -148,7 +148,7 @@ func getFields(v *reflect.Value) fieldSlice {
 	for i, length := 0, v.NumField(); i < length; i++ {
 		f := v.Field(i)
 		fieldName := v.Type().Field(i).Name
-		if fieldName == "Hash" {
+		if fieldName == "Hash" || fieldName == "Id" {
 			continue
 		}
 		encoding := reverseEncodings[fieldName]

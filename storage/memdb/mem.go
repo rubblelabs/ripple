@@ -39,19 +39,19 @@ func NewMemoryDB(path string) (*MemoryDB, error) {
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		parts := strings.Split(scanner.Text(), ":")
-		var key data.Hash256
-		if _, err := hex.Decode(key[:], []byte(parts[0])); err != nil {
+		var nodeid data.Hash256
+		if _, err := hex.Decode(nodeid[:], []byte(parts[0])); err != nil {
 			return nil, err
 		}
 		value, err := hex.DecodeString(parts[1])
 		if err != nil {
 			return nil, err
 		}
-		node, err := data.ReadPrefix(bytes.NewReader(value))
+		node, err := data.ReadPrefix(bytes.NewReader(value), nodeid)
 		if err != nil {
 			return nil, err
 		}
-		mem.nodes[key] = node
+		mem.nodes[nodeid] = node
 	}
 	if scanner.Err() != nil {
 		return nil, scanner.Err()

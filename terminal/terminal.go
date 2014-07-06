@@ -83,7 +83,7 @@ func newTxBundle(v data.Transaction, insert string, flag Flag) (*bundle, error) 
 		values = []interface{}{data.CheckSymbol(v), base.GetType(), base.Fee, insert, base.MemoSymbol(), base.Account, base.Sequence}
 	)
 	if flag&ShowTransactionId > 0 {
-		txId, err := data.Hash(v)
+		txId, err := data.NodeId(v)
 		if err != nil {
 			return nil, err
 		}

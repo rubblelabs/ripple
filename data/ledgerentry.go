@@ -7,6 +7,7 @@ type leBase struct {
 	Flags           *LedgerEntryFlag `json:",omitempty"`
 	LedgerIndex     *Hash256         `json:"index,omitempty"`
 	Hash            Hash256          `json:"-"`
+	Id              Hash256          `json:"-"`
 }
 
 type AccountRoot struct {
@@ -97,7 +98,7 @@ func (le *leBase) Prefix() HashPrefix                  { return HP_LEAF_NODE }
 func (le *leBase) NodeType() NodeType                  { return NT_ACCOUNT_NODE }
 func (le *leBase) Ledger() uint32                      { return 0 }
 func (le *leBase) GetHash() *Hash256                   { return &le.Hash }
-func (le *leBase) NodeId() *Hash256                    { return le.LedgerIndex }
+func (le *leBase) NodeId() *Hash256                    { return &le.Id }
 
 func (o *Offer) Ratio() *Value {
 	return o.TakerPays.Ratio(o.TakerGets)
