@@ -45,10 +45,10 @@ var (
 // Throughout the library, native values are interpreted as drips unless
 // otherwise specified.
 type Value struct {
-	Native   bool
-	Negative bool
-	Num      uint64
-	Offset   int64
+	native   bool
+	negative bool
+	num      uint64
+	offset   int64
 }
 
 func init() {
@@ -65,10 +65,10 @@ func init() {
 
 func newValue(native, negative bool, num uint64, offset int64) *Value {
 	return &Value{
-		Native:   native,
-		Negative: negative,
-		Num:      num,
-		Offset:   offset,
+		native:   native,
+		negative: negative,
+		num:      num,
+		offset:   offset,
 	}
 }
 
@@ -96,7 +96,7 @@ var valueRegex = regexp.MustCompile("([+-]?)(\\d*)(\\.(\\d*))?([eE]([+-]?)(\\d+)
 func NewValue(s string, native bool) (*Value, error) {
 	var err error
 	v := Value{
-		Native: native,
+		native: native,
 	}
 	matches := valueRegex.FindStringSubmatch(s)
 	if matches == nil {
@@ -106,18 +106,18 @@ func NewValue(s string, native bool) (*Value, error) {
 		return nil, fmt.Errorf("Overlong Number: %s", s)
 	}
 	if matches[1] == "-" {
-		v.Negative = true
+		v.negative = true
 	}
 	if len(matches[4]) == 0 {
-		if v.Num, err = strconv.ParseUint(matches[2], 10, 64); err != nil {
+		if v.num, err = strconv.ParseUint(matches[2], 10, 64); err != nil {
 			return nil, fmt.Errorf("Invalid Number: %s", s)
 		}
-		v.Offset = 0
+		v.offset = 0
 	} else {
-		if v.Num, err = strconv.ParseUint(matches[2]+matches[4], 10, 64); err != nil {
+		if v.num, err = strconv.ParseUint(matches[2]+matches[4], 10, 64); err != nil {
 			return nil, fmt.Errorf("Invalid Number: %s", s)
 		}
-		v.Offset = -int64(len(matches[4]))
+		v.offset = -int64(len(matches[4]))
 	}
 	if len(matches[5]) > 0 {
 		exp, err := strconv.ParseInt(matches[7], 10, 64)
@@ -125,57 +125,57 @@ func NewValue(s string, native bool) (*Value, error) {
 			return nil, fmt.Errorf("Invalid Number: %s", s)
 		}
 		if matches[6] == "-" {
-			v.Offset -= exp
+			v.offset -= exp
 		} else {
-			v.Offset += exp
+			v.offset += exp
 		}
 	}
-	if v.Native && len(matches[3]) > 0 {
-		v.Offset += 6
+	if v.IsNative() && len(matches[3]) > 0 {
+		v.offset += 6
 	}
 	return &v, v.canonicalise()
 }
 
 func (v *Value) canonicalise() error {
-	if v.Native {
-		if v.Num == 0 {
-			v.Offset = 0
-			v.Negative = false
+	if v.IsNative() {
+		if v.num == 0 {
+			v.offset = 0
+			v.negative = false
 		} else {
-			for v.Offset < 0 {
-				v.Num /= 10
-				v.Offset++
+			for v.offset < 0 {
+				v.num /= 10
+				v.offset++
 			}
-			for v.Offset > 0 {
-				v.Num *= 10
-				v.Offset--
+			for v.offset > 0 {
+				v.num *= 10
+				v.offset--
 			}
-			if v.Num > maxNative {
+			if v.num > maxNative {
 				return fmt.Errorf("Native amount out of range: %s", v.debug())
 			}
 		}
 	} else {
-		if v.Num == 0 {
-			v.Offset = -100
-			v.Negative = false
+		if v.num == 0 {
+			v.offset = -100
+			v.negative = false
 		} else {
-			for v.Num < minValue && v.Offset > minOffset {
-				v.Num *= 10
-				v.Offset--
+			for v.num < minValue && v.offset > minOffset {
+				v.num *= 10
+				v.offset--
 			}
-			for v.Num > maxValue {
-				if v.Offset >= maxOffset {
+			for v.num > maxValue {
+				if v.offset >= maxOffset {
 					return fmt.Errorf("Value overflow: %s", v.debug())
 				}
-				v.Num /= 10
-				v.Offset++
+				v.num /= 10
+				v.offset++
 			}
-			if v.Offset < minOffset || v.Num < minValue {
-				v.Num = 0
-				v.Offset = 0
-				v.Negative = false
+			if v.offset < minOffset || v.num < minValue {
+				v.num = 0
+				v.offset = 0
+				v.negative = false
 			}
-			if v.Offset > maxOffset {
+			if v.offset > maxOffset {
 				return fmt.Errorf("Value overflow: %s", v.debug())
 			}
 		}
@@ -185,12 +185,12 @@ func (v *Value) canonicalise() error {
 
 // Clone returns a Value which is a copy of v.
 func (v Value) Clone() *Value {
-	return newValue(v.Native, v.Negative, v.Num, v.Offset)
+	return newValue(v.native, v.negative, v.num, v.offset)
 }
 
 // ZeroClone returns a zero Value, native or non-native depending on v's setting.
 func (v Value) ZeroClone() *Value {
-	if v.Native {
+	if v.IsNative() {
 		return zeroNative.Clone()
 	}
 	return zeroNonNative.Clone()
@@ -198,21 +198,21 @@ func (v Value) ZeroClone() *Value {
 
 // Abs returns a copy of v with a positive sign.
 func (v Value) Abs() *Value {
-	return newValue(v.Native, false, v.Num, v.Offset)
+	return newValue(v.native, false, v.num, v.offset)
 }
 
 // Negate returns a new Value with the opposite sign of v.
 func (v Value) Negate() *Value {
-	return newValue(v.Native, !v.Negative, v.Num, v.Offset)
+	return newValue(v.native, !v.negative, v.num, v.offset)
 }
 
 func (a Value) factor(b Value) (int64, int64, int64) {
-	ao, bo := a.Offset, b.Offset
-	av, bv := int64(a.Num), int64(b.Num)
-	if a.Negative {
+	ao, bo := a.offset, b.offset
+	av, bv := int64(a.num), int64(b.num)
+	if a.negative {
 		av = -av
 	}
-	if b.Negative {
+	if b.negative {
 		bv = -bv
 	}
 
@@ -236,7 +236,7 @@ func (a Value) factor(b Value) (int64, int64, int64) {
 // Add adds a to b and returns the sum as a new Value.
 func (a Value) Add(b Value) (*Value, error) {
 	switch {
-	case a.Native != b.Native:
+	case a.IsNative() != b.IsNative():
 		return nil, fmt.Errorf("Cannot add native and non-native values")
 	case a.IsZero():
 		return b.Clone(), nil
@@ -244,7 +244,7 @@ func (a Value) Add(b Value) (*Value, error) {
 		return a.Clone(), nil
 	default:
 		av, bv, ao := a.factor(b)
-		v := newValue(a.Native, (av+bv) < 0, abs(av+bv), ao)
+		v := newValue(a.native, (av+bv) < 0, abs(av+bv), ao)
 		return v, v.canonicalise()
 	}
 }
@@ -254,14 +254,14 @@ func (a Value) Subtract(b Value) (*Value, error) {
 }
 
 func normalise(a, b Value) (uint64, uint64, int64, int64) {
-	av, bv := a.Num, b.Num
-	ao, bo := a.Offset, b.Offset
-	if a.Native {
+	av, bv := a.num, b.num
+	ao, bo := a.offset, b.offset
+	if a.IsNative() {
 		for ; av < minValue; av *= 10 {
 			ao--
 		}
 	}
-	if b.Native {
+	if b.IsNative() {
 		for ; bv < minValue; bv *= 10 {
 			bo--
 		}
@@ -273,9 +273,9 @@ func (a Value) Multiply(b Value) (*Value, error) {
 	if a.IsZero() || b.IsZero() {
 		return a.ZeroClone(), nil
 	}
-	if a.Native && b.Native {
-		min := min64(a.Num, b.Num)
-		max := max64(a.Num, b.Num)
+	if a.IsNative() && b.IsNative() {
+		min := min64(a.num, b.num)
+		max := max64(a.num, b.num)
 		if min > maxNativeSqrt || (((max >> 32) * min) > maxNativeDiv) {
 			return nil, fmt.Errorf("Native value overflow: %s*%s", a.debug(), b.debug())
 		}
@@ -291,7 +291,7 @@ func (a Value) Multiply(b Value) (*Value, error) {
 	if len(m.Bytes()) > 64 {
 		return nil, fmt.Errorf("Multiply: %s*%s", a.debug(), b.debug())
 	}
-	v := newValue(a.Native, a.Negative != b.Negative, m.Uint64()+7, ao+bo+14)
+	v := newValue(a.native, a.negative != b.negative, m.Uint64()+7, ao+bo+14)
 	return v, v.canonicalise()
 }
 
@@ -311,7 +311,7 @@ func (num Value) Divide(den Value) (*Value, error) {
 	if len(d.Bytes()) > 64 {
 		return nil, fmt.Errorf("Divide: %s/%s", num.debug(), den.debug())
 	}
-	v := newValue(num.Native, num.Negative != den.Negative, d.Uint64()+5, ao-bo-17)
+	v := newValue(num.native, num.negative != den.negative, d.Uint64()+5, ao-bo-17)
 	return v, v.canonicalise()
 }
 
@@ -320,7 +320,7 @@ func (num Value) Ratio(den Value) (*Value, error) {
 	if err != nil {
 		return nil, err
 	}
-	if den.Native {
+	if den.native {
 		return quotient.Multiply(*xrpMultipler)
 	}
 	return quotient, nil
@@ -343,24 +343,28 @@ func (a Value) Compare(b Value) int {
 
 // isScientific indicates when the value should be String()ed in scientific notation.
 func (v Value) isScientific() bool {
-	return v.Offset != 0 && (v.Offset < -25 || v.Offset > -5)
+	return v.offset != 0 && (v.offset < -25 || v.offset > -5)
+}
+
+func (v Value) IsNative() bool {
+	return v.native
 }
 
 func (v Value) IsZero() bool {
-	return v.Num == 0
+	return v.num == 0
 }
 
 func (v Value) Bytes() []byte {
 	var u uint64
-	if !v.Negative {
+	if !v.negative {
 		u |= 1 << 62
 	}
-	if !v.Native {
+	if !v.IsNative() {
 		u |= 1 << 63
-		u |= v.Num & ((1 << 54) - 1)
-		u |= uint64(v.Offset+97) << 54
+		u |= v.num & ((1 << 54) - 1)
+		u |= uint64(v.offset+97) << 54
 	} else {
-		u |= v.Num & ((1 << 62) - 1)
+		u |= v.num & ((1 << 62) - 1)
 	}
 	var b [8]byte
 	binary.BigEndian.PutUint64(b[:], u)
@@ -369,17 +373,17 @@ func (v Value) Bytes() []byte {
 
 // Rat returns the value as a big.Rat.
 func (v Value) Rat() *big.Rat {
-	n := big.NewInt(int64(v.Num))
-	if v.Negative {
+	n := big.NewInt(int64(v.num))
+	if v.negative {
 		n.Neg(n)
 	}
 
 	d := big.NewInt(1)
-	if v.Offset < 0 {
-		d.Exp(big.NewInt(10), big.NewInt(-v.Offset), nil)
-	} else if v.Offset > 0 {
+	if v.offset < 0 {
+		d.Exp(big.NewInt(10), big.NewInt(-v.offset), nil)
+	} else if v.offset > 0 {
 		mult := big.NewInt(1)
-		mult.Exp(big.NewInt(10), big.NewInt(v.Offset), nil)
+		mult.Exp(big.NewInt(10), big.NewInt(v.offset), nil)
 		n.Mul(n, mult)
 	}
 
@@ -394,18 +398,18 @@ func (v Value) String() string {
 	if v.IsZero() {
 		return "0"
 	}
-	if !v.Native && v.isScientific() {
-		value := strconv.FormatUint(v.Num, 10)
+	if !v.IsNative() && v.isScientific() {
+		value := strconv.FormatUint(v.num, 10)
 		origLen := len(value)
 		value = strings.TrimRight(value, "0")
-		offset := strconv.FormatInt(v.Offset+int64(origLen-len(value)), 10)
-		if v.Negative {
+		offset := strconv.FormatInt(v.offset+int64(origLen-len(value)), 10)
+		if v.negative {
 			return "-" + value + "e" + offset
 		}
 		return value + "e" + offset
 	}
 	rat := v.Rat()
-	if v.Native {
+	if v.IsNative() {
 		rat.Quo(rat, big.NewRat(int64(xrpPrecision), 1))
 	}
 	left := rat.FloatString(0)
@@ -413,12 +417,12 @@ func (v Value) String() string {
 		return left
 	}
 	length := len(left)
-	if v.Negative {
+	if v.negative {
 		length -= 1
 	}
 	return strings.TrimRight(rat.FloatString(32-length), "0")
 }
 
 func (v Value) debug() string {
-	return fmt.Sprintf("Native: %t Negative: %t Value: %d Offset: %d", v.Native, v.Negative, v.Num, v.Offset)
+	return fmt.Sprintf("Native: %t Negative: %t Value: %d Offset: %d", v.native, v.negative, v.num, v.offset)
 }

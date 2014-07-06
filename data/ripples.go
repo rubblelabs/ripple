@@ -72,7 +72,7 @@ func (s BalanceSlice) Less(i, j int) bool {
 	case !s[i].Currency.Equals(s[j].Currency):
 		return s[i].Currency.Less(s[j].Currency)
 	case s[i].Change.Abs().Equals(*s[j].Change.Abs()):
-		return s[i].Change.Negative != s[j].Change.Negative
+		return s[i].Change.negative != s[j].Change.negative
 	default:
 		return s[i].Change.Abs().Less(*s[j].Change.Abs())
 	}
@@ -223,7 +223,7 @@ func (txm *TransactionWithMetaData) Balances() (BalanceSlice, error) {
 					// ownercount change
 					continue
 				}
-				change, err := NewAmount(int64(current.Balance.Num - previous.Balance.Num))
+				change, err := NewAmount(int64(current.Balance.num - previous.Balance.num))
 				if err != nil {
 					return nil, err
 				}
@@ -234,7 +234,7 @@ func (txm *TransactionWithMetaData) Balances() (BalanceSlice, error) {
 						return nil, err
 					}
 				}
-				if change.Num != 0 {
+				if change.num != 0 {
 					balances.Add(current.Account, current.Balance.Value, change.Value, &zeroCurrency)
 				}
 			case RIPPLE_STATE:

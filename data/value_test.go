@@ -79,16 +79,16 @@ var valueTests = TestSlice{
 	{ErrorCheck(NewValue("9000000000000.000001", true)), ErrorMatches, "Native amount out of range: .*", "Parse n9000000000000.000001 (overflow)"},
 
 	{valueCheck("123").ZeroClone().IsZero(), Equals, true, "ZeroClone is zero"},
-	{valueCheck("123").ZeroClone().Native, Equals, false, "ZeroClone is not native"},
+	{valueCheck("123").ZeroClone().IsNative(), Equals, false, "ZeroClone is not native"},
 	{valueCheck("0").IsZero(), Equals, true, "IsZero true"},
 	{valueCheck("123").IsZero(), Equals, false, "IsZero false"},
 	{valueCheck("n123").ZeroClone().IsZero(), Equals, true, "native ZeroClone is zero"},
-	{valueCheck("n123").ZeroClone().Native, Equals, true, "native ZeroClone is native"},
+	{valueCheck("n123").ZeroClone().IsNative(), Equals, true, "native ZeroClone is native"},
 	{valueCheck("n0").IsZero(), Equals, true, "native IsZero true"},
 	{valueCheck("n123").IsZero(), Equals, false, "native IsZero false"},
 
-	{zeroNonNative.Native, Equals, false, "zeroNonNative"},
-	{zeroNative.Native, Equals, true, "zeroNative"},
+	{zeroNonNative.IsNative(), Equals, false, "zeroNonNative"},
+	{zeroNative.IsNative(), Equals, true, "zeroNative"},
 
 	{valueCheck("-0.01").Abs().String(), Equals, "0.01", "Abs -0.01"},
 	{valueCheck("0.01").Abs().String(), Equals, "0.01", "Abs 0.01"},
