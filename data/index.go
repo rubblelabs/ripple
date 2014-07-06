@@ -37,6 +37,10 @@ func LedgerIndex(le LedgerEntry) (*Hash256, error) {
 		return GetLedgerHashIndex()
 	case *Directory:
 		return GetDirectoryNodeIndex(v.RootIndex, v.IndexPrevious.Next())
+	case *FeeSettings:
+		return buildIndex([]interface{}{NS_FEE})
+	case *Amendments:
+		return buildIndex([]interface{}{NS_AMENDMENT})
 	default:
 		return nil, fmt.Errorf("Unknown LedgerEntry")
 	}
