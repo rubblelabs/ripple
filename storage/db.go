@@ -14,11 +14,3 @@ type DB interface {
 	Stats() string
 	Close() error
 }
-
-type IndexedDB interface {
-	DB
-	Query(*data.Query) ([]data.Storer, error)
-	InsertLookup(string, *LookupItem) error
-	GetLookups(string) ([]LookupItem, error)
-	GetAccount(uint32) *data.Account
-}
