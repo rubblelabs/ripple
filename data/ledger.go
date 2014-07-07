@@ -17,8 +17,8 @@ type Ledger struct {
 	Hash         Hash256          `json:"hash"`
 	Closed       bool             `json:"closed"`
 	Accepted     bool             `json:"accepted"`
-	Transactions TransactionSlice `json:"transactions"`
-	AccountState LedgerEntrySlice `json:"accountState"`
+	Transactions TransactionSlice `json:"transactions,omitempty"`
+	AccountState LedgerEntrySlice `json:"accountState,omitempty"`
 }
 
 func NewEmptyLedger(sequence uint32) *Ledger {
