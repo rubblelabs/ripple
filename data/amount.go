@@ -83,18 +83,18 @@ func (a Amount) ZeroClone() *Amount {
 }
 
 func (a Amount) IsPositive() bool {
-	return !a.Negative
+	return !a.negative
 }
 
 func (a Amount) Negate() *Amount {
 	clone := a.Clone()
-	clone.Negative = !clone.Negative
+	clone.negative = !clone.negative
 	return clone
 }
 
 func (a Amount) Abs() *Amount {
 	clone := a.Clone()
-	clone.Negative = false
+	clone.negative = false
 	return clone
 }
 
@@ -167,7 +167,7 @@ func (a Amount) Ratio(b Amount) *Value {
 	switch {
 	case err == nil:
 		return ratio
-	case a.Native:
+	case a.IsNative():
 		return &zeroNative
 	default:
 		return &zeroNonNative
@@ -175,7 +175,7 @@ func (a Amount) Ratio(b Amount) *Value {
 }
 
 func (a Amount) Bytes() []byte {
-	if a.Native {
+	if a.IsNative() {
 		return a.Value.Bytes()
 	}
 	return append(a.Value.Bytes(), append(a.Currency.Bytes(), a.Issuer.Bytes()...)...)
@@ -189,7 +189,7 @@ func (a Amount) String() string {
 		return err.Error()
 	}
 	switch {
-	case a.Native:
+	case a.IsNative():
 		return factored.Value.String() + "/XRP"
 	case a.Issuer.IsZero():
 		return factored.Value.String() + "/" + a.Currency.String()
@@ -201,7 +201,7 @@ func (a Amount) String() string {
 // Amount in computer parsable form
 func (a Amount) Machine() string {
 	switch {
-	case a.Native:
+	case a.IsNative():
 		return a.Value.String() + "/XRP"
 	case a.Issuer.IsZero():
 		return a.Value.String() + "/" + a.Currency.Machine()

@@ -79,16 +79,16 @@ var valueTests = TestSlice{
 	{ErrorCheck(NewValue("9000000000000.000001", true)), ErrorMatches, "Native amount out of range: .*", "Parse n9000000000000.000001 (overflow)"},
 
 	{valueCheck("123").ZeroClone().IsZero(), Equals, true, "ZeroClone is zero"},
-	{valueCheck("123").ZeroClone().Native, Equals, false, "ZeroClone is not native"},
+	{valueCheck("123").ZeroClone().IsNative(), Equals, false, "ZeroClone is not native"},
 	{valueCheck("0").IsZero(), Equals, true, "IsZero true"},
 	{valueCheck("123").IsZero(), Equals, false, "IsZero false"},
 	{valueCheck("n123").ZeroClone().IsZero(), Equals, true, "native ZeroClone is zero"},
-	{valueCheck("n123").ZeroClone().Native, Equals, true, "native ZeroClone is native"},
+	{valueCheck("n123").ZeroClone().IsNative(), Equals, true, "native ZeroClone is native"},
 	{valueCheck("n0").IsZero(), Equals, true, "native IsZero true"},
 	{valueCheck("n123").IsZero(), Equals, false, "native IsZero false"},
 
-	{zeroNonNative.Native, Equals, false, "zeroNonNative"},
-	{zeroNative.Native, Equals, true, "zeroNative"},
+	{zeroNonNative.IsNative(), Equals, false, "zeroNonNative"},
+	{zeroNative.IsNative(), Equals, true, "zeroNative"},
 
 	{valueCheck("-0.01").Abs().String(), Equals, "0.01", "Abs -0.01"},
 	{valueCheck("0.01").Abs().String(), Equals, "0.01", "Abs 0.01"},
@@ -178,6 +178,14 @@ var valueTests = TestSlice{
 	{divValCheck("n-1000000", "2").String(), Equals, "-0.5", "n-1000000/2"},
 	{divValCheck("1", "n-200000000").String(), Equals, "-0.000000005", "1/n-200000000"},
 
+	{ratioValCheck("n1.", "n2.").String(), Equals, "0.5", "n1./n2. ratio"},
+	{ratioValCheck("n-1.", "n2.").String(), Equals, "-0.5", "n-1./n2. ratio"},
+	{ratioValCheck("n1.", "n-200.").String(), Equals, "-0.005", "n1./n-200. ratio"},
+	{ratioValCheck("0", "n1").String(), Equals, "0", "0/n1 ratio"},
+	{ratioValCheck("1", "n2000000").String(), Equals, "0.5", "1/n2000000 ratio"},
+	{ratioValCheck("n-1000000", "2").String(), Equals, "-0.5", "n-1000000/2 ratio"},
+	{ratioValCheck("1", "n-200000000").String(), Equals, "-0.005", "1/n-200000000 ratio"},
+
 	{valueCheck("1").Compare(*valueCheck("1")), Equals, 0, "1 Compare 1"},
 	{valueCheck("0").Compare(*valueCheck("1")), Equals, -1, "0 Compare 1"},
 	{valueCheck("1").Compare(*valueCheck("0")), Equals, 1, "1 Compare 0"},
@@ -248,6 +256,14 @@ func divValCheck(a, b string) *Value {
 		panic(err)
 	} else {
 		return quotient
+	}
+}
+
+func ratioValCheck(a, b string) *Value {
+	if ratio, err := valueCheck(a).Ratio(*valueCheck(b)); err != nil {
+		panic(err)
+	} else {
+		return ratio
 	}
 }
 

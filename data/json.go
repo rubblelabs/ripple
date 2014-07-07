@@ -268,8 +268,8 @@ func (t *rippleHumanTime) UnmarshalJSON(b []byte) error {
 }
 
 func (v *Value) MarshalText() ([]byte, error) {
-	if v.Native {
-		return []byte(strconv.FormatUint(v.Num, 10)), nil
+	if v.IsNative() {
+		return []byte(strconv.FormatUint(v.num, 10)), nil
 	}
 	return []byte(v.String()), nil
 }
@@ -306,8 +306,8 @@ type amountJSON struct {
 }
 
 func (a Amount) MarshalJSON() ([]byte, error) {
-	if a.Native {
-		return []byte(`"` + strconv.FormatUint(a.Num, 10) + `"`), nil
+	if a.IsNative() {
+		return []byte(`"` + strconv.FormatUint(a.num, 10) + `"`), nil
 	}
 	return json.Marshal(amountJSON{(*nonNativeValue)(a.Value), a.Currency, a.Issuer})
 }

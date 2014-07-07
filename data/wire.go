@@ -12,14 +12,14 @@ func (v *Value) Unmarshal(r Reader) error {
 	if err := binary.Read(r, binary.BigEndian, &u); err != nil {
 		return err
 	}
-	v.Native = (u >> 63) == 0
-	v.Negative = (u>>62)&1 == 0
-	if v.Native {
-		v.Num = u & ((1 << 62) - 1)
-		v.Offset = 0
+	v.native = (u >> 63) == 0
+	v.negative = (u>>62)&1 == 0
+	if v.IsNative() {
+		v.num = u & ((1 << 62) - 1)
+		v.offset = 0
 	} else {
-		v.Num = u & ((1 << 54) - 1)
-		v.Offset = int64((u>>54)&((1<<8)-1)) - 97
+		v.num = u & ((1 << 54) - 1)
+		v.offset = int64((u>>54)&((1<<8)-1)) - 97
 	}
 	return nil
 }
@@ -33,7 +33,7 @@ func (a *Amount) Unmarshal(r Reader) error {
 	if err := a.Value.Unmarshal(r); err != nil {
 		return err
 	}
-	if a.Value.Native {
+	if a.Value.IsNative() {
 		return nil
 	}
 	if err := unmarshalSlice(a.Currency[:], r, "Currency"); err != nil {
