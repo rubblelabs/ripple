@@ -27,6 +27,17 @@ func (v *Value) Scan(src interface{}) error {
 	return v.Unmarshal(bytes.NewReader(b))
 }
 
+func (a *Amount) Scan(src interface{}) error {
+	if src == nil {
+		return nil
+	}
+	b, ok := src.([]byte)
+	if !ok {
+		return fmt.Errorf("Cannot scan %+v into Amount", src)
+	}
+	return a.Unmarshal(bytes.NewReader(b))
+}
+
 func (t *RippleTime) Scan(src interface{}) error {
 	v, ok := src.(int64)
 	if !ok {
@@ -38,6 +49,9 @@ func (t *RippleTime) Scan(src interface{}) error {
 
 // support function for satisfying sql.Scanner interface
 func scan(dest []byte, src interface{}, typ string) error {
+	if src == nil {
+		return nil
+	}
 	b, ok := src.([]byte)
 	if !ok {
 		return fmt.Errorf("Cannot scan %+v into a %s", src, typ)

@@ -292,7 +292,6 @@ func (v *nonNativeValue) UnmarshalText(b []byte) error {
 	}
 	*v = nonNativeValue(*value)
 	return nil
-	// return (*Value)(v).Parse(string(b))
 }
 
 func (v *nonNativeValue) MarshalText() ([]byte, error) {
@@ -307,7 +306,7 @@ type amountJSON struct {
 
 func (a Amount) MarshalJSON() ([]byte, error) {
 	if a.Value == nil {
-		return nil, fmt.Errorf("Amount has a nil Value")
+		return nil, fmt.Errorf("Value has a nil Value")
 	}
 	if a.IsNative() {
 		return []byte(`"` + strconv.FormatUint(a.num, 10) + `"`), nil
