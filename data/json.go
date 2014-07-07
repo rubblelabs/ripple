@@ -306,6 +306,9 @@ type amountJSON struct {
 }
 
 func (a Amount) MarshalJSON() ([]byte, error) {
+	if a.Value == nil {
+		return nil, fmt.Errorf("Amount has a nil Value")
+	}
 	if a.IsNative() {
 		return []byte(`"` + strconv.FormatUint(a.num, 10) + `"`), nil
 	}
