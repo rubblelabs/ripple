@@ -5,7 +5,6 @@ Go packages to interact with the Ripple protocol.
 
 [![GoDoc](https://godoc.org/github.com/rubblelabs/ripple?status.png)](https://godoc.org/github.com/rubblelabs/ripple)
 [![Build Status](https://drone.io/github.com/rubblelabs/ripple/status.png)](https://drone.io/github.com/rubblelabs/ripple/latest)
-[![Coverage Status](https://img.shields.io/coveralls/rubblelabs/ripple.svg)](https://coveralls.io/r/rubblelabs/ripple)
 
 Documentation is very much non-existent currently.
 
