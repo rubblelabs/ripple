@@ -57,7 +57,7 @@ type OfferCancel struct {
 
 type TrustSet struct {
 	TxBase
-	LimitAmount *Amount `json:",omitempty"`
+	LimitAmount Amount
 	QualityIn   *uint32 `json:",omitempty"`
 	QualityOut  *uint32 `json:",omitempty"`
 }
