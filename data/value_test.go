@@ -182,9 +182,9 @@ var valueTests = TestSlice{
 	{ratioValCheck("n-1.", "n2.").String(), Equals, "-0.5", "n-1./n2. ratio"},
 	{ratioValCheck("n1.", "n-200.").String(), Equals, "-0.005", "n1./n-200. ratio"},
 	{ratioValCheck("0", "n1").String(), Equals, "0", "0/n1 ratio"},
-	{ratioValCheck("1", "n2000000").String(), Equals, "0.0000005", "1/n2000000 ratio"},
-	{ratioValCheck("n-1000000", "2").String(), Equals, "-500000", "n-1000000/2 ratio"},
-	{ratioValCheck("1", "n-200000000").String(), Equals, "-0.000000005", "1/n-200000000 ratio"},
+	{ratioValCheck("1", "n2000000").String(), Equals, "0.5", "1/n2000000 ratio"},
+	{ratioValCheck("n-1000000", "2").String(), Equals, "-0.5", "n-1000000/2 ratio"},
+	{ratioValCheck("1", "n-200000000").String(), Equals, "-0.005", "1/n-200000000 ratio"},
 
 	{valueCheck("1").Compare(*valueCheck("1")), Equals, 0, "1 Compare 1"},
 	{valueCheck("0").Compare(*valueCheck("1")), Equals, -1, "0 Compare 1"},

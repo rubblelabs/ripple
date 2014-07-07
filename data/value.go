@@ -327,8 +327,8 @@ func (num Value) Divide(den Value) (*Value, error) {
 	return v, v.canonicalise()
 }
 
-// Ratio returns the ratio a/b. It works just like Divide, but always returns
-// a non-native Value for additional precision.
+// Ratio returns the ratio a/b. XRP are interpreted at face value rather than drips.
+// The result of Ratio is always a non-native Value for additional precision.
 func (a Value) Ratio(b Value) (*Value, error) {
 	var err error
 	num := &a
@@ -339,9 +339,17 @@ func (a Value) Ratio(b Value) (*Value, error) {
 		if err != nil {
 			return nil, err
 		}
+		num, err = num.Divide(*xrpMultipler)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if den.IsNative() {
 		den, err = den.NonNative()
+		if err != nil {
+			return nil, err
+		}
+		den, err = den.Divide(*xrpMultipler)
 		if err != nil {
 			return nil, err
 		}
