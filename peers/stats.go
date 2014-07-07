@@ -4,7 +4,7 @@ import (
 	"code.google.com/p/goprotobuf/proto"
 	"encoding/json"
 	"fmt"
-	"github.com/donovanhide/ripple/peers/protocol"
+	"github.com/rubblelabs/ripple/peers/protocol"
 	metrics "github.com/rcrowley/go-metrics"
 	"reflect"
 	"strconv"

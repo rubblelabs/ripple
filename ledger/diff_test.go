@@ -2,8 +2,8 @@ package ledger
 
 import (
 	"bytes"
-	"github.com/donovanhide/ripple/data"
-	"github.com/donovanhide/ripple/storage/memdb"
+	"github.com/rubblelabs/ripple/data"
+	"github.com/rubblelabs/ripple/storage/memdb"
 	"testing"
 )
 

@@ -3,7 +3,7 @@ package main
 
 import (
 	"flag"
-	"github.com/donovanhide/ripple/crypto"
+	"github.com/rubblelabs/ripple/crypto"
 	"log"
 	"os"
 	"os/signal"

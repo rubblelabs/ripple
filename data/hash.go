@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"github.com/donovanhide/ripple/crypto"
+	"github.com/rubblelabs/ripple/crypto"
 	"strings"
 )
 

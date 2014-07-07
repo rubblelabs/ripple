@@ -3,8 +3,8 @@ package terminal
 
 import (
 	"fmt"
-	"github.com/donovanhide/ripple/data"
-	"github.com/donovanhide/ripple/websockets"
+	"github.com/rubblelabs/ripple/data"
+	"github.com/rubblelabs/ripple/websockets"
 	"github.com/fatih/color"
 	"reflect"
 )

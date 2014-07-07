@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/codegangsta/cli"
-	"github.com/donovanhide/ripple/crypto"
-	"github.com/donovanhide/ripple/data"
-	"github.com/donovanhide/ripple/websockets"
+	"github.com/rubblelabs/ripple/crypto"
+	"github.com/rubblelabs/ripple/data"
+	"github.com/rubblelabs/ripple/websockets"
 	"os"
 	"strings"
 )

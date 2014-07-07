@@ -3,8 +3,8 @@ package peers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/donovanhide/ripple/crypto"
-	"github.com/donovanhide/ripple/peers/protocol"
+	"github.com/rubblelabs/ripple/crypto"
+	"github.com/rubblelabs/ripple/peers/protocol"
 	"sync"
 	"time"
 )

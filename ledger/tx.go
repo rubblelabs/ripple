@@ -1,7 +1,7 @@
 package ledger
 
 import (
-	"github.com/donovanhide/ripple/data"
+	"github.com/rubblelabs/ripple/data"
 	"sort"
 )
 

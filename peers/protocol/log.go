@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"github.com/donovanhide/ripple/data"
+	"github.com/rubblelabs/ripple/data"
 	"strings"
 )
 

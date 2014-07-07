@@ -3,7 +3,7 @@ package websockets
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/donovanhide/ripple/data"
+	"github.com/rubblelabs/ripple/data"
 	"sync/atomic"
 )
 

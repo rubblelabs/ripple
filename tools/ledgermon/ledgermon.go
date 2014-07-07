@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/donovanhide/ripple/websockets"
+	"github.com/rubblelabs/ripple/websockets"
 )
 
 //TODO(luke): Merge this tool with subscribe.go

@@ -2,8 +2,8 @@ package ledger
 
 import (
 	"fmt"
-	"github.com/donovanhide/ripple/data"
-	"github.com/donovanhide/ripple/storage"
+	"github.com/rubblelabs/ripple/data"
+	"github.com/rubblelabs/ripple/storage"
 	"io"
 	"strconv"
 	"strings"

@@ -1,7 +1,7 @@
 package data
 
 import (
-	"github.com/donovanhide/ripple/crypto"
+	"github.com/rubblelabs/ripple/crypto"
 )
 
 func Sign(s Signer, key crypto.Key) error {

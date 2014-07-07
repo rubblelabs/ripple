@@ -2,7 +2,7 @@ package storage
 
 import (
 	"errors"
-	"github.com/donovanhide/ripple/data"
+	"github.com/rubblelabs/ripple/data"
 )
 
 var ErrNotFound = errors.New("Not found")

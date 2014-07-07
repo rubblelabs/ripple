@@ -2,7 +2,7 @@ package websockets
 
 import (
 	"encoding/json"
-	"github.com/donovanhide/ripple/data"
+	"github.com/rubblelabs/ripple/data"
 	"io/ioutil"
 	. "launchpad.net/gocheck"
 	"testing"

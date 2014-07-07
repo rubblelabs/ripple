@@ -1,7 +1,7 @@
 package websockets
 
 import (
-	"github.com/donovanhide/ripple/data"
+	"github.com/rubblelabs/ripple/data"
 	"github.com/golang/glog"
 	"time"
 )

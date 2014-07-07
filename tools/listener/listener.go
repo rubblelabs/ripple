@@ -2,10 +2,10 @@ package main
 
 import (
 	"flag"
-	"github.com/donovanhide/ripple/crypto"
-	"github.com/donovanhide/ripple/ledger"
-	"github.com/donovanhide/ripple/peers"
-	"github.com/donovanhide/ripple/storage/memdb"
+	"github.com/rubblelabs/ripple/crypto"
+	"github.com/rubblelabs/ripple/ledger"
+	"github.com/rubblelabs/ripple/peers"
+	"github.com/rubblelabs/ripple/storage/memdb"
 	"github.com/golang/glog"
 	metrics "github.com/rcrowley/go-metrics"
 	"github.com/rcrowley/go-metrics/influxdb"

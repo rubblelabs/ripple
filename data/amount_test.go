@@ -2,7 +2,7 @@ package data
 
 import (
 	"fmt"
-	. "github.com/donovanhide/ripple/testing"
+	. "github.com/rubblelabs/ripple/testing"
 	. "launchpad.net/gocheck"
 	"testing"
 )

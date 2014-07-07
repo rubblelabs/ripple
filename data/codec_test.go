@@ -2,7 +2,7 @@ package data
 
 import (
 	"encoding/json"
-	internal "github.com/donovanhide/ripple/testing"
+	internal "github.com/rubblelabs/ripple/testing"
 	. "launchpad.net/gocheck"
 )
 

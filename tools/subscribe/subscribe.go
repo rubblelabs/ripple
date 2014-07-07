@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/donovanhide/ripple/terminal"
-	"github.com/donovanhide/ripple/websockets"
+	"github.com/rubblelabs/ripple/terminal"
+	"github.com/rubblelabs/ripple/websockets"
 	"os"
 )
 

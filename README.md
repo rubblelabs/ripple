@@ -3,9 +3,9 @@ ripple
 
 Go packages to interact with the Ripple protocol.
 
-[![GoDoc](https://godoc.org/github.com/donovanhide/ripple?status.png)](https://godoc.org/github.com/donovanhide/ripple)
-[![Build Status](https://drone.io/github.com/donovanhide/ripple/status.png)](https://drone.io/github.com/donovanhide/ripple/latest)
-[![Coverage Status](https://img.shields.io/coveralls/donovanhide/ripple.svg)](https://coveralls.io/r/donovanhide/ripple)
+[![GoDoc](https://godoc.org/github.com/rubblelabs/ripple?status.png)](https://godoc.org/github.com/rubblelabs/ripple)
+[![Build Status](https://drone.io/github.com/rubblelabs/ripple/status.png)](https://drone.io/github.com/rubblelabs/ripple/latest)
+[![Coverage Status](https://img.shields.io/coveralls/rubblelabs/ripple.svg)](https://coveralls.io/r/rubblelabs/ripple)
 
 Documentation is very much non-existent currently.
 
@@ -23,8 +23,8 @@ Please bear in mind that this has been an exercise that has taken a lot of time,
 
 ## Test Coverage
 
-[crypto package](https://drone.io/github.com/donovanhide/ripple/files/crypto.html)
+[crypto package](https://drone.io/github.com/rubblelabs/ripple/files/crypto.html)
 
-[data package](https://drone.io/github.com/donovanhide/ripple/files/data.html)
+[data package](https://drone.io/github.com/rubblelabs/ripple/files/data.html)
 
-[websockets package](https://drone.io/github.com/donovanhide/ripple/files/websockets.html)
+[websockets package](https://drone.io/github.com/rubblelabs/ripple/files/websockets.html)

@@ -1,7 +1,7 @@
 package memdb
 
 import (
-	"github.com/donovanhide/ripple/data"
+	"github.com/rubblelabs/ripple/data"
 	"testing"
 )
 
