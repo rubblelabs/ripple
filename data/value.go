@@ -79,6 +79,12 @@ func NewNativeValue(n int64) (*Value, error) {
 	return v, v.canonicalise()
 }
 
+// NewNonNativeValue returns a Value of n*10^offset.
+func NewNonNativeValue(n int64, offset int64) (*Value, error) {
+	v := newValue(false, n < 0, uint64(n), offset)
+	return v, v.canonicalise()
+}
+
 // Match fields:
 // 0 = whole input
 // 1 = sign
@@ -383,6 +389,10 @@ func (v Value) isScientific() bool {
 
 func (v Value) IsNative() bool {
 	return v.native
+}
+
+func (v Value) IsNegative() bool {
+	return v.negative
 }
 
 func (v Value) IsZero() bool {
