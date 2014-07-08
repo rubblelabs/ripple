@@ -118,3 +118,18 @@ func (s *MessagesSuite) TestRipplePathFindResponse(c *C) {
 	c.Assert(msg.Result.Alternatives[0].PathsComputed[0], HasLen, 2)
 	c.Assert(msg.Result.Alternatives[0].PathsComputed[0].String(), Equals, "XRP => SGD/r9Dr5xwkeLegBeXq6ujinjSBLQzQ1zQGjH")
 }
+
+func (s *MessagesSuite) TestAccountInfoResponse(c *C) {
+	msg := &AccountInfoCommand{}
+	readResponseFile(c, msg, "testdata/account_info.json")
+
+	// Response fields
+	c.Assert(msg.Status, Equals, "success")
+	c.Assert(msg.Type, Equals, "response")
+
+	c.Assert(msg.Result.LedgerSequence, Equals, uint32(7636529))
+	c.Assert(*msg.Result.AccountData.TransferRate, Equals, uint32(1002000000))
+	c.Assert(msg.Result.AccountData.LedgerEntryType, Equals, data.ACCOUNT_ROOT)
+	c.Assert(msg.Result.AccountData.Sequence, Equals, uint32(546))
+	c.Assert(msg.Result.AccountData.Balance.String(), Equals, "10321199.422233")
+}

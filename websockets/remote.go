@@ -3,9 +3,9 @@ package websockets
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/rubblelabs/ripple/data"
 	"github.com/golang/glog"
 	"github.com/gorilla/websocket"
+	"github.com/rubblelabs/ripple/data"
 	"net"
 	"net/url"
 	"reflect"
@@ -216,11 +216,25 @@ func (r *Remote) Ledger(ledger interface{}, transactions bool) (*LedgerResult, e
 // Synchronously requests paths
 func (r *Remote) RipplePathFind(src, dest data.Account, amount data.Amount, srcCurr *[]data.Currency) (*RipplePathFindResult, error) {
 	cmd := &RipplePathFindCommand{
-		Command:       newCommand("ledger"),
+		Command:       newCommand("ripple_path_find"),
 		SrcAccount:    src,
 		SrcCurrencies: srcCurr,
 		DestAccount:   dest,
 		DestAmount:    amount,
+	}
+	r.Outgoing <- cmd
+	<-cmd.Ready
+	if cmd.CommandError != nil {
+		return nil, cmd.CommandError
+	}
+	return cmd.Result, nil
+}
+
+// Synchronously requests account info
+func (r *Remote) AccountInfo(a data.Account) (*AccountInfoResult, error) {
+	cmd := &AccountInfoCommand{
+		Command: newCommand("account_info"),
+		Account: a,
 	}
 	r.Outgoing <- cmd
 	<-cmd.Ready

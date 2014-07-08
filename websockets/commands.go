@@ -178,3 +178,14 @@ type RipplePathFindResult struct {
 	DestAccount    data.Account    `json:"destination_account"`
 	DestCurrencies []data.Currency `json:"destination_currencies"`
 }
+
+type AccountInfoCommand struct {
+	*Command
+	Account data.Account       `json:"account"`
+	Result  *AccountInfoResult `json:"result,omitempty"`
+}
+
+type AccountInfoResult struct {
+	LedgerSequence uint32           `json:"ledger_current_index"`
+	AccountData    data.AccountRoot `json:"account_data"`
+}
