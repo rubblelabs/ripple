@@ -100,3 +100,21 @@ func (s *MessagesSuite) TestLedgerDataResponse(c *C) {
 	c.Assert(len(msg.Result.State), Equals, 2048)
 	c.Assert(msg.Result.State[0].GetType(), Equals, "AccountRoot")
 }
+
+func (s *MessagesSuite) TestRipplePathFindResponse(c *C) {
+	msg := &RipplePathFindCommand{}
+	readResponseFile(c, msg, "testdata/ripple_path_find.json")
+
+	// Response fields
+	c.Assert(msg.Status, Equals, "success")
+	c.Assert(msg.Type, Equals, "response")
+
+	c.Assert(msg.Result.DestAccount.String(), Equals, "r9Dr5xwkeLegBeXq6ujinjSBLQzQ1zQGjH")
+	c.Assert(msg.Result.DestCurrencies, HasLen, 6)
+	c.Assert(msg.Result.Alternatives, HasLen, 1)
+	c.Assert(msg.Result.Alternatives[0].SrcAmount.String(), Equals, "0.9940475268/USD/rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B")
+	c.Assert(msg.Result.Alternatives[0].PathsComputed, HasLen, 4)
+	c.Assert(msg.Result.Alternatives[0].PathsCanonical, HasLen, 0)
+	c.Assert(msg.Result.Alternatives[0].PathsComputed[0], HasLen, 2)
+	c.Assert(msg.Result.Alternatives[0].PathsComputed[0].String(), Equals, "XRP => SGD/r9Dr5xwkeLegBeXq6ujinjSBLQzQ1zQGjH")
+}

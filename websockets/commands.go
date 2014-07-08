@@ -159,3 +159,22 @@ type LedgerDataResult struct {
 	Marker         *data.Hash256         `json:"marker"`
 	State          data.LedgerEntrySlice `json:"state"`
 }
+
+type RipplePathFindCommand struct {
+	*Command
+	SrcAccount    data.Account          `json:"source_account"`
+	SrcCurrencies *[]data.Currency      `json:"source_currencies,omitempty"`
+	DestAccount   data.Account          `json:"destination_account"`
+	DestAmount    data.Amount           `json:"destination_amount"`
+	Result        *RipplePathFindResult `json:"result,omitempty"`
+}
+
+type RipplePathFindResult struct {
+	Alternatives []struct {
+		SrcAmount      data.Amount  `json:"source_amount"`
+		PathsComputed  data.PathSet `json:"paths_computed,omitempty"`
+		PathsCanonical data.PathSet `json:"paths_canonical,omitempty"`
+	}
+	DestAccount    data.Account    `json:"destination_account"`
+	DestCurrencies []data.Currency `json:"destination_currencies"`
+}

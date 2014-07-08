@@ -213,6 +213,23 @@ func (r *Remote) Ledger(ledger interface{}, transactions bool) (*LedgerResult, e
 	return cmd.Result, nil
 }
 
+// Synchronously requests paths
+func (r *Remote) RipplePathFind(src, dest data.Account, amount data.Amount, srcCurr *[]data.Currency) (*RipplePathFindResult, error) {
+	cmd := &RipplePathFindCommand{
+		Command:       newCommand("ledger"),
+		SrcAccount:    src,
+		SrcCurrencies: srcCurr,
+		DestAccount:   dest,
+		DestAmount:    amount,
+	}
+	r.Outgoing <- cmd
+	<-cmd.Ready
+	if cmd.CommandError != nil {
+		return nil, cmd.CommandError
+	}
+	return cmd.Result, nil
+}
+
 // Synchronously subscribe to streams and receive a confirmation message
 // Streams are recived asynchronously over the Incoming channel
 func (r *Remote) Subscribe(ledger, transactions, server bool) (*SubscribeResult, error) {
