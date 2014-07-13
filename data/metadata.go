@@ -81,7 +81,10 @@ type TransactionSlice []*TransactionWithMetaData
 func (s TransactionSlice) Len() int      { return len(s) }
 func (s TransactionSlice) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 func (s TransactionSlice) Less(i, j int) bool {
-	return s[i].MetaData.TransactionIndex < s[j].MetaData.TransactionIndex
+	if s[i].LedgerSequence == s[j].LedgerSequence {
+		return s[i].MetaData.TransactionIndex < s[j].MetaData.TransactionIndex
+	}
+	return s[i].LedgerSequence < s[j].LedgerSequence
 }
 
 type TransactionWithMetaData struct {
