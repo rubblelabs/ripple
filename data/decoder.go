@@ -269,7 +269,7 @@ func readObject(r Reader, v *reflect.Value) error {
 				v.Set(m.Elem())
 				return err
 			default:
-				return fmt.Errorf("Unknown object: %+v", enc)
+				return fmt.Errorf("Unexpected object: %s for field: %s", v.Type(), name)
 			}
 		default:
 			if v.Kind() == reflect.Struct {
