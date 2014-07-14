@@ -1,5 +1,9 @@
 package data
 
+import (
+	"sort"
+)
+
 type Fields struct {
 	Account             *Account         `json:",omitempty"`
 	AccountTxnID        *Hash256         `json:",omitempty"`
@@ -86,6 +90,8 @@ func (s TransactionSlice) Less(i, j int) bool {
 	}
 	return s[i].LedgerSequence < s[j].LedgerSequence
 }
+
+func (s TransactionSlice) Sort() { sort.Sort(s) }
 
 type TransactionWithMetaData struct {
 	Transaction
