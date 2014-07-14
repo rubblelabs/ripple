@@ -269,7 +269,7 @@ func readObject(r Reader, v *reflect.Value) error {
 				v.Set(m.Elem())
 				return err
 			default:
-				panic(fmt.Sprintf("Unknown object: %+v", enc))
+				return fmt.Errorf("Unknown object: %+v", enc)
 			}
 		default:
 			if v.Kind() == reflect.Struct {
