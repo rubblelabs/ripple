@@ -99,6 +99,7 @@ func (s *MessagesSuite) TestLedgerDataResponse(c *C) {
 	c.Assert(msg.Result.Marker.String(), Equals, "02DE1A2AD4332A1AF01C59F16E45218FA70E5792BD963B6D7ACF188D6D150607")
 	c.Assert(len(msg.Result.State), Equals, 2048)
 	c.Assert(msg.Result.State[0].GetType(), Equals, "AccountRoot")
+	c.Assert(msg.Result.State[0].GetLedgerIndex().String(), Equals, "00001A2969BE1FC85F1D7A55282FA2E6D95C71D2E4B9C0FDD3D9994F3C00FF8F")
 }
 
 func (s *MessagesSuite) TestRipplePathFindResponse(c *C) {
