@@ -58,30 +58,6 @@ func newCommand(command string) *Command {
 	}
 }
 
-type LedgerCommand struct {
-	*Command
-	LedgerIndex  interface{}   `json:"ledger_index"`
-	Accounts     bool          `json:"accounts"`
-	Transactions bool          `json:"transactions"`
-	Expand       bool          `json:"expand"`
-	Result       *LedgerResult `json:"result,omitempty"`
-}
-
-type LedgerResult struct {
-	Ledger struct {
-		LedgerSequence  uint32                `json:"ledger_index,string"`
-		Accepted        bool                  `json:"accepted"`
-		CloseTime       data.RippleTime       `json:"close_time"`
-		Closed          bool                  `json:"closed"`
-		Hash            data.Hash256          `json:"ledger_hash"`
-		PreviousLedger  data.Hash256          `json:"parent_hash"`
-		TotalXRP        uint64                `json:"total_coins,string"`
-		AccountHash     data.Hash256          `json:"account_hash"`
-		TransactionHash data.Hash256          `json:"transaction_hash"`
-		Transactions    data.TransactionSlice `json:"transactions"`
-	}
-}
-
 type AccountTxCommand struct {
 	*Command
 	Account   data.Account           `json:"account"`
@@ -144,6 +120,32 @@ type SubmitResult struct {
 	EngineResultMessage string                 `json:"engine_result_message"`
 	TxBlob              string                 `json:"tx_blob"`
 	Tx                  interface{}            `json:"tx_json"`
+}
+
+type LedgerCommand struct {
+	*Command
+	LedgerIndex  interface{}   `json:"ledger_index"`
+	Accounts     bool          `json:"accounts"`
+	Transactions bool          `json:"transactions"`
+	Expand       bool          `json:"expand"`
+	Result       *LedgerResult `json:"result,omitempty"`
+}
+
+type LedgerResult struct {
+	Ledger data.Ledger
+}
+
+type LedgerHeaderCommand struct {
+	*Command
+	Ledger interface{} `json:"ledger"`
+	Result *LedgerHeaderResult
+}
+
+type LedgerHeaderResult struct {
+	Ledger         data.Ledger
+	LedgerSequence uint32              `json:"ledger_index"`
+	Hash           *data.Hash256       `json:"ledger_hash,omitempty"`
+	LedgerData     data.VariableLength `json:"ledger_data"`
 }
 
 type LedgerDataCommand struct {
