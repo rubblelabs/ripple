@@ -2,19 +2,19 @@ package main
 
 import (
 	"flag"
+	"github.com/golang/glog"
 	"github.com/rubblelabs/ripple/crypto"
 	"github.com/rubblelabs/ripple/ledger"
 	"github.com/rubblelabs/ripple/peers"
 	"github.com/rubblelabs/ripple/storage/memdb"
-	"github.com/golang/glog"
-	metrics "github.com/rcrowley/go-metrics"
-	"github.com/rcrowley/go-metrics/influxdb"
+	// metrics "github.com/rcrowley/go-metrics"
+	// "github.com/rcrowley/go-metrics/influxdb"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"runtime"
-	"time"
+	// "time"
 )
 
 var trusted = flag.String("trusted", "r.ripple.com:51235", "trusted hosts separated by commas")
@@ -38,9 +38,9 @@ func servePeers(m *peers.Manager) http.HandlerFunc {
 
 func main() {
 	flag.Parse()
-	go influxdb.Influxdb(metrics.DefaultRegistry, time.Second*5, &influxdb.Config{
-		Database: "ripple",
-	})
+	// go influxdb.Influxdb(metrics.DefaultRegistry, time.Second*5, &influxdb.Config{
+	// 	Database: "ripple",
+	// })
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	kill := make(chan os.Signal, 1)
 	signal.Notify(kill, os.Interrupt, os.Kill)
