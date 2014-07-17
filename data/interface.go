@@ -32,6 +32,7 @@ type Storer interface {
 type LedgerEntry interface {
 	Storer
 	GetLedgerEntryType() LedgerEntryType
+	GetLedgerIndex() *Hash256
 }
 
 type Transaction interface {

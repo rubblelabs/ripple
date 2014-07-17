@@ -99,6 +99,7 @@ func (le *leBase) NodeType() NodeType                  { return NT_ACCOUNT_NODE 
 func (le *leBase) Ledger() uint32                      { return 0 }
 func (le *leBase) GetHash() *Hash256                   { return &le.Hash }
 func (le *leBase) NodeId() *Hash256                    { return &le.Id }
+func (le *leBase) GetLedgerIndex() *Hash256            { return le.LedgerIndex }
 
 func (o *Offer) Ratio() *Value {
 	return o.TakerPays.Ratio(o.TakerGets)
