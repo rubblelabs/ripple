@@ -51,7 +51,7 @@ func (ro RadixOperations) Less(i, j int) bool {
 }
 func (ro RadixOperations) Swap(i, j int) { ro[i], ro[j] = ro[j], ro[i] }
 
-func (ro *RadixOperations) Add(node data.Hashable, action RadixAction, nodeid data.Hash256, depth uint8) {
+func (ro *RadixOperations) Add(node data.Storer, action RadixAction, nodeid data.Hash256, depth uint8) {
 	r := &RadixOperation{
 		RadixNode: &RadixNode{
 			Node:  node,
@@ -81,7 +81,7 @@ func Diff(left, right data.Hash256, db storage.DB) (RadixOperations, error) {
 	return ops, nil
 }
 
-func visitChildren(node data.Hashable, db storage.DB, ops *RadixOperations, depth uint8, action RadixAction) error {
+func visitChildren(node data.Storer, db storage.DB, ops *RadixOperations, depth uint8, action RadixAction) error {
 	inner, ok := node.(*data.InnerNode)
 	if !ok {
 		return nil
@@ -97,7 +97,7 @@ func visitChildren(node data.Hashable, db storage.DB, ops *RadixOperations, dept
 }
 
 func diff(left, right data.Hash256, db storage.DB, ops *RadixOperations, depth uint8) error {
-	var l, r data.Hashable
+	var l, r data.Storer
 	var err error
 	switch {
 	case left.IsZero() && right.IsZero():

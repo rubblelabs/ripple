@@ -8,7 +8,7 @@ import (
 )
 
 type RadixNode struct {
-	Node  data.Hashable
+	Node  data.Storer
 	Depth uint8
 }
 
