@@ -1,5 +1,9 @@
 package data
 
+import (
+	"fmt"
+)
+
 type TransactionFlag uint32
 type LedgerEntryFlag uint32
 
@@ -65,3 +69,100 @@ const (
 	LsLowFreeze    LedgerEntryFlag = 0x00400000
 	LsHighFreeze   LedgerEntryFlag = 0x00800000
 )
+
+var txFlagNames = map[TransactionType][]struct {
+	Flag TransactionFlag
+	Name string
+}{
+	PAYMENT: {
+		{TxNoDirectRipple, "NoDirectRipple"},
+		{TxPartialPayment, "PartialPayment"},
+		{TxLimitQuality, "LimitQuality"},
+		{TxCircle, "Circle"},
+	},
+	ACCOUNT_SET: {
+		{TxSetRequireDest, "SetRequireDest"},
+		{TxSetRequireAuth, "SetRequireAuth"},
+		{TxSetDisallowXRP, "SetDisallowXRP"},
+		{TxSetDisableMaster, "SetDisableMaster"},
+		{TxNoFreeze, "NoFreeze"},
+		{TxGlobalFreeze, "GlobalFreeze"},
+		{TxRequireDestTag, "RequireDestTag"},
+		{TxOptionalDestTag, "OptionalDestTag"},
+		{TxRequireAuth, "RequireAuth"},
+		{TxDisallowXRP, "DisallowXRP"},
+		{TxAllowXRP, "AllowXRP"},
+	},
+	OFFER_CREATE: {
+		{TxPassive, "Passive"},
+		{TxImmediateOrCancel, "ImmediateOrCancel"},
+		{TxFillOrKill, "FillOrKill"},
+		{TxSell, "Sell"},
+	},
+	TRUST_SET: {
+		{TxSetAuth, "SetAuth"},
+		{TxSetNoRipple, "SetNoRipple"},
+		{TxClearNoRipple, "ClearNoRipple"},
+		{TxSetFreeze, "SetFreeze"},
+		{TxClearFreeze, "ClearFreeze"},
+	},
+}
+
+var leFlagNames = map[LedgerEntryType][]struct {
+	Flag LedgerEntryFlag
+	Name string
+}{
+	ACCOUNT_ROOT: {
+		{LsPasswordSpent, "PasswordSpent"},
+		{LsRequireDestTag, "RequireDestTag"},
+		{LsRequireAuth, "RequireAuth"},
+		{LsDisallowXRP, "DisallowXRP"},
+		{LsDisableMaster, "DisableMaster"},
+		{LsNoFreeze, "NoFreeze"},
+	},
+	OFFER: {
+		{LsPassive, "Passive"},
+		{LsSell, "Sell"},
+	},
+	RIPPLE_STATE: {
+		{LsLowReserve, "LowReserve"},
+		{LsHighReserve, "HighReserve"},
+		{LsLowAuth, "LowAuth"},
+		{LsHighAuth, "HighAuth"},
+		{LsLowNoRipple, "LowNoRipple"},
+		{LsHighNoRipple, "HighNoRipple"},
+		{LsLowFreeze, "LowFreeze"},
+		{LsHighFreeze, "HighFreeze"},
+	},
+}
+
+func (f TransactionFlag) String() string {
+	return fmt.Sprintf("%08X", uint32(f))
+}
+
+func (f LedgerEntryFlag) String() string {
+	return fmt.Sprintf("%08X", uint32(f))
+}
+
+func (f TransactionFlag) Explain(tx Transaction) []string {
+	var flags []string
+	if f&TxCanonicalSignature > 0 {
+		flags = append(flags, "CanonicalSignature")
+	}
+	for _, n := range txFlagNames[tx.GetTransactionType()] {
+		if f&n.Flag > 0 {
+			flags = append(flags, n.Name)
+		}
+	}
+	return flags
+}
+
+func (f LedgerEntryFlag) Explain(le LedgerEntry) []string {
+	var flags []string
+	for _, n := range leFlagNames[le.GetLedgerEntryType()] {
+		if f&n.Flag > 0 {
+			flags = append(flags, n.Name)
+		}
+	}
+	return flags
+}
