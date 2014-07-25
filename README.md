@@ -15,6 +15,7 @@ We've included command-line tools to show how to apply the library:
 * listener: connects to rippled servers with the peering protocol and displays the traffic
 * subscribe: tracks ledgers and transactions via websockets and explains each transaction's metadata
 * tx: creates transactions, signs them, and submits them via websockets
+* vanity: generates new ripple wallets in search of vanity addresses
 
 The hope is one day that these packages might lay the foundations for an alternative implementation of the [Ripple daemon](https://github.com/ripple/rippled). This is, however, a long way off!
 
