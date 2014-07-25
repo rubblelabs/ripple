@@ -6,19 +6,19 @@ Go packages to interact with the Ripple protocol.
 [![GoDoc](https://godoc.org/github.com/rubblelabs/ripple?status.png)](https://godoc.org/github.com/rubblelabs/ripple)
 [![Build Status](https://drone.io/github.com/rubblelabs/ripple/status.png)](https://drone.io/github.com/rubblelabs/ripple/latest)
 
-Documentation is very much non-existent currently.
+The data, crypto, and websockets packages are very functional and quite well tested. Most websockets commands are implemented but not all.
 
-This is very much a work in progress. There is a lot of code to tidy up and not all of it is currently present in this repository. If you'd like to help, more tests and docs are welcome. If you'd like to refactor a section, please raise an issue and let's discuss the idea before writing any code.
+The peers and ledger packages are the least polished packages currently, and they are very much unfinished (and the tests might be non-existent or non-functional), but better to get the code out in the open.
 
-The peers, ledger and websockets packages are the least polished packages currently, and they are very much unfinished (and the tests might be non-existent or non-functional), but better to get the code out in the open.
+We've included command-line tools to show how to apply the library:
 
-I'll add some simple tools in the next week or two which demonstrate how to use the packages.
+* listener: connects to rippled servers with the peering protocol and displays the traffic
+* subscribe: tracks ledgers and transactions via websockets and explains each transaction's metadata
+* tx: creates transactions, signs them, and submits them via websockets
 
 The hope is one day that these packages might lay the foundations for an alternative implementation of the [Ripple daemon](https://github.com/ripple/rippled). This is, however, a long way off!
 
-Please bear in mind that this has been an exercise that has taken a lot of time, so if you want to help and are not a developer, bounties and thanks are more than welcome here:
-
-[rGWBfkHZUECBtpSt22donchB263cgAfdhJ](https://ripple.com//contact?to=rGWBfkHZUECBtpSt22donchB263cgAfdhJ&name=donch]rGWBfkHZUECBtpSt22donchB263cgAfdhJ)
+Please bear in mind that this has been an exercise that has taken a lot of time, so if you want to help and are not a developer, bounties and thanks are more than welcome. Please see the [AUTHORS](https://github.com/rubblelabs/ripple/blob/master/AUTHORS) file.
 
 ## Test Coverage
 
