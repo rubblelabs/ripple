@@ -33,8 +33,8 @@ type RippleState struct {
 	leBase
 	LowLimit          Amount
 	HighLimit         Amount
-	PreviousTxnID     Hash256
-	PreviousTxnLgrSeq uint32
+	PreviousTxnID     *Hash256   `json:",omitempty"`
+	PreviousTxnLgrSeq *uint32    `json:",omitempty"`
 	Balance           Amount     `json:",omitempty"`
 	LowNode           *NodeIndex `json:",omitempty"`
 	HighNode          *NodeIndex `json:",omitempty"`
