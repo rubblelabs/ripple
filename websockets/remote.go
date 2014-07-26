@@ -24,8 +24,8 @@ const (
 )
 
 type Remote struct {
-	Outgoing chan Syncer
 	Incoming chan interface{}
+	outgoing chan Syncer
 	ws       *websocket.Conn
 }
 
@@ -44,14 +44,14 @@ func NewRemote(endpoint string) (*Remote, error) {
 		return nil, err
 	}
 	return &Remote{
-		Outgoing: make(chan Syncer, 10),
 		Incoming: make(chan interface{}, 10),
+		outgoing: make(chan Syncer, 10),
 		ws:       ws,
 	}, nil
 }
 
 func (r *Remote) Close() {
-	close(r.Outgoing)
+	close(r.outgoing)
 }
 
 func (r *Remote) Run() {
@@ -78,7 +78,7 @@ func (r *Remote) Run() {
 	var response Command
 	for {
 		select {
-		case command, ok := <-r.Outgoing:
+		case command, ok := <-r.outgoing:
 			if !ok {
 				glog.Infoln("Closing")
 				return
@@ -89,6 +89,7 @@ func (r *Remote) Run() {
 
 		case in, ok := <-inbound:
 			if !ok {
+				glog.Infoln("Connection closed at endpoint")
 				return
 			}
 
@@ -130,7 +131,7 @@ func (r *Remote) Tx(hash data.Hash256) (*TxResult, error) {
 		Command:     newCommand("tx"),
 		Transaction: hash,
 	}
-	r.Outgoing <- cmd
+	r.outgoing <- cmd
 	<-cmd.Ready
 	if cmd.CommandError != nil {
 		return nil, cmd.CommandError
@@ -142,7 +143,7 @@ func (r *Remote) accountTx(account data.Account, c chan *data.TransactionWithMet
 	defer close(c)
 	cmd := newAccountTxCommand(account, pageSize, nil)
 	for ; ; cmd = newAccountTxCommand(account, pageSize, cmd.Result.Marker) {
-		r.Outgoing <- cmd
+		r.outgoing <- cmd
 		<-cmd.Ready
 		if cmd.CommandError != nil {
 			glog.Errorln(cmd.Error())
@@ -174,7 +175,7 @@ func (r *Remote) Submit(tx data.Transaction) (*SubmitResult, error) {
 		Command: newCommand("submit"),
 		TxBlob:  fmt.Sprintf("%X", raw),
 	}
-	r.Outgoing <- cmd
+	r.outgoing <- cmd
 	<-cmd.Ready
 	if cmd.CommandError != nil {
 		return nil, cmd.CommandError
@@ -189,7 +190,7 @@ func (r *Remote) LedgerData(ledger interface{}, marker *data.Hash256) (*LedgerDa
 		Ledger:  ledger,
 		Marker:  marker,
 	}
-	r.Outgoing <- cmd
+	r.outgoing <- cmd
 	<-cmd.Ready
 	if cmd.CommandError != nil {
 		return nil, cmd.CommandError
@@ -205,7 +206,7 @@ func (r *Remote) Ledger(ledger interface{}, transactions bool) (*LedgerResult, e
 		Transactions: transactions,
 		Expand:       true,
 	}
-	r.Outgoing <- cmd
+	r.outgoing <- cmd
 	<-cmd.Ready
 	if cmd.CommandError != nil {
 		return nil, cmd.CommandError
@@ -218,7 +219,7 @@ func (r *Remote) LedgerHeader(ledger interface{}) (*LedgerHeaderResult, error) {
 		Command: newCommand("ledger_header"),
 		Ledger:  ledger,
 	}
-	r.Outgoing <- cmd
+	r.outgoing <- cmd
 	<-cmd.Ready
 	if cmd.CommandError != nil {
 		return nil, cmd.CommandError
@@ -235,7 +236,7 @@ func (r *Remote) RipplePathFind(src, dest data.Account, amount data.Amount, srcC
 		DestAccount:   dest,
 		DestAmount:    amount,
 	}
-	r.Outgoing <- cmd
+	r.outgoing <- cmd
 	<-cmd.Ready
 	if cmd.CommandError != nil {
 		return nil, cmd.CommandError
@@ -249,7 +250,7 @@ func (r *Remote) AccountInfo(a data.Account) (*AccountInfoResult, error) {
 		Command: newCommand("account_info"),
 		Account: a,
 	}
-	r.Outgoing <- cmd
+	r.outgoing <- cmd
 	<-cmd.Ready
 	if cmd.CommandError != nil {
 		return nil, cmd.CommandError
@@ -274,7 +275,7 @@ func (r *Remote) Subscribe(ledger, transactions, server bool) (*SubscribeResult,
 		Command: newCommand("subscribe"),
 		Streams: streams,
 	}
-	r.Outgoing <- cmd
+	r.outgoing <- cmd
 	<-cmd.Ready
 	if cmd.CommandError != nil {
 		return nil, cmd.CommandError
