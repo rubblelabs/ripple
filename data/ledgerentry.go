@@ -61,7 +61,7 @@ type Offer struct {
 type Directory struct {
 	leBase
 	RootIndex         Hash256
-	Indexes           Vector256
+	Indexes           *Vector256 `json:",omitempty"`
 	Owner             *Account   `json:",omitempty"`
 	TakerPaysCurrency *Hash160   `json:",omitempty"`
 	TakerPaysIssuer   *Hash160   `json:",omitempty"`
