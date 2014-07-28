@@ -154,6 +154,6 @@ func (s *MessagesSuite) TestAccountInfoResponse(c *C) {
 	c.Assert(msg.Result.LedgerSequence, Equals, uint32(7636529))
 	c.Assert(*msg.Result.AccountData.TransferRate, Equals, uint32(1002000000))
 	c.Assert(msg.Result.AccountData.LedgerEntryType, Equals, data.ACCOUNT_ROOT)
-	c.Assert(msg.Result.AccountData.Sequence, Equals, uint32(546))
+	c.Assert(*msg.Result.AccountData.Sequence, Equals, uint32(546))
 	c.Assert(msg.Result.AccountData.Balance.String(), Equals, "10321199.422233")
 }

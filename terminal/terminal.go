@@ -3,9 +3,9 @@ package terminal
 
 import (
 	"fmt"
+	"github.com/fatih/color"
 	"github.com/rubblelabs/ripple/data"
 	"github.com/rubblelabs/ripple/websockets"
-	"github.com/fatih/color"
 	"reflect"
 )
 
@@ -66,7 +66,7 @@ func newLeBundle(v interface{}, flag Flag) (*bundle, error) {
 		values = append(values, []interface{}{le.Account, *le.Flags, le.Balance}...)
 	case *data.LedgerHashes:
 		format += "%d hashes"
-		values = append(values, []interface{}{len(le.Hashes)}...)
+		values = append(values, []interface{}{len(*le.Hashes)}...)
 	case *data.RippleState:
 		format += "%s %s %s"
 		values = append(values, []interface{}{le.Balance, le.HighLimit, le.LowLimit}...)
