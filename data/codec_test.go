@@ -72,3 +72,20 @@ func (s *CodecSuite) TestBadNodes(c *C) {
 		c.Assert(err, Not(IsNil), msg)
 	}
 }
+
+func (s *CodecSuite) TestParseMetaData(c *C) {
+	for _, test := range internal.Nodes {
+		nodeId, err := NewHash256(test.NodeId())
+		c.Assert(err, IsNil)
+		n, err := ReadPrefix(test.Reader(), *nodeId)
+		msg := dump(test, n)
+		c.Assert(err, IsNil, msg)
+		txm, ok := n.(*TransactionWithMetaData)
+		if !ok {
+			continue
+		}
+		for _, a := range txm.MetaData.AffectedNodes {
+			c.Assert(a.State(), Not(IsNil))
+		}
+	}
+}

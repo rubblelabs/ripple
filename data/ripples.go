@@ -123,7 +123,10 @@ func (txm *TransactionWithMetaData) Trades() (TradeSlice, error) {
 				break
 			}
 			// Fully consumed offer
-			previous, final := node.DeletedNode.PreviousFields, node.DeletedNode.FinalFields
+			var (
+				previous = node.DeletedNode.PreviousFields.(*Offer)
+				final    = node.DeletedNode.FinalFields.(*Offer)
+			)
 			if previous.TakerPays == nil {
 				reason = "Deleted Offer PreviousFields missing TakerPays"
 				break
@@ -148,7 +151,10 @@ func (txm *TransactionWithMetaData) Trades() (TradeSlice, error) {
 				break
 			}
 			// Partially consumed offer
-			previous, current := node.ModifiedNode.PreviousFields, node.ModifiedNode.FinalFields
+			var (
+				previous = node.ModifiedNode.PreviousFields.(*Offer)
+				current  = node.ModifiedNode.FinalFields.(*Offer)
+			)
 			if previous.TakerPays == nil {
 				reason = "Modified Offer PreviousFields missing TakerPays"
 				break
@@ -196,11 +202,11 @@ func (txm *TransactionWithMetaData) Balances() (BalanceSlice, error) {
 		case node.CreatedNode != nil:
 			switch node.CreatedNode.LedgerEntryType {
 			case ACCOUNT_ROOT:
-				created := node.CreatedNode.NewFields
-				balances.Add(created.Account, &zeroNative, created.Balance.Value, &zeroCurrency)
+				created := node.CreatedNode.NewFields.(*AccountRoot)
+				balances.Add(created.Account, &zeroNative, created.Balance, &zeroCurrency)
 			case RIPPLE_STATE:
 				// New trust line
-				state := node.CreatedNode.NewFields
+				state := node.CreatedNode.NewFields.(*RippleState)
 				balances.Add(&account, &zeroNonNative, state.Balance.Value, &state.Balance.Currency)
 			}
 		case node.DeletedNode != nil:
@@ -218,7 +224,10 @@ func (txm *TransactionWithMetaData) Balances() (BalanceSlice, error) {
 			switch node.ModifiedNode.LedgerEntryType {
 			case ACCOUNT_ROOT:
 				// Changed XRP Balance
-				previous, current := node.ModifiedNode.PreviousFields, node.ModifiedNode.FinalFields
+				var (
+					previous = node.ModifiedNode.PreviousFields.(*AccountRoot)
+					current  = node.ModifiedNode.FinalFields.(*AccountRoot)
+				)
 				if previous.Balance == nil {
 					// ownercount change
 					continue
@@ -235,11 +244,14 @@ func (txm *TransactionWithMetaData) Balances() (BalanceSlice, error) {
 					}
 				}
 				if change.num != 0 {
-					balances.Add(current.Account, current.Balance.Value, change.Value, &zeroCurrency)
+					balances.Add(current.Account, current.Balance, change.Value, &zeroCurrency)
 				}
 			case RIPPLE_STATE:
 				// Changed non-native balance
-				previous, current := node.ModifiedNode.PreviousFields, node.ModifiedNode.FinalFields
+				var (
+					previous = node.ModifiedNode.PreviousFields.(*RippleState)
+					current  = node.ModifiedNode.FinalFields.(*RippleState)
+				)
 				if previous.Balance == nil {
 					//flag change
 					continue

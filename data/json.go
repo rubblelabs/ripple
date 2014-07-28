@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 type ledgerJSON Ledger
@@ -198,6 +199,74 @@ func (l *LedgerEntrySlice) UnmarshalJSON(b []byte) error {
 		*l = append(*l, le)
 	}
 	return nil
+}
+
+// const leSliceFormat = `%s,"LedgerEntryType":"%s"}`
+
+// func (s LedgerEntrySlice) MarshalJSON() ([]byte, error) {
+// 	var raw []json.RawMessage
+// 	for _, le := range s {
+// 		b, err := json.Marshal(le)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 		extra := fmt.Sprintf(leSliceFormat, string(b[:len(b)-1]), le.GetLedgerEntryType())
+// 		raw = append(raw, json.RawMessage(extra))
+// 	}
+// 	return json.Marshal(raw)
+// }
+
+type affectedNodeJSON struct {
+	LedgerEntryType   LedgerEntryType
+	LedgerIndex       *Hash256
+	PreviousTxnID     *Hash256
+	PreviousTxnLgrSeq *uint32
+	FinalFields       json.RawMessage `json:",omitempty"`
+	PreviousFields    json.RawMessage `json:",omitempty"`
+	NewFields         json.RawMessage `json:",omitempty"`
+}
+
+func (a *AffectedNode) UnmarshalJSON(b []byte) error {
+	var affected affectedNodeJSON
+	if err := json.Unmarshal(b, &affected); err != nil {
+		return err
+	}
+	*a = AffectedNode{
+		LedgerEntryType:   affected.LedgerEntryType,
+		LedgerIndex:       affected.LedgerIndex,
+		PreviousTxnID:     affected.PreviousTxnID,
+		PreviousTxnLgrSeq: affected.PreviousTxnLgrSeq,
+	}
+	if affected.FinalFields != nil {
+		a.FinalFields = LedgerEntryFactory[a.LedgerEntryType]()
+		if err := json.Unmarshal(affected.FinalFields, a.FinalFields); err != nil {
+			return err
+		}
+	}
+	if affected.PreviousFields != nil {
+		a.PreviousFields = LedgerEntryFactory[a.LedgerEntryType]()
+		if err := json.Unmarshal(affected.PreviousFields, a.PreviousFields); err != nil {
+			return err
+		}
+	}
+	if affected.NewFields != nil {
+		a.NewFields = LedgerEntryFactory[a.LedgerEntryType]()
+		if err := json.Unmarshal(affected.NewFields, a.NewFields); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+const leTypeFormat = `:{"LedgerEntryType":"%s",`
+
+func (a *AffectedNode) MarshalJSON() ([]byte, error) {
+	b, err := json.Marshal(struct {
+		AffectedNode
+	}{*a})
+	// I can only apologise
+	fixed := strings.Replace(string(b), fmt.Sprintf(leTypeFormat, a.LedgerEntryType), ":{", -1)
+	return []byte(fixed), err
 }
 
 func (i NodeIndex) MarshalText() ([]byte, error) {

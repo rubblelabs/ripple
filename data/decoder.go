@@ -247,12 +247,19 @@ func readObject(r Reader, v *reflect.Value) error {
 			case "EndOfObject":
 				return errorEndOfObject
 			case "PreviousFields", "NewFields", "FinalFields":
-				var fields Fields
-				f := reflect.ValueOf(&fields)
-				v.Elem().FieldByName(name).Set(f)
-				if readObject(r, &f); err != nil && err != errorEndOfObject {
+				leType := LedgerEntryType(v.Elem().FieldByName("LedgerEntryType").Uint())
+				le := LedgerEntryFactory[leType]()
+				fields := reflect.ValueOf(le)
+				v.Elem().FieldByName(name).Set(fields)
+				if err := readObject(r, &fields); err != nil && err != errorEndOfObject {
 					return err
 				}
+				// var fields Fields
+				// f := reflect.ValueOf(&fields)
+				// v.Elem().FieldByName(name).Set(f)
+				// if readObject(r, &f); err != nil && err != errorEndOfObject {
+				// 	return err
+				// }
 			case "ModifiedNode", "DeletedNode", "CreatedNode":
 				var node AffectedNode
 				n := reflect.ValueOf(&node)

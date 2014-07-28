@@ -102,7 +102,7 @@ func writeRaw(w io.Writer, value interface{}, ignoreSigningFields bool) error {
 
 func encode(w io.Writer, value interface{}, ignoreSigningFields bool) error {
 	v := reflect.Indirect(reflect.ValueOf(value))
-	fields := getFields(&v)
+	fields := getFields(&v, 0)
 	// fmt.Println(fields.String())
 	return fields.Each(func(e enc, v interface{}) error {
 		if ignoreSigningFields && e.SigningField() {
@@ -142,13 +142,17 @@ func (s *fieldSlice) Append(e enc, v interface{}, children fieldSlice) {
 	*s = append(*s, field{e, v, children})
 }
 
-func getFields(v *reflect.Value) fieldSlice {
+func getFields(v *reflect.Value, depth int) fieldSlice {
 	// fmt.Println(v, v.Kind(), v.Type().Name())
 	var fields fieldSlice
 	for i, length := 0, v.NumField(); i < length; i++ {
 		f := v.Field(i)
 		fieldName := v.Type().Field(i).Name
 		if fieldName == "Hash" || fieldName == "Id" {
+			continue
+		}
+		// Stops LedgerEntryType being encoded for Fields
+		if fieldName == "LedgerEntryType" && depth > 1 && v.Type().Name() == "leBase" {
 			continue
 		}
 		encoding := reverseEncodings[fieldName]
@@ -171,16 +175,16 @@ func getFields(v *reflect.Value) fieldSlice {
 			var children fieldSlice
 			for i := 0; i < f.Len(); i++ {
 				f2 := f.Index(i)
-				children = append(children, getFields(&f2)...)
+				children = append(children, getFields(&f2, depth+1)...)
 			}
 			children.Append(reverseEncodings["EndOfArray"], nil, nil)
 			fields.Append(encoding, nil, children)
 		case ST_OBJECT:
-			children := getFields(&f)
+			children := getFields(&f, depth+1)
 			children.Append(reverseEncodings["EndOfObject"], nil, nil)
 			fields.Append(encoding, nil, children)
 		default:
-			fields = append(fields, getFields(&f)...)
+			fields = append(fields, getFields(&f, depth+1)...)
 		}
 	}
 	fields.Sort()
