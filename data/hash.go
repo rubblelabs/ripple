@@ -37,6 +37,24 @@ func (h Hash160) String() string {
 	return string(b2h(h[:]))
 }
 
+func (h *Hash160) Account() *Account {
+	if h == nil {
+		return nil
+	}
+	var a Account
+	copy(a[:], h[:])
+	return &a
+}
+
+func (h *Hash160) Currency() *Currency {
+	if h == nil {
+		return nil
+	}
+	var c Currency
+	copy(c[:], h[:])
+	return &c
+}
+
 // Accepts either a hex string or a byte slice of length 32
 func NewHash256(value interface{}) (*Hash256, error) {
 	var h Hash256
@@ -76,7 +94,10 @@ func (h Hash256) Compare(x Hash256) int {
 	return bytes.Compare(h[:], x[:])
 }
 
-func (h Hash256) Bytes() []byte {
+func (h *Hash256) Bytes() []byte {
+	if h == nil {
+		return nil
+	}
 	return h[:]
 }
 
