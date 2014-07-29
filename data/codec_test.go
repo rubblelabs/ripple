@@ -85,8 +85,9 @@ func (s *CodecSuite) TestParseMetaData(c *C) {
 			continue
 		}
 		for _, a := range txm.MetaData.AffectedNodes {
-			entry, _ := a.LedgerEntry()
-			c.Assert(entry, Not(IsNil))
+			effect, node, _ := a.AffectedNode()
+			c.Assert(effect, Not(IsNil))
+			c.Assert(node, Not(IsNil))
 		}
 	}
 }
