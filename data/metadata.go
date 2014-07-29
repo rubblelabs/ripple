@@ -69,16 +69,16 @@ func NewTransactionWithMetadata(typ TransactionType) *TransactionWithMetaData {
 	return &TransactionWithMetaData{Transaction: TxFactory[typ]()}
 }
 
-func (effect *NodeEffect) State() LedgerEntryState {
+func (effect *NodeEffect) AffectedNode() (*AffectedNode, LedgerEntry, LedgerEntryState) {
 	switch {
 	case effect.CreatedNode != nil && effect.CreatedNode.NewFields != nil:
-		return Created
+		return effect.CreatedNode, effect.CreatedNode.NewFields, Created
 	case effect.DeletedNode != nil && effect.DeletedNode.FinalFields != nil:
-		return Deleted
+		return effect.DeletedNode, effect.DeletedNode.FinalFields, Deleted
 	case effect.ModifiedNode != nil && effect.ModifiedNode.FinalFields != nil:
-		return Modified
+		return effect.ModifiedNode, effect.ModifiedNode.FinalFields, Modified
 	case effect.ModifiedNode != nil && effect.ModifiedNode.FinalFields == nil:
-		return Touched
+		return effect.ModifiedNode, nil, Touched
 	default:
 		panic(fmt.Sprintf("Unknown LedgerEntryState: %+v", effect))
 	}
