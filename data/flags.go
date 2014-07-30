@@ -23,11 +23,13 @@ const (
 	TxSetRequireAuth   TransactionFlag = 0x00000002
 	TxSetDisallowXRP   TransactionFlag = 0x00000003
 	TxSetDisableMaster TransactionFlag = 0x00000004
+	TxSetAccountTxnID  TransactionFlag = 0x00000005
 	TxNoFreeze         TransactionFlag = 0x00000006
 	TxGlobalFreeze     TransactionFlag = 0x00000007
 	TxRequireDestTag   TransactionFlag = 0x00010000
 	TxOptionalDestTag  TransactionFlag = 0x00020000
 	TxRequireAuth      TransactionFlag = 0x00040000
+	TxOptionalAuth     TransactionFlag = 0x00080000
 	TxDisallowXRP      TransactionFlag = 0x00100000
 	TxAllowXRP         TransactionFlag = 0x00200000
 
