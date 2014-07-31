@@ -279,6 +279,16 @@ func (i *NodeIndex) UnmarshalText(b []byte) error {
 	return err
 }
 
+func (e ExchangeRate) MarshalText() ([]byte, error) {
+	return []byte(fmt.Sprintf("%016X", e)), nil
+}
+
+func (e *ExchangeRate) UnmarshalText(b []byte) error {
+	n, err := strconv.ParseUint(string(b), 16, 64)
+	*e = ExchangeRate(n)
+	return err
+}
+
 func (r TransactionResult) MarshalText() ([]byte, error) {
 	return []byte(r.String()), nil
 }

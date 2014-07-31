@@ -1,6 +1,7 @@
 package data
 
 import (
+	"encoding/binary"
 	"fmt"
 	"github.com/rubblelabs/ripple/crypto"
 	"strings"
@@ -11,6 +12,8 @@ type Amount struct {
 	Currency Currency
 	Issuer   Account
 }
+
+type ExchangeRate uint64
 
 func newAmount(value *Value, currency Currency, issuer Account) *Amount {
 	return &Amount{
@@ -208,4 +211,30 @@ func (a Amount) Machine() string {
 	default:
 		return a.Value.String() + "/" + a.Currency.Machine() + "/" + a.Issuer.String()
 	}
+}
+
+func NewExchangeRate(a, b *Amount) (ExchangeRate, error) {
+	if b.IsZero() {
+		return 0, nil
+	}
+	rate, err := a.Divide(b)
+	if err != nil {
+		return 0, err
+	}
+	if rate.IsZero() {
+		return 0, nil
+	}
+	if rate.offset >= -100 || rate.offset <= 155 {
+		panic("Impossible Rate")
+	}
+	return ExchangeRate(uint64(rate.offset+100)<<54 | uint64(rate.num)), nil
+}
+
+func (e *ExchangeRate) Bytes() []byte {
+	if e == nil {
+		return nil
+	}
+	var b []byte
+	binary.BigEndian.PutUint64(b, uint64(*e))
+	return b
 }

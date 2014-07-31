@@ -66,7 +66,7 @@ type Directory struct {
 	TakerPaysIssuer   *Hash160         `json:",omitempty"`
 	TakerGetsCurrency *Hash160         `json:",omitempty"`
 	TakerGetsIssuer   *Hash160         `json:",omitempty"`
-	ExchangeRate      *NodeIndex       `json:",omitempty"`
+	ExchangeRate      *ExchangeRate    `json:",omitempty"`
 	IndexNext         *NodeIndex       `json:",omitempty"`
 	IndexPrevious     *NodeIndex       `json:",omitempty"`
 }
