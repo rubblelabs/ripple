@@ -234,7 +234,7 @@ func (e *ExchangeRate) Bytes() []byte {
 	if e == nil {
 		return nil
 	}
-	var b []byte
+	b := make([]byte, 8)
 	binary.BigEndian.PutUint64(b, uint64(*e))
 	return b
 }
