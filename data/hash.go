@@ -21,7 +21,10 @@ var zero256 Hash256
 var zeroAccount Account
 var zeroPublicKey PublicKey
 
-func (h Hash128) Bytes() []byte {
+func (h *Hash128) Bytes() []byte {
+	if h == nil {
+		return nil
+	}
 	return h[:]
 }
 
@@ -29,7 +32,10 @@ func (h Hash128) String() string {
 	return string(b2h(h[:]))
 }
 
-func (h Hash160) Bytes() []byte {
+func (h *Hash160) Bytes() []byte {
+	if h == nil {
+		return nil
+	}
 	return h[:]
 }
 

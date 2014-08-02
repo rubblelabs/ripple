@@ -399,7 +399,10 @@ func (v Value) IsZero() bool {
 	return v.num == 0
 }
 
-func (v Value) Bytes() []byte {
+func (v *Value) Bytes() []byte {
+	if v == nil {
+		return nil
+	}
 	var u uint64
 	if !v.negative {
 		u |= 1 << 62
