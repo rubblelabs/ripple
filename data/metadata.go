@@ -11,7 +11,6 @@ const (
 	Created LedgerEntryState = iota
 	Modified
 	Deleted
-	Touched
 )
 
 type AffectedNode struct {
@@ -69,17 +68,29 @@ func NewTransactionWithMetadata(typ TransactionType) *TransactionWithMetaData {
 	return &TransactionWithMetaData{Transaction: TxFactory[typ]()}
 }
 
-func (effect *NodeEffect) AffectedNode() (*AffectedNode, LedgerEntry, LedgerEntryState) {
+// AffectedNode returns the AffectedNode, the current LedgerEntry,
+// the previous LedgerEntry (which might be nil) and the LedgerEntryState
+func (effect *NodeEffect) AffectedNode() (*AffectedNode, LedgerEntry, LedgerEntry, LedgerEntryState) {
+	var (
+		node            *AffectedNode
+		final, previous LedgerEntry
+		state           LedgerEntryState
+	)
 	switch {
 	case effect.CreatedNode != nil && effect.CreatedNode.NewFields != nil:
-		return effect.CreatedNode, effect.CreatedNode.NewFields, Created
+		node, final, state = effect.CreatedNode, effect.CreatedNode.NewFields, Created
 	case effect.DeletedNode != nil && effect.DeletedNode.FinalFields != nil:
-		return effect.DeletedNode, effect.DeletedNode.FinalFields, Deleted
+		node, final, state = effect.DeletedNode, effect.DeletedNode.FinalFields, Deleted
 	case effect.ModifiedNode != nil && effect.ModifiedNode.FinalFields != nil:
-		return effect.ModifiedNode, effect.ModifiedNode.FinalFields, Modified
+		node, final, state = effect.ModifiedNode, effect.ModifiedNode.FinalFields, Modified
 	case effect.ModifiedNode != nil && effect.ModifiedNode.FinalFields == nil:
-		return effect.ModifiedNode, nil, Touched
+		node, final, state = effect.ModifiedNode, LedgerEntryFactory[effect.ModifiedNode.LedgerEntryType](), Modified
 	default:
 		panic(fmt.Sprintf("Unknown LedgerEntryState: %+v", effect))
 	}
+	previous = node.PreviousFields
+	if previous == nil {
+		previous = LedgerEntryFactory[final.GetLedgerEntryType()]()
+	}
+	return node, final, previous, state
 }
