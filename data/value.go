@@ -1,6 +1,7 @@
 package data
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"math/big"
@@ -417,6 +418,15 @@ func (v *Value) Bytes() []byte {
 	var b [8]byte
 	binary.BigEndian.PutUint64(b[:], u)
 	return b[:]
+}
+
+func (v Value) MarshalBinary() ([]byte, error) {
+	return v.Bytes(), nil
+}
+
+func (v *Value) UnmarshalBinary(b []byte) error {
+	buf := bytes.NewBuffer(b)
+	return v.Unmarshal(buf)
 }
 
 // Rat returns the value as a big.Rat.
