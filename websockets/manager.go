@@ -1,8 +1,8 @@
 package websockets
 
 import (
-	"github.com/rubblelabs/ripple/data"
 	"github.com/golang/glog"
+	"github.com/rubblelabs/ripple/data"
 	"time"
 )
 
@@ -28,7 +28,7 @@ type ManagedLedger struct {
 
 type Manager struct {
 	// Ledgers are emitted on this channel in the correct order
-	Ledgers chan *ManagedLedger
+	ledgers chan *ManagedLedger
 
 	// Ledgers are captured in whatever order they arrive on this channel
 	unorderedLedgers chan *ManagedLedger
@@ -43,17 +43,24 @@ type Manager struct {
 	nextLedgerSequence uint32
 }
 
+// NewManager creates a new Manager and starts emitting ManagedLedgers
+// starting with startLedgerIdx.
 func NewManager(startLedgerIdx uint32) *Manager {
 	return &Manager{
-		Ledgers:            make(chan *ManagedLedger),
+		ledgers:            make(chan *ManagedLedger),
 		unorderedLedgers:   make(chan *ManagedLedger),
 		nextLedgerSequence: startLedgerIdx,
 	}
 }
 
+// Ledgers returns a channel that emits ManagedLedgers.
+func (m *Manager) Ledgers() <-chan *ManagedLedger {
+	return m.ledgers
+}
+
 // Accepts unordered ledgers, buffers, and emits them in order.
 func (m *Manager) runLedgerBuffer() {
-	ledgerBuffer := make(map[uint32]*ManagedLedger)
+	ledgerBuffer := make(map[uint32]*ManagedLedger, 10)
 
 	// If TIMEOUT elapses without receiving the next ledger,
 	// kill the connection and resume on another server.
@@ -72,12 +79,12 @@ func (m *Manager) runLedgerBuffer() {
 		case l := <-m.unorderedLedgers:
 			if l.LedgerSequence == m.nextLedgerSequence {
 				// Ledger is the one we need next. Emit it.
-				m.Ledgers <- l
+				m.ledgers <- l
 				m.nextLedgerSequence++
 
 				// If we already have any of the next ledgers, emit them now too.
 				for ; ledgerBuffer[m.nextLedgerSequence] != nil; m.nextLedgerSequence++ {
-					m.Ledgers <- ledgerBuffer[m.nextLedgerSequence]
+					m.ledgers <- ledgerBuffer[m.nextLedgerSequence]
 					delete(ledgerBuffer, m.nextLedgerSequence)
 				}
 

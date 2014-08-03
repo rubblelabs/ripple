@@ -12,7 +12,7 @@ func main() {
 	m := websockets.NewManager(7302386)
 	go m.Run()
 
-	for ledger := range m.Ledgers {
+	for ledger := range m.Ledgers() {
 		fmt.Printf(
 			"Ledger %d closed with %d txns\n",
 			ledger.LedgerSequence,
