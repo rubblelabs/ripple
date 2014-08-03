@@ -22,15 +22,15 @@ type CommandError struct {
 
 type Command struct {
 	*CommandError
-	Id     uint64    `json:"id"`
-	Name   string    `json:"command"`
-	Type   string    `json:"type,omitempty"`
-	Status string    `json:"status,omitempty"`
-	Ready  chan bool `json:"-"`
+	Id     uint64        `json:"id"`
+	Name   string        `json:"command"`
+	Type   string        `json:"type,omitempty"`
+	Status string        `json:"status,omitempty"`
+	Ready  chan struct{} `json:"-"`
 }
 
 func (c *Command) Done() {
-	c.Ready <- true
+	c.Ready <- struct{}{}
 }
 
 func (c *Command) Fail(message string) {
@@ -39,7 +39,7 @@ func (c *Command) Fail(message string) {
 		Code:    -1,
 		Message: message,
 	}
-	c.Ready <- true
+	c.Ready <- struct{}{}
 }
 
 func (c *Command) IncrementId() {
@@ -54,7 +54,7 @@ func newCommand(command string) *Command {
 	return &Command{
 		Id:    atomic.AddUint64(&counter, 1),
 		Name:  command,
-		Ready: make(chan bool),
+		Ready: make(chan struct{}),
 	}
 }
 
