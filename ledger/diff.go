@@ -37,7 +37,7 @@ type RadixDiff struct {
 }
 
 func (r *RadixOperation) String() string {
-	return fmt.Sprintf("%c,%d,%s,%s", r.Action, r.Depth, r.NodeId.TruncatedString(8), r.Node.GetType())
+	return fmt.Sprintf("%c,%s,%d,%s", r.Action, r.Node.GetType(), r.Depth, r.NodeId)
 }
 
 type RadixOperations []*RadixOperation
@@ -171,7 +171,7 @@ func diff(left, right data.Hash256, db storage.DB, ops *RadixOperations, depth u
 func (diff *RadixDiff) Dump(sequence uint32, w io.Writer) error {
 	for _, op := range diff.Operations {
 		_, err := fmt.Fprintf(w, "%d,%c,%s,%d,%s,%d\n", sequence, op.Action,
-			op.NodeId.TruncatedString(8), op.Depth, op.Node.GetType())
+			op.NodeId.String(), op.Depth, op.Node.GetType())
 		if err != nil {
 			return err
 		}
