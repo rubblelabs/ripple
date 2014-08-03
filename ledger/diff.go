@@ -121,7 +121,7 @@ func diff(left, right data.Hash256, db storage.DB, ops *RadixOperations, depth u
 	if err != nil {
 		return err
 	}
-	r, err = db.Get(left)
+	r, err = db.Get(right)
 	if err != nil {
 		return err
 	}
