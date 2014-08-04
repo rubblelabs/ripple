@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/rubblelabs/ripple/data"
 	"github.com/rubblelabs/ripple/storage"
-	"io"
 	"strconv"
 	"strings"
 )
@@ -69,21 +68,17 @@ func (state *LedgerState) Fill() error {
 	return state.Transactions.Fill()
 }
 
-func (state *LedgerState) WriteSummary(w io.Writer) error {
+func (state *LedgerState) Summary() (string, error) {
 	summary := make(map[string]uint64)
+	var s []string
 	if err := state.AccountState.Summary(summary); err != nil {
-		return err
+		return "", err
 	}
 	if err := state.Transactions.Summary(summary); err != nil {
-		return err
+		return "", err
 	}
-	out := []string{strconv.FormatUint(uint64(state.Sequence()), 10)}
 	for _, typ := range data.HashableTypes {
-		out = append(out, strconv.FormatUint(summary[typ], 10))
+		s = append(s, strconv.FormatUint(summary[typ], 10))
 	}
-	if _, err := w.Write([]byte(strings.Join(out, ","))); err != nil {
-		return err
-	}
-	_, err := w.Write([]byte{'\n'})
-	return err
+	return strings.Join(s, ","), nil
 }

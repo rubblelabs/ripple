@@ -9,9 +9,17 @@ import (
 
 func Test(t *testing.T) { TestingT(t) }
 
-type DiffSuite struct{}
+type DiffSuite struct {
+	db *memdb.MemoryDB
+}
 
 var _ = Suite(&DiffSuite{})
+
+func (s *DiffSuite) SetUpTest(c *C) {
+	var err error
+	s.db, err = memdb.NewMemoryDB("testdata/38129-32570.gz")
+	c.Check(err, IsNil)
+}
 
 var expectedDiff = []string{
 	"D,Account Node,0,AF47E9E91A41621B0F8AC5A119A5AD8B9E892147381BEAF6F2186127B89A44FF",
@@ -29,13 +37,24 @@ var expectedDiff = []string{
 }
 
 func (s *DiffSuite) TestDiff(c *C) {
-	mem, err := memdb.NewMemoryDB("testdata/38129-32570.gz")
-	c.Check(err, IsNil)
 	first, err := data.NewHash256("2C23D15B6B549123FB351E4B5CDE81C564318EB845449CD43C3EA7953C4DB452")
 	c.Check(err, IsNil)
 	second, err := data.NewHash256("AF47E9E91A41621B0F8AC5A119A5AD8B9E892147381BEAF6F2186127B89A44FF")
 	c.Check(err, IsNil)
-	diff, err := Diff(*first, *second, mem)
+	diff, err := Diff(*first, *second, s.db)
 	c.Check(err, IsNil)
 	c.Assert(diff.String(), DeepEquals, expectedDiff)
+}
+
+var expectedSummary = "0,0,1,0,0,0,0,0,0,0,137,65,0,2,4,53,0"
+
+func (s *DiffSuite) TestSummary(c *C) {
+	ledger, err := data.NewHash256("E6DB7365949BF9814D76BCC730B01818EB9136A89DB224F3F9F5AAE4569D758E")
+	c.Check(err, IsNil)
+	state, err := NewLedgerStateFromDB(*ledger, s.db)
+	c.Check(err, IsNil)
+	c.Check(state.Fill(), IsNil)
+	summary, err := state.Summary()
+	c.Check(err, IsNil)
+	c.Check(summary, DeepEquals, expectedSummary)
 }
