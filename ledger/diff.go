@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/rubblelabs/ripple/data"
 	"github.com/rubblelabs/ripple/storage"
-	"io"
-	"strconv"
 )
 
 type RadixAction byte
@@ -20,24 +18,16 @@ const (
 type RadixOperation struct {
 	*RadixNode
 	Action RadixAction
-	NodeId data.Hash256
 }
 
-func NewRadixOperation(node *RadixNode, action RadixAction, nodeid data.Hash256) *RadixOperation {
+func NewRadixOperation(action RadixAction, node data.Storer, depth uint8) *RadixOperation {
 	return &RadixOperation{
-		RadixNode: node,
-		Action:    action,
-		NodeId:    nodeid,
+		RadixNode: &RadixNode{
+			Node:  node,
+			Depth: depth,
+		},
+		Action: action,
 	}
-}
-
-type RadixDiff struct {
-	Left, Right *RadixMap
-	Operations  RadixOperations
-}
-
-func (r *RadixOperation) String() string {
-	return fmt.Sprintf("%c,%s,%d,%s", r.Action, r.Node.GetType(), r.Depth, r.NodeId)
 }
 
 type RadixOperations []*RadixOperation
@@ -51,26 +41,8 @@ func (ro RadixOperations) Less(i, j int) bool {
 }
 func (ro RadixOperations) Swap(i, j int) { ro[i], ro[j] = ro[j], ro[i] }
 
-func (ro *RadixOperations) Add(node data.Storer, action RadixAction, nodeid data.Hash256, depth uint8) {
-	r := &RadixOperation{
-		RadixNode: &RadixNode{
-			Node:  node,
-			Depth: depth,
-		},
-		Action: action,
-		NodeId: nodeid,
-	}
-	*ro = append(*ro, r)
-}
-
-func (ro RadixOperations) Dump(sequence uint32, w io.Writer) error {
-	prefix := strconv.FormatUint(uint64(sequence), 10)
-	for _, op := range ro {
-		if _, err := fmt.Fprintf(w, "%s,%s\n", prefix, op.String()); err != nil {
-			return err
-		}
-	}
-	return nil
+func (ro *RadixOperations) Add(node data.Storer, action RadixAction, depth uint8) {
+	*ro = append(*ro, NewRadixOperation(action, node, depth))
 }
 
 func Diff(left, right data.Hash256, db storage.DB) (RadixOperations, error) {
@@ -91,7 +63,7 @@ func visitChildren(node data.Storer, db storage.DB, ops *RadixOperations, depth 
 		if err != nil {
 			return nil
 		}
-		ops.Add(child, action, h, depth)
+		ops.Add(child, action, depth)
 		return visitChildren(child, db, ops, depth+1, action)
 	})
 }
@@ -107,14 +79,14 @@ func diff(left, right data.Hash256, db storage.DB, ops *RadixOperations, depth u
 		if err != nil {
 			return err
 		}
-		ops.Add(r, Addition, right, depth)
+		ops.Add(r, Deletion, depth)
 		return visitChildren(r, db, ops, depth+1, Deletion)
 	case right.IsZero():
 		l, err = db.Get(left)
 		if err != nil {
 			return err
 		}
-		ops.Add(l, Addition, left, depth)
+		ops.Add(l, Addition, depth)
 		return visitChildren(l, db, ops, depth+1, Addition)
 	}
 	l, err = db.Get(left)
@@ -125,8 +97,8 @@ func diff(left, right data.Hash256, db storage.DB, ops *RadixOperations, depth u
 	if err != nil {
 		return err
 	}
-	ops.Add(r, Addition, right, depth)
-	ops.Add(l, Addition, left, depth)
+	ops.Add(r, Deletion, depth)
+	ops.Add(l, Addition, depth)
 	leftInner, leftOk := l.(*data.InnerNode)
 	rightInner, rightOk := r.(*data.InnerNode)
 	switch {
@@ -168,13 +140,14 @@ func diff(left, right data.Hash256, db storage.DB, ops *RadixOperations, depth u
 	return nil
 }
 
-func (diff *RadixDiff) Dump(sequence uint32, w io.Writer) error {
-	for _, op := range diff.Operations {
-		_, err := fmt.Fprintf(w, "%d,%c,%s,%d,%s,%d\n", sequence, op.Action,
-			op.NodeId.String(), op.Depth, op.Node.GetType())
-		if err != nil {
-			return err
-		}
+func (ro RadixOperations) String() []string {
+	s := make([]string, len(ro))
+	for i := range ro {
+		s[i] = ro[i].String()
 	}
-	return nil
+	return s
+}
+
+func (r RadixOperation) String() string {
+	return fmt.Sprintf("%c,%s,%d,%s", r.Action, r.Node.GetType(), r.Depth, r.Node.NodeId())
 }
