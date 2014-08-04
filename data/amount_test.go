@@ -110,6 +110,13 @@ var amountTests = TestSlice{
 	// {ErrorCheck(NewAmount("xx")), ErrorMatches, "Bad amount:.*", "IsValid xx"},
 	{ErrorCheck(NewAmount(nil)), ErrorMatches, "Bad type:.*", "IsValid nil"},
 	{ErrorCheck(NewAmount(int(1))), ErrorMatches, "Bad type:.*", "IsValid int(0)"},
+
+	{checkBinaryMarshal(amountCheck("0/XRP")).String(), Equals, "0/XRP", "Binary Marshal 0/XRP"},
+	{checkBinaryMarshal(amountCheck("0.1/XRP")).String(), Equals, "0.1/XRP", "Binary Marshal 0.1/XRP"},
+	{checkBinaryMarshal(amountCheck("-0.1/XRP")).String(), Equals, "-0.1/XRP", "Binary Marshal -0.1/XRP"},
+	{checkBinaryMarshal(amountCheck("0/USD/rNDKeo9RrCiRdfsMG8AdoZvNZxHASGzbZL")).String(), Equals, "0/USD/rNDKeo9RrCiRdfsMG8AdoZvNZxHASGzbZL", "Binary Marshal 0/USD/rNDKeo9RrCiRdfsMG8AdoZvNZxHASGzbZL"},
+	{checkBinaryMarshal(amountCheck("0.1/USD/rNDKeo9RrCiRdfsMG8AdoZvNZxHASGzbZL")).String(), Equals, "0.1/USD/rNDKeo9RrCiRdfsMG8AdoZvNZxHASGzbZL", "Binary Marshal 0.1/USD/rNDKeo9RrCiRdfsMG8AdoZvNZxHASGzbZL"},
+	{checkBinaryMarshal(amountCheck("-0.1/USD/rNDKeo9RrCiRdfsMG8AdoZvNZxHASGzbZL")).String(), Equals, "-0.1/USD/rNDKeo9RrCiRdfsMG8AdoZvNZxHASGzbZL", "Binary Marshal -0.1/USD/rNDKeo9RrCiRdfsMG8AdoZvNZxHASGzbZL"},
 }
 
 func subCheck(a, b string) *Amount {
@@ -171,4 +178,20 @@ func ExampleValue_Add() {
 	// 100
 	// 200.199
 	// 300.199
+}
+
+func checkBinaryMarshal(v1 *Amount) *Amount {
+	var b []byte
+	var err error
+
+	if b, err = v1.MarshalBinary(); err != nil {
+		panic(err)
+	}
+
+	v2 := &Amount{}
+	if err = v2.UnmarshalBinary(b); err != nil {
+		panic(err)
+	}
+
+	return v2
 }

@@ -225,6 +225,12 @@ var valueTests = TestSlice{
 	{valueCheck("0").Less(*valueCheck("1")), Equals, true, "0<1"},
 	{valueCheck("n1").Less(*valueCheck("1")), Equals, false, "n1<1"},
 	{valueCheck("n1.").Less(*valueCheck("1")), Equals, false, "n1.<1"},
+
+	{checkValBinaryMarshal(valueCheck("0")).String(), Equals, "0", "Binary marshal 0"},
+	{checkValBinaryMarshal(valueCheck("n0.1")).String(), Equals, "0.1", "Binary marshal n0.1"},
+	{checkValBinaryMarshal(valueCheck("n-0.1")).String(), Equals, "-0.1", "Binary marshal n-0.1"},
+	{checkValBinaryMarshal(valueCheck("0.1")).String(), Equals, "0.1", "Binary marshal 0.1"},
+	{checkValBinaryMarshal(valueCheck("-0.1")).String(), Equals, "-0.1", "Binary marshal -0.1"},
 }
 
 func subValCheck(a, b string) *Value {
@@ -295,4 +301,20 @@ func equalValCheck(a, b string) bool {
 
 func (s *ValueSuite) TestValue(c *C) {
 	valueTests.Test(c)
+}
+
+func checkValBinaryMarshal(v1 *Value) *Value {
+	var b []byte
+	var err error
+
+	if b, err = v1.MarshalBinary(); err != nil {
+		panic(err)
+	}
+
+	v2 := &Value{}
+	if err = v2.UnmarshalBinary(b); err != nil {
+		panic(err)
+	}
+
+	return v2
 }

@@ -1,6 +1,7 @@
 package data
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"github.com/rubblelabs/ripple/crypto"
@@ -63,6 +64,17 @@ func NewAmount(v interface{}) (*Amount, error) {
 	default:
 		return nil, fmt.Errorf("Bad type: %+v", v)
 	}
+}
+
+func (a Amount) MarshalBinary() ([]byte, error) {
+	var buf bytes.Buffer
+	err := a.Marshal(&buf)
+	return buf.Bytes(), err
+}
+
+func (a *Amount) UnmarshalBinary(b []byte) error {
+	buf := bytes.NewBuffer(b)
+	return a.Unmarshal(buf)
 }
 
 func (a Amount) Equals(b Amount) bool {
