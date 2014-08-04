@@ -19,7 +19,9 @@ We've included command-line tools to show how to apply the library:
 
 The hope is one day that these packages might lay the foundations for an alternative implementation of the [Ripple daemon](https://github.com/ripple/rippled). This is, however, a long way off!
 
-Please bear in mind that this has been an exercise that has taken a lot of time, so if you want to help and are not a developer, bounties and thanks are more than welcome. Please see the [AUTHORS](https://github.com/rubblelabs/ripple/blob/master/AUTHORS) file.
+Please bear in mind that this has been an exercise that has taken a lot of time, so if you want to help and are not a developer, bounties and thanks are more than welcome. Please see the [AUTHORS](https://github.com/rubblelabs/ripple/blob/master/AUTHORS) file. If you'd like to chat about the code, have a look here:
+
+[![Gitter chat](https://badges.gitter.im/rubblelabs/ripple.png)](https://gitter.im/rubblelabs/ripple)
 
 ## Test Coverage
 
