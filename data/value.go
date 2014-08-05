@@ -405,15 +405,17 @@ func (v *Value) Bytes() []byte {
 		return nil
 	}
 	var u uint64
-	if !v.negative {
+	if !v.negative && (v.num > 0 || v.IsNative()) {
 		u |= 1 << 62
 	}
-	if !v.IsNative() {
+	if v.IsNative() {
+		u |= v.num & ((1 << 62) - 1)
+	} else {
 		u |= 1 << 63
 		u |= v.num & ((1 << 54) - 1)
-		u |= uint64(v.offset+97) << 54
-	} else {
-		u |= v.num & ((1 << 62) - 1)
+		if v.num > 0 {
+			u |= uint64(v.offset+97) << 54
+		}
 	}
 	var b [8]byte
 	binary.BigEndian.PutUint64(b[:], u)
