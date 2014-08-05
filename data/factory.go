@@ -95,12 +95,13 @@ var txTypes = map[string]TransactionType{
 var HashableTypes []string
 
 func init() {
-	HashableTypes = append(HashableTypes, []string{"LedgerMaster", "InnerNode"}...)
+	HashableTypes = append(HashableTypes, NT_TRANSACTION_NODE.String())
 	for _, typ := range txNames {
 		if len(typ) > 0 {
 			HashableTypes = append(HashableTypes, typ)
 		}
 	}
+	HashableTypes = append(HashableTypes, NT_ACCOUNT_NODE.String())
 	for _, typ := range ledgerEntryNames {
 		if len(typ) > 0 {
 			HashableTypes = append(HashableTypes, typ)

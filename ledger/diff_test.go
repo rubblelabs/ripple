@@ -46,7 +46,7 @@ func (s *DiffSuite) TestDiff(c *C) {
 	c.Assert(diff.String(), DeepEquals, expectedDiff)
 }
 
-var expectedSummary = "0,0,1,0,0,0,0,0,0,0,137,65,0,2,4,53,0"
+var expectedSummary = "1,1,0,0,0,0,0,0,0,145,137,65,0,2,4,53,0"
 
 func (s *DiffSuite) TestSummary(c *C) {
 	ledger, err := data.NewHash256("E6DB7365949BF9814D76BCC730B01818EB9136A89DB224F3F9F5AAE4569D758E")
