@@ -231,6 +231,8 @@ var valueTests = TestSlice{
 	{checkValBinaryMarshal(valueCheck("n-0.1")).String(), Equals, "-0.1", "Binary marshal n-0.1"},
 	{checkValBinaryMarshal(valueCheck("0.1")).String(), Equals, "0.1", "Binary marshal 0.1"},
 	{checkValBinaryMarshal(valueCheck("-0.1")).String(), Equals, "-0.1", "Binary marshal -0.1"},
+
+	{checkValHex(valueCheckCanonical(false, false, 0, -15)), Equals, "8000000000000000", "Zero hex"},
 }
 
 func subValCheck(a, b string) *Value {
@@ -317,4 +319,15 @@ func checkValBinaryMarshal(v1 *Value) *Value {
 	}
 
 	return v2
+}
+
+func checkValHex(v1 *Value) string {
+	var b []byte
+	var err error
+
+	if b, err = v1.MarshalBinary(); err != nil {
+		panic(err)
+	}
+
+	return string(b2h(b))
 }
