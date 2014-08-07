@@ -2,9 +2,9 @@ package ledger
 
 import (
 	"fmt"
+
 	"github.com/rubblelabs/ripple/data"
 	"github.com/rubblelabs/ripple/storage"
-	"io"
 )
 
 type RadixNode struct {
@@ -85,13 +85,6 @@ func (m *RadixMap) walk(f WalkFunc, key data.Hash256, depth uint8, fill bool) er
 	}
 	return inner.Each(func(pos int, child data.Hash256) error {
 		return m.walk(f, child, depth+1, fill)
-	})
-}
-
-func (m *RadixMap) Dump(sequence uint32, w io.Writer) error {
-	return m.Walk(func(key data.Hash256, n *RadixNode) error {
-		_, err := fmt.Fprintf(w, "%d,%d,%s,%s\n", sequence, n.Depth, n.Node.GetType(), key)
-		return err
 	})
 }
 

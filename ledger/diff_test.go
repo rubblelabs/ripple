@@ -1,10 +1,11 @@
 package ledger
 
 import (
+	"testing"
+
 	"github.com/rubblelabs/ripple/data"
 	"github.com/rubblelabs/ripple/storage/memdb"
 	. "launchpad.net/gocheck"
-	"testing"
 )
 
 func Test(t *testing.T) { TestingT(t) }
@@ -18,7 +19,7 @@ var _ = Suite(&DiffSuite{})
 func (s *DiffSuite) SetUpSuite(c *C) {
 	var err error
 	s.db, err = memdb.NewMemoryDB([]string{"testdata/38129-32570.gz", "testdata/99943.gz"})
-	c.Check(err, IsNil)
+	c.Assert(err, IsNil)
 }
 
 var expectedDiff = []string{
@@ -37,26 +38,26 @@ var expectedDiff = []string{
 }
 
 func (s *DiffSuite) TestDiff(c *C) {
-	first, err := data.NewHash256("2C23D15B6B549123FB351E4B5CDE81C564318EB845449CD43C3EA7953C4DB452")
-	c.Check(err, IsNil)
-	second, err := data.NewHash256("AF47E9E91A41621B0F8AC5A119A5AD8B9E892147381BEAF6F2186127B89A44FF")
-	c.Check(err, IsNil)
+	first, err := data.NewHash256("2C23D15B6B549123FB351E4B5CDE81C564318EB845449CD43C3EA7953C4DB452") // 38,129 Account Hash
+	c.Assert(err, IsNil)
+	second, err := data.NewHash256("AF47E9E91A41621B0F8AC5A119A5AD8B9E892147381BEAF6F2186127B89A44FF") // 38,128 Account Hash
+	c.Assert(err, IsNil)
 	diff, err := Diff(*first, *second, s.db)
-	c.Check(err, IsNil)
+	c.Assert(err, IsNil)
 	c.Assert(diff.String(), DeepEquals, expectedDiff)
 }
 
 var expectedSummary = "1,1,0,0,0,0,0,0,0,145,137,65,0,2,4,53,0"
 
 func (s *DiffSuite) TestSummary(c *C) {
-	ledger, err := data.NewHash256("E6DB7365949BF9814D76BCC730B01818EB9136A89DB224F3F9F5AAE4569D758E")
-	c.Check(err, IsNil)
+	ledger, err := data.NewHash256("E6DB7365949BF9814D76BCC730B01818EB9136A89DB224F3F9F5AAE4569D758E") // 38,129 Ledger Hash
+	c.Assert(err, IsNil)
 	state, err := NewLedgerStateFromDB(*ledger, s.db)
-	c.Check(err, IsNil)
-	c.Check(state.Fill(), IsNil)
+	c.Assert(err, IsNil)
+	c.Assert(state.Fill(), IsNil)
 	summary, err := state.Summary()
-	c.Check(err, IsNil)
-	c.Check(summary, DeepEquals, expectedSummary)
+	c.Assert(err, IsNil)
+	c.Assert(summary, DeepEquals, expectedSummary)
 }
 
 var expectedUnfolded = []string{
@@ -78,10 +79,13 @@ var expectedFolded = []string{
 }
 
 func (s *DiffSuite) TestFold(c *C) {
-	ledger, err := data.NewHash256("E6DB7365949BF9814D76BCC730B01818EB9136A89DB224F3F9F5AAE4569D758E")
-	c.Check(err, IsNil)
-	state, err := NewLedgerStateFromDB(*ledger, s.db)
-	c.Check(err, IsNil)
-	c.Check(state.Fill(), IsNil)
-	// c.Check(summary, DeepEquals, expectedSummary)
+	first, err := data.NewHash256("71E4F1363337A5A0305FEE7175EBACA458381AB77E820738336E084BE190B8C6") //99,943 account hash
+	c.Assert(err, IsNil)
+	second, err := data.NewHash256("D027189E2A84B636C6B812FE0FA808279212D8F59B2465C9BBF9E2665294D09A") //99,942 account hash
+	diff, err := Diff(*first, *second, s.db)
+	c.Assert(err, IsNil)
+	c.Assert(diff.String(), DeepEquals, expectedUnfolded)
+
+	// c.Assert(state.Fill(), IsNil)
+	// c.Assert(summary, DeepEquals, expectedSummary)
 }
