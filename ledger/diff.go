@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/rubblelabs/ripple/data"
 	"github.com/rubblelabs/ripple/storage"
+	"sort"
 )
 
 type RadixAction byte
@@ -32,17 +33,48 @@ func NewRadixOperation(action RadixAction, node data.Storer, depth uint8) *Radix
 
 type RadixOperations []*RadixOperation
 
-func (ro RadixOperations) Len() int { return len(ro) }
-func (ro RadixOperations) Less(i, j int) bool {
+func (ro RadixOperations) Len() int      { return len(ro) }
+func (ro RadixOperations) Swap(i, j int) { ro[i], ro[j] = ro[j], ro[i] }
+
+type OpsByAction struct{ RadixOperations }
+
+func (ops OpsByAction) Less(i, j int) bool {
+	ro := ops.RadixOperations
 	if ro[i].Action == ro[j].Action {
 		return ro[i].Depth < ro[j].Depth
 	}
 	return ro[i].Action > ro[j].Action
 }
-func (ro RadixOperations) Swap(i, j int) { ro[i], ro[j] = ro[j], ro[i] }
+
+type OpsByIndex struct{ RadixOperations }
+
+func (ops OpsByIndex) Less(i, j int) bool {
+	ro := ops.RadixOperations
+	if ro[i].RadixNode.Node.GetHash() == ro[j].RadixNode.Node.GetHash() {
+		return ro[i].Action > ro[j].Action
+	}
+	return ro[i].RadixNode.Node.GetHash().Compare(*ro[j].RadixNode.Node.GetHash()) < 0
+}
 
 func (ro *RadixOperations) Add(node data.Storer, action RadixAction, depth uint8) {
 	*ro = append(*ro, NewRadixOperation(action, node, depth))
+}
+
+// Converts nodes that are both added and deleted into moved
+func (ro RadixOperations) Fold() RadixOperations {
+	var folded RadixOperations
+	sort.Sort(OpsByAction{ro})
+	for i := 0; i < len(ro)-1; i++ {
+		if ro[i].Node.GetHash() == ro[i+1].Node.GetHash() {
+			moved := *ro[i+1]
+			moved.Action = Movement
+			folded = append(folded, &moved)
+			i++
+		} else {
+			folded = append(folded, ro[i])
+		}
+	}
+	return folded
 }
 
 func Diff(left, right data.Hash256, db storage.DB) (RadixOperations, error) {

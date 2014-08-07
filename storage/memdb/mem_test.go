@@ -12,7 +12,7 @@ func checkErr(t *testing.T, err error) {
 }
 
 func TestMemStore(t *testing.T) {
-	mem, err := NewMemoryDB("testdata/mem.gz")
+	mem, err := NewMemoryDB([]string{"testdata/mem.gz"})
 	checkErr(t, err)
 	h1, err := data.NewHash256("CAD2E1FDC45A01998C75A2F50D2DFF3B77CE1451F3F58A328D1323917AC72FD7")
 	checkErr(t, err)

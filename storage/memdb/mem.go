@@ -24,16 +24,15 @@ func NewEmptyMemoryDB() *MemoryDB {
 	}
 }
 
-func NewMemoryDB(path string) (*MemoryDB, error) {
-	mem := NewEmptyMemoryDB()
+func readInput(mem *MemoryDB, path string) error {
 	f, err := os.Open(path)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer f.Close()
 	r, err := gzip.NewReader(f)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer r.Close()
 	scanner := bufio.NewScanner(r)
@@ -41,20 +40,27 @@ func NewMemoryDB(path string) (*MemoryDB, error) {
 		parts := strings.Split(scanner.Text(), ":")
 		var nodeid data.Hash256
 		if _, err := hex.Decode(nodeid[:], []byte(parts[0])); err != nil {
-			return nil, err
+			return err
 		}
 		value, err := hex.DecodeString(parts[1])
 		if err != nil {
-			return nil, err
+			return err
 		}
 		node, err := data.ReadPrefix(bytes.NewReader(value), nodeid)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		mem.nodes[nodeid] = node
 	}
-	if scanner.Err() != nil {
-		return nil, scanner.Err()
+	return scanner.Err()
+}
+
+func NewMemoryDB(paths []string) (*MemoryDB, error) {
+	mem := NewEmptyMemoryDB()
+	for _, path := range paths {
+		if err := readInput(mem, path); err != nil {
+			return nil, err
+		}
 	}
 	return mem, nil
 }
