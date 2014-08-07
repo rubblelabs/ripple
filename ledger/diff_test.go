@@ -79,12 +79,12 @@ var expectedFolded = []string{
 }
 
 func (s *DiffSuite) TestFold(c *C) {
-	first, err := data.NewHash256("71E4F1363337A5A0305FEE7175EBACA458381AB77E820738336E084BE190B8C6") //99,943 account hash
-	c.Assert(err, IsNil)
-	second, err := data.NewHash256("D027189E2A84B636C6B812FE0FA808279212D8F59B2465C9BBF9E2665294D09A") //99,942 account hash
-	diff, err := Diff(*first, *second, s.db)
-	c.Assert(err, IsNil)
-	c.Assert(diff.String(), DeepEquals, expectedUnfolded)
+	// first, err := data.NewHash256("71E4F1363337A5A0305FEE7175EBACA458381AB77E820738336E084BE190B8C6") //99,943 account hash
+	// c.Assert(err, IsNil)
+	// second, err := data.NewHash256("D027189E2A84B636C6B812FE0FA808279212D8F59B2465C9BBF9E2665294D09A") //99,942 account hash
+	// diff, err := Diff(*first, *second, s.db)
+	// c.Assert(err, IsNil)
+	// c.Assert(diff.String(), DeepEquals, expectedUnfolded)
 
 	// c.Assert(state.Fill(), IsNil)
 	// c.Assert(summary, DeepEquals, expectedSummary)
