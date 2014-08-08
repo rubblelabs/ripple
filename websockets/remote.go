@@ -280,6 +280,13 @@ func (r *Remote) Subscribe(ledger, transactions, server bool) (*SubscribeResult,
 	if cmd.CommandError != nil {
 		return nil, cmd.CommandError
 	}
+
+	if ledger && cmd.Result.LedgerStreamMsg == nil {
+		return nil, fmt.Errorf("Missing ledger subscribe response")
+	}
+	if server && cmd.Result.ServerStreamMsg == nil {
+		return nil, fmt.Errorf("Missing server subscribe response")
+	}
 	return cmd.Result, nil
 
 }
