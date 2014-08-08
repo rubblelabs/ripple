@@ -21,6 +21,9 @@ const (
 
 	// Send pings to peer with this period. Must be less than pongWait.
 	pingPeriod = (pongWait * 9) / 10
+
+	// Time allowed to connect to server.
+	dialTimeout = 5 * time.Second
 )
 
 type Remote struct {
@@ -29,13 +32,15 @@ type Remote struct {
 	ws       *websocket.Conn
 }
 
+// NewRemote returns a new remote session connected to the specified
+// server endpoint URI. To close the connection, use Close().
 func NewRemote(endpoint string) (*Remote, error) {
 	glog.Infoln(endpoint)
 	u, err := url.Parse(endpoint)
 	if err != nil {
 		return nil, err
 	}
-	c, err := net.DialTimeout("tcp", u.Host, time.Second*5)
+	c, err := net.DialTimeout("tcp", u.Host, dialTimeout)
 	if err != nil {
 		return nil, err
 	}
@@ -43,27 +48,46 @@ func NewRemote(endpoint string) (*Remote, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Remote{
+	r := &Remote{
 		Incoming: make(chan interface{}, 10),
 		outgoing: make(chan Syncer, 10),
 		ws:       ws,
-	}, nil
+	}
+
+	go r.run()
+	return r, nil
 }
 
+// Close shuts down the Remote session and blocks until all internal
+// goroutines have been cleaned up.
+// Any commands that are pending a response will return with an error.
 func (r *Remote) Close() {
 	close(r.outgoing)
+
+	// Drain the Incoming channel and block until it is closed,
+	// indicating that this Remote is fully cleaned up.
+	for _ = range r.Incoming {
+	}
 }
 
-func (r *Remote) Run() {
+// run spawns the read/write pumps and then runs until Close() is called.
+func (r *Remote) run() {
 	outbound := make(chan interface{})
 	inbound := make(chan []byte)
 	pending := make(map[uint64]Syncer)
 
 	defer func() {
-		close(outbound)
+		close(outbound) // Shuts down the writePump
 		close(r.Incoming)
+
+		// Cancel all pending commands with an error
 		for _, c := range pending {
 			c.Fail("Connection Closed")
+		}
+
+		// Drain the inbound channel and block until it is closed,
+		// indicating that the readPump has returned.
+		for _ = range inbound {
 		}
 	}()
 
@@ -72,7 +96,10 @@ func (r *Remote) Run() {
 		defer r.ws.Close()
 		r.writePump(outbound)
 	}()
-	go r.readPump(inbound)
+	go func() {
+		defer close(inbound)
+		r.readPump(inbound)
+	}()
 
 	// Main run loop
 	var response Command
@@ -80,7 +107,6 @@ func (r *Remote) Run() {
 		select {
 		case command, ok := <-r.outgoing:
 			if !ok {
-				glog.Infoln("Closing")
 				return
 			}
 			outbound <- command
@@ -89,7 +115,7 @@ func (r *Remote) Run() {
 
 		case in, ok := <-inbound:
 			if !ok {
-				glog.Infoln("Connection closed at endpoint")
+				glog.Errorln("Connection closed by server")
 				return
 			}
 
@@ -291,16 +317,15 @@ func (r *Remote) Subscribe(ledger, transactions, server bool) (*SubscribeResult,
 
 }
 
-// Reads from the websocket and sends to inbound channel
-// Expects to receive PONGs at specified interval, or kills the session
-func (r *Remote) readPump(inbound chan []byte) {
+// readPump reads from the websocket and sends to inbound channel.
+// Expects to receive PONGs at specified interval, or logs an error and returns.
+func (r *Remote) readPump(inbound chan<- []byte) {
 	r.ws.SetReadDeadline(time.Now().Add(pongWait))
 	r.ws.SetPongHandler(func(string) error { r.ws.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
 		_, message, err := r.ws.ReadMessage()
 		if err != nil {
 			glog.Errorln(err)
-			close(inbound)
 			return
 		}
 		glog.V(2).Infoln(dump(message))
@@ -310,12 +335,12 @@ func (r *Remote) readPump(inbound chan []byte) {
 }
 
 // Consumes from the outbound channel and sends them over the websocket.
-// Also sends PING messages at specified interval
-func (r *Remote) writePump(outbound chan interface{}) {
+// Also sends PING messages at the specified interval.
+// Returns when outbound channel is closed, or an error is encountered.
+func (r *Remote) writePump(outbound <-chan interface{}) {
 	ticker := time.NewTicker(pingPeriod)
-	defer func() {
-		ticker.Stop()
-	}()
+	defer ticker.Stop()
+
 	for {
 		select {
 

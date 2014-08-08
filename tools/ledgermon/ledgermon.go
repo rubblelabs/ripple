@@ -10,7 +10,6 @@ import (
 func main() {
 	flag.Parse()
 	m := websockets.NewManager(7302386)
-	go m.Run()
 
 	for ledger := range m.Ledgers() {
 		fmt.Printf(

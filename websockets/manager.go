@@ -1,14 +1,19 @@
 package websockets
 
 import (
+	"fmt"
 	"github.com/golang/glog"
 	"github.com/rubblelabs/ripple/data"
 	"time"
 )
 
-// If no new ledger is emitted in this time, disconnects from server
-// to try another one
-const TIMEOUT = time.Second * 30
+const (
+	// Number of out-of-order buffers to keep
+	ledgerBufferSize = 10
+
+	// Timeout for getLedger command
+	getLedgerTimeout = 30 * time.Second
+)
 
 // Roster of websockets servers to rotate through
 var URIs []string = []string{
@@ -26,6 +31,10 @@ type ManagedLedger struct {
 	Transactions   data.TransactionSlice
 }
 
+// Manager produces ledgers with transactions in order, starting from any index.
+// If it encouters an error, it reconnects to a different server and picks up
+// where it left off. It is ideal for applications that need to consume all
+// ledgers despite server errors, network errors, and application restarts.
 type Manager struct {
 	// Ledgers are emitted on this channel in the correct order
 	ledgers chan *ManagedLedger
@@ -36,21 +45,24 @@ type Manager struct {
 	// Current websockets.Remote
 	remote *Remote
 
-	// Whether the remote is currently connected
-	remoteConnected bool
+	// Ledgers to be requested individually using the "ledger" command
+	ledgerRequests chan uint32
 
 	// Next ledger to anticipate
 	nextLedgerSequence uint32
 }
 
-// NewManager creates a new Manager and starts emitting ManagedLedgers
+// NewManager creates a Manager and starts emitting ManagedLedgers
 // starting with startLedgerIdx.
 func NewManager(startLedgerIdx uint32) *Manager {
-	return &Manager{
+	m := &Manager{
 		ledgers:            make(chan *ManagedLedger),
 		unorderedLedgers:   make(chan *ManagedLedger),
+		ledgerRequests:     make(chan uint32, 1),
 		nextLedgerSequence: startLedgerIdx,
 	}
+	go m.run()
+	return m
 }
 
 // Ledgers returns a channel that emits ManagedLedgers.
@@ -58,65 +70,26 @@ func (m *Manager) Ledgers() <-chan *ManagedLedger {
 	return m.ledgers
 }
 
-// Accepts unordered ledgers, buffers, and emits them in order.
-func (m *Manager) runLedgerBuffer() {
-	ledgerBuffer := make(map[uint32]*ManagedLedger, 10)
-
-	// If TIMEOUT elapses without receiving the next ledger,
-	// kill the connection and resume on another server.
-	// This can overcome network problems, server bugs, etc.
-	watchdogTimer := time.NewTimer(TIMEOUT)
-
-	for {
-		select {
-		case <-watchdogTimer.C:
-			if m.remoteConnected {
-				m.remote.Close()
-				m.remoteConnected = false
-			}
-			watchdogTimer.Reset(TIMEOUT)
-
-		case l := <-m.unorderedLedgers:
-			if l.LedgerSequence == m.nextLedgerSequence {
-				// Ledger is the one we need next. Emit it.
-				m.ledgers <- l
-				m.nextLedgerSequence++
-
-				// If we already have any of the next ledgers, emit them now too.
-				for ; ledgerBuffer[m.nextLedgerSequence] != nil; m.nextLedgerSequence++ {
-					m.ledgers <- ledgerBuffer[m.nextLedgerSequence]
-					delete(ledgerBuffer, m.nextLedgerSequence)
-				}
-
-				// If we still have a gap, request the next ledger
-				if len(ledgerBuffer) > 0 && m.remoteConnected {
-					go m.getLedger(m.nextLedgerSequence)
-				}
-
-				watchdogTimer.Reset(TIMEOUT)
-
-			} else if l.LedgerSequence > m.nextLedgerSequence {
-				// Ledger is not the one we need. Stash it.
-
-				// If a gap was just created, start filling it
-				if len(ledgerBuffer) == 0 && m.remoteConnected {
-					go m.getLedger(m.nextLedgerSequence)
-				}
-
-				// Stash this ledger in the buffer
-				ledgerBuffer[l.LedgerSequence] = l
-
-			} else {
-				glog.Errorf("Received old ledger: %d", l.LedgerSequence)
-			}
-		}
-	}
-}
-
-// Runs forever
-func (m *Manager) Run() {
+// Spawns the following goroutines which conspire to provide gapless, ordered
+// ledgers complete with transactions.
+//
+// +----------------------+     +----------------+
+// | consolidateStreams() |     | ledgerGetter() |
+// +-----------+----------+     +--------+-------+
+//             |                         |
+//             +-------------+-----------+
+//                           |
+//                           | unorderedLedgers
+//                           |
+//                  +--------+--------+
+//                  | bufferLedgers() |
+//                  +--------+--------+
+//                           |
+//                           v Ledgers()
+//
+func (m *Manager) run() {
 	uriIndex := 0
-	go m.runLedgerBuffer()
+	go m.bufferLedgers()
 
 	for {
 		m.handleConnection(URIs[uriIndex])
@@ -124,12 +97,54 @@ func (m *Manager) Run() {
 		// Increment to next URI
 		uriIndex = (uriIndex + 1) % len(URIs)
 
-		glog.Infof("Reconnecting in 5 seconds...")
-		time.Sleep(5 * time.Second)
+		glog.Infof("Reconnecting in 1 seconds...")
+		time.Sleep(1 * time.Second)
 	}
 }
 
-// Establishes a websockets connection and receives streaming messages
+// Accepts unordered ledgers, buffers them, and emits them in order.
+// If ledgers are missing, it requests them from ledgerGetter.
+func (m *Manager) bufferLedgers() {
+	ledgerBuffer := make(map[uint32]*ManagedLedger)
+
+	for l := range m.unorderedLedgers {
+		if l.LedgerSequence == m.nextLedgerSequence {
+			// Ledger is the one we need next. Emit it.
+			m.ledgers <- l
+			m.nextLedgerSequence++
+
+			// If we already have any of the next ledgers, emit them now too.
+			for ; ledgerBuffer[m.nextLedgerSequence] != nil; m.nextLedgerSequence++ {
+				m.ledgers <- ledgerBuffer[m.nextLedgerSequence]
+				delete(ledgerBuffer, m.nextLedgerSequence)
+			}
+
+			// If we still have a gap, request the next ledger
+			if len(ledgerBuffer) > 0 {
+				m.ledgerRequests <- m.nextLedgerSequence
+			}
+
+		} else if l.LedgerSequence > m.nextLedgerSequence {
+			// Ledger is not the one we need. Stash it.
+
+			// If a gap was just created, start filling it
+			if len(ledgerBuffer) == 0 {
+				m.ledgerRequests <- m.nextLedgerSequence
+			}
+
+			// Stash this ledger in the buffer if there is room
+			if len(ledgerBuffer) < ledgerBufferSize {
+				ledgerBuffer[l.LedgerSequence] = l
+			}
+
+		} else {
+			glog.Errorf("Received old ledger: %d", l.LedgerSequence)
+		}
+	}
+}
+
+// Establishes a websockets connection, spawns a ledgerGetter, and then
+// passes control to consolidateStreams().
 func (m *Manager) handleConnection(uri string) {
 	var err error
 	m.remote, err = NewRemote(uri)
@@ -137,32 +152,33 @@ func (m *Manager) handleConnection(uri string) {
 		glog.Errorln(err.Error())
 		return
 	}
-	go m.remote.Run()
-	m.remoteConnected = true
-	defer func() {
-		m.remoteConnected = false
-	}()
 
-	res, err := m.remote.Subscribe(true, true, false)
+	res, err := m.remote.Subscribe(true, true, true)
 	if err != nil {
 		glog.Errorf(err.Error())
 		m.remote.Close()
 		return
 	}
-	glog.Infof(
-		"Subscribed at %d\n",
-		res.LedgerSequence,
-	)
+	glog.Infof("Subscribed at %d\n", res.LedgerSequence)
 
 	if m.nextLedgerSequence == 0 {
 		// Starting at 0 indicates start at current ledger
 		m.nextLedgerSequence = res.LedgerSequence + 1
-	} else if m.nextLedgerSequence < res.LedgerSequence {
-		// If we need ledgers from before the subscription point, start retreiving them
-		go m.getLedger(m.nextLedgerSequence)
+	} else {
+		m.ledgerRequests <- m.nextLedgerSequence
 	}
 
-	// Receive streaming messages and collate them into ManagedLedgers
+	quitLedgerGetter := make(chan struct{}, 1)
+	go ledgerGetter(m.remote, m.ledgerRequests, m.unorderedLedgers, quitLedgerGetter)
+	defer func() {
+		quitLedgerGetter <- struct{}{}
+	}()
+
+	m.consolidateStreams()
+}
+
+// Receives streaming messages and collate them into ManagedLedgers
+func (m *Manager) consolidateStreams() {
 	var currLedgerTxnCount uint32
 	var currLedger *ManagedLedger
 	for msg := range m.remote.Incoming {
@@ -178,6 +194,12 @@ func (m *Manager) handleConnection(uri string) {
 			currLedgerTxnCount = msg.TxnCount
 
 		case *TransactionStreamMsg:
+			if currLedger == nil {
+				// If we get a transaction before we see our first ledger,
+				// ignore it.
+				continue
+			}
+
 			glog.V(2).Infof("Txn %s", msg.Transaction.GetHash())
 			currLedger.Transactions = append(currLedger.Transactions, &msg.Transaction)
 
@@ -187,6 +209,9 @@ func (m *Manager) handleConnection(uri string) {
 				currLedgerTxnCount = 0
 			}
 
+		case *ServerStreamMsg:
+			glog.V(1).Infof("Server message: %s", msg.Status)
+
 		default:
 			panic("Unknown incoming message")
 
@@ -194,17 +219,53 @@ func (m *Manager) handleConnection(uri string) {
 	}
 }
 
-// Requestes an individual ledger
-func (m *Manager) getLedger(sequence uint32) {
-	res, err := m.remote.Ledger(sequence, true)
-	if err != nil {
-		glog.Errorf(err.Error())
-		return
+// Monitors ledgerRequests for ledgers that need to be fetched individually.
+// Fetches them synchronously and sends them to unorderedLedgers.
+func ledgerGetter(r *Remote, ledgerRequests <-chan uint32, unorderedLedgers chan<- *ManagedLedger, quit <-chan struct{}) {
+	for {
+		select {
+		case getLedgerIdx := <-ledgerRequests:
+			ml, err := getLedger(r, getLedgerIdx)
+			if err != nil {
+				glog.Errorf(err.Error())
+				r.Close()
+				return
+			}
+			unorderedLedgers <- ml
+
+		case <-quit:
+			return
+		}
 	}
-	m.unorderedLedgers <- &ManagedLedger{
-		LedgerSequence: res.Ledger.LedgerSequence,
-		CloseTime:      res.Ledger.CloseTime,
-		Hash:           res.Ledger.Hash,
-		Transactions:   res.Ledger.Transactions,
+}
+
+// Requestes an individual ledger with timeout
+func getLedger(r *Remote, sequence uint32) (*ManagedLedger, error) {
+	var ledger *ManagedLedger
+
+	timeout := time.NewTimer(getLedgerTimeout)
+	result := make(chan error, 1)
+
+	go func() {
+		res, err := r.Ledger(sequence, true)
+		if err != nil {
+			result <- err
+			return
+		}
+		ledger = &ManagedLedger{
+			LedgerSequence: res.Ledger.LedgerSequence,
+			CloseTime:      res.Ledger.CloseTime,
+			Hash:           res.Ledger.Hash,
+			Transactions:   res.Ledger.Transactions,
+		}
+		result <- nil
+	}()
+
+	select {
+	case err := <-result:
+		return ledger, err
+
+	case <-timeout.C:
+		return nil, fmt.Errorf("getLedger Timeout")
 	}
 }
