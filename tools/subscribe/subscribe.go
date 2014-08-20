@@ -25,7 +25,6 @@ func main() {
 	flag.Parse()
 	r, err := websockets.NewRemote(*host)
 	checkErr(err, true)
-	go r.Run()
 
 	// Subscribe to all streams
 	confirmation, err := r.Subscribe(true, true, true)

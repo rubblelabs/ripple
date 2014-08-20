@@ -7,10 +7,10 @@ import (
 	"encoding/hex"
 	"flag"
 	"fmt"
+	"github.com/golang/glog"
 	"github.com/rubblelabs/ripple/data"
 	"github.com/rubblelabs/ripple/terminal"
 	"github.com/rubblelabs/ripple/websockets"
-	"github.com/golang/glog"
 	"os"
 	"regexp"
 	"strconv"
@@ -18,7 +18,7 @@ import (
 
 const usage = `Usage: explain [tx hash|ledger sequence|ripple address|-] [options]
 
-Examples: 
+Examples:
 
 explain 6000000
 	Explain all transactions for ledger 6000000
@@ -94,7 +94,6 @@ func main() {
 	r, err := websockets.NewRemote(*host)
 	checkErr(err)
 	glog.Infoln("Connected to: ", *host)
-	go r.Run()
 	switch {
 	case len(matches) == 0:
 		showUsage()
