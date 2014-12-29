@@ -3,10 +3,11 @@ package terminal
 
 import (
 	"fmt"
+	"reflect"
+
 	"github.com/fatih/color"
 	"github.com/rubblelabs/ripple/data"
 	"github.com/rubblelabs/ripple/websockets"
-	"reflect"
 )
 
 type Flag uint32
@@ -138,7 +139,10 @@ func newTxmBundle(txm *data.TransactionWithMetaData, flag Flag) (*bundle, error)
 	if err != nil {
 		return nil, err
 	}
-	if !txm.MetaData.TransactionResult.Success() {
+	if len(txm.MetaData.AffectedNodes) == 0 {
+		// Likely a proposed transaction
+		b.color = proposalStyle
+	} else if !txm.MetaData.TransactionResult.Success() {
 		b.color = infoStyle
 	}
 	return b, nil

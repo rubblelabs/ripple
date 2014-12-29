@@ -3,13 +3,14 @@ package websockets
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/golang/glog"
-	"github.com/gorilla/websocket"
-	"github.com/rubblelabs/ripple/data"
 	"net"
 	"net/url"
 	"reflect"
 	"time"
+
+	"github.com/golang/glog"
+	"github.com/gorilla/websocket"
+	"github.com/rubblelabs/ripple/data"
 )
 
 const (
@@ -286,13 +287,16 @@ func (r *Remote) AccountInfo(a data.Account) (*AccountInfoResult, error) {
 
 // Synchronously subscribe to streams and receive a confirmation message
 // Streams are recived asynchronously over the Incoming channel
-func (r *Remote) Subscribe(ledger, transactions, server bool) (*SubscribeResult, error) {
+func (r *Remote) Subscribe(ledger, transactions, transactionsProposed, server bool) (*SubscribeResult, error) {
 	streams := []string{}
 	if ledger {
 		streams = append(streams, "ledger")
 	}
 	if transactions {
 		streams = append(streams, "transactions")
+	}
+	if transactionsProposed {
+		streams = append(streams, "transactions_proposed")
 	}
 	if server {
 		streams = append(streams, "server")

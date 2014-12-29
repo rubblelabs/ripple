@@ -2,6 +2,7 @@ package websockets
 
 import (
 	"encoding/json"
+
 	"github.com/rubblelabs/ripple/data"
 )
 

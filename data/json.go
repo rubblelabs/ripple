@@ -142,8 +142,11 @@ func UnmarshalTransactionWithMetadata(b []byte, txm *TransactionWithMetaData) er
 	if err := json.Unmarshal(b, &extract); err != nil {
 		return err
 	}
-	raw := fmt.Sprintf(extractTxmFormat, extract.Tx[:len(extract.Tx)-1], extract.Meta)
-	return json.Unmarshal([]byte(raw), txm)
+	if len(extract.Meta) > 0 {
+		raw := fmt.Sprintf(extractTxmFormat, extract.Tx[:len(extract.Tx)-1], extract.Meta)
+		return json.Unmarshal([]byte(raw), txm)
+	}
+	return json.Unmarshal(extract.Tx, txm)
 }
 
 const txmFormat = `%s,"hash":"%s","inLedger":%d,"ledger_index":%d,"meta":%s}`

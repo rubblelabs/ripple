@@ -2,9 +2,10 @@ package websockets
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/golang/glog"
 	"github.com/rubblelabs/ripple/data"
-	"time"
 )
 
 const (
@@ -153,7 +154,7 @@ func (m *Manager) handleConnection(uri string) {
 		return
 	}
 
-	res, err := m.remote.Subscribe(true, true, true)
+	res, err := m.remote.Subscribe(true, true, false, true)
 	if err != nil {
 		glog.Errorf(err.Error())
 		m.remote.Close()

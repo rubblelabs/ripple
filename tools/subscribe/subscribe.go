@@ -3,9 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+
 	"github.com/rubblelabs/ripple/terminal"
 	"github.com/rubblelabs/ripple/websockets"
-	"os"
 )
 
 func checkErr(err error, quit bool) {
@@ -27,7 +28,7 @@ func main() {
 	checkErr(err, true)
 
 	// Subscribe to all streams
-	confirmation, err := r.Subscribe(true, true, true)
+	confirmation, err := r.Subscribe(true, false, true, true)
 	checkErr(err, true)
 	terminal.Println(fmt.Sprint("Subscribed at: ", confirmation.LedgerSequence), terminal.Default)
 
