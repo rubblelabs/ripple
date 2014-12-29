@@ -41,19 +41,6 @@ func (l *Ledger) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// Wrapper type to enable second level of marshalling
-// when found in ledger API call
-type txmLedger struct {
-	MetaData MetaData `json:"metaData"`
-}
-
-// Wrapper type to enable marshalling when found in
-// AccountTx call
-type splitTxm struct {
-	Tx   json.RawMessage
-	Meta json.RawMessage
-}
-
 // Wrapper types to enable second level of marshalling
 // when found in tx API call
 type txmNormal TransactionWithMetaData
@@ -61,16 +48,19 @@ type txmNormal TransactionWithMetaData
 var (
 	txmSplitTypeRegex       = regexp.MustCompile(`"tx":`)
 	txmTransactionTypeRegex = regexp.MustCompile(`"TransactionType"\s*:\s*"(\w+)"`)
-	txmHashRegex            = regexp.MustCompile(`"hash"\s*:\s*"(\w+)"`)
-	txmMetaTypeRegex        = regexp.MustCompile(`"(meta|metaData)"`)
 )
 
 // This function is a horrow show, demonstrating the huge
 // inconsistencies in the presentation of a transaction
 // by the rippled API
 func (txm *TransactionWithMetaData) UnmarshalJSON(b []byte) error {
+
 	if txmSplitTypeRegex.Match(b) {
-		var split splitTxm
+		// Transaction has the form {"tx":{}, "meta":{}, "validated": true}
+		var split struct {
+			Tx   json.RawMessage
+			Meta json.RawMessage
+		}
 		if err := json.Unmarshal(b, &split); err != nil {
 			return err
 		}
@@ -79,43 +69,27 @@ func (txm *TransactionWithMetaData) UnmarshalJSON(b []byte) error {
 		}
 		return json.Unmarshal(split.Meta, &txm.MetaData)
 	}
+
+	// Sniff the transaction type, and allocate the appropriate type
 	txTypeMatch := txmTransactionTypeRegex.FindStringSubmatch(string(b))
-	hashMatch := txmHashRegex.FindStringSubmatch(string(b))
-	metaTypeMatch := txmMetaTypeRegex.FindStringSubmatch(string(b))
-	var txType, hash, metaType string
 	if txTypeMatch == nil {
 		return fmt.Errorf("Not a valid transaction with metadata: Missing TransactionType")
 	}
-	txType = txTypeMatch[1]
-	if hashMatch == nil {
-		return fmt.Errorf("Not a valid transaction with metadata: Missing Hash")
-	}
-	hash = hashMatch[1]
-	if metaTypeMatch != nil {
-		metaType = metaTypeMatch[1]
-	}
+	txType := txTypeMatch[1]
 	txm.Transaction = GetTxFactoryByType(txType)()
-	h, err := hex.DecodeString(hash)
-	if err != nil {
-		return fmt.Errorf("Bad hash: %s", hash)
-	}
-	copy(txm.GetBase().Hash[:], h)
 	if err := json.Unmarshal(b, txm.Transaction); err != nil {
 		return err
 	}
-	switch metaType {
-	case "meta":
-		return json.Unmarshal(b, (*txmNormal)(txm))
-	case "metaData":
-		var meta txmLedger
-		if err := json.Unmarshal(b, &meta); err != nil {
-			return err
-		}
-		txm.MetaData = meta.MetaData
-		return nil
-	default:
-		return json.Unmarshal(b, (*txmNormal)(txm))
+
+	// Parse the rest in one shot
+	extract := &struct {
+		*txmNormal
+		MetaData *MetaData `json:"metaData"`
+	}{
+		txmNormal: (*txmNormal)(txm),
+		MetaData:  &txm.MetaData,
 	}
+	return json.Unmarshal(b, extract)
 }
 
 func (txm TransactionWithMetaData) marshalJSON() ([]byte, []byte, error) {
@@ -128,25 +102,6 @@ func (txm TransactionWithMetaData) marshalJSON() ([]byte, []byte, error) {
 		return nil, nil, err
 	}
 	return tx, meta, nil
-}
-
-type extractTxm struct {
-	Tx   json.RawMessage `json:"transaction"`
-	Meta json.RawMessage `json:"meta"`
-}
-
-const extractTxmFormat = `%s,"meta":%s}`
-
-func UnmarshalTransactionWithMetadata(b []byte, txm *TransactionWithMetaData) error {
-	var extract extractTxm
-	if err := json.Unmarshal(b, &extract); err != nil {
-		return err
-	}
-	if len(extract.Meta) > 0 {
-		raw := fmt.Sprintf(extractTxmFormat, extract.Tx[:len(extract.Tx)-1], extract.Meta)
-		return json.Unmarshal([]byte(raw), txm)
-	}
-	return json.Unmarshal(extract.Tx, txm)
 }
 
 const txmFormat = `%s,"hash":"%s","inLedger":%d,"ledger_index":%d,"meta":%s}`

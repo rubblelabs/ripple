@@ -21,7 +21,7 @@ type LedgerStreamMsg struct {
 
 // Fields from subscribed transaction stream messages
 type TransactionStreamMsg struct {
-	Transaction         data.TransactionWithMetaData `json:"-"`
+	Transaction         data.TransactionWithMetaData `json:"transaction"`
 	EngineResult        data.TransactionResult       `json:"engine_result"`
 	EngineResultCode    int                          `json:"engine_result_code"`
 	EngineResultMessage string                       `json:"engine_result_message"`
@@ -61,8 +61,11 @@ type SubscribeResult struct {
 type txStreamJSON TransactionStreamMsg
 
 func (msg *TransactionStreamMsg) UnmarshalJSON(b []byte) error {
-	if err := json.Unmarshal(b, (*txStreamJSON)(msg)); err != nil {
-		return err
+	var extract struct {
+		*txStreamJSON
+		MetaData *data.MetaData `json:"meta"`
 	}
-	return data.UnmarshalTransactionWithMetadata(b, &msg.Transaction)
+	extract.txStreamJSON = (*txStreamJSON)(msg)
+	extract.MetaData = &msg.Transaction.MetaData
+	return json.Unmarshal(b, &extract)
 }

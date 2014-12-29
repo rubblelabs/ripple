@@ -1,6 +1,10 @@
 package websockets
 
 import (
+	"encoding/json"
+	"io/ioutil"
+	"testing"
+
 	"github.com/rubblelabs/ripple/data"
 	. "gopkg.in/check.v1"
 )
@@ -113,4 +117,54 @@ func (s *MessagesSuite) TestServerStreamMsg(c *C) {
 	c.Assert(msg.Status, Equals, "syncing")
 	c.Assert(msg.LoadBase, Equals, 256)
 	c.Assert(msg.LoadFactor, Equals, 256)
+}
+
+func (s *MessagesSuite) TestProposedTransactionStreamMsg(c *C) {
+	msg := streamMessageFactory["transaction"]().(*TransactionStreamMsg)
+	readResponseFile(c, msg, "testdata/proposed_transaction_stream.json")
+
+	c.Assert(msg.EngineResult.String(), Equals, "tesSUCCESS")
+	c.Assert(msg.EngineResultCode, Equals, 0)
+	c.Assert(msg.EngineResultMessage, Equals, "The transaction was applied.")
+	c.Assert(msg.Status, Equals, "proposed")
+	c.Assert(msg.Validated, Equals, false)
+
+	offer := msg.Transaction.Transaction.(*data.OfferCreate)
+
+	c.Assert(offer.GetType(), Equals, "OfferCreate")
+	c.Assert(offer.Account.String(), Equals, "rHsZHqa5oMQNL5hFm4kfLd47aEMYjPstpg")
+	c.Assert(offer.Fee.String(), Equals, "0.011")
+	c.Assert(msg.Transaction.GetHash().String(), Equals, "2E55F1B9A147B647F6699FD877CA2AEC5A7A0A22A6F2D609DB6DABC445EF9862")
+	c.Assert(offer.SigningPubKey.String(), Equals, "025718736160FA6632F48EA4354A35AB0340F8D7DC7083799B9C57C3E937D71851")
+	c.Assert(offer.TxnSignature.String(), Equals, "30440220572BCA1D98177F3A7082B4A77EBAA4D5977237CE0591678CFECEC8D3C0457FB802200E400395F505F07F7DCBE46F74D0D5CAFCD12D6078F5FD98DE1D72D85B887DC1")
+	c.Assert(offer.Sequence, Equals, uint32(10379931))
+
+	c.Assert(*offer.OfferSequence, Equals, uint32(10379905))
+	c.Assert(offer.TakerGets.String(), Equals, "28865.168964/XRP")
+	c.Assert(offer.TakerPays.String(), Equals, "4285.465077979/CNY/razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA")
+}
+
+func BenchmarkProposedTransactionStreamJSON(b *testing.B) {
+	bites, err := ioutil.ReadFile("testdata/proposed_transaction_stream.json")
+	if err != nil {
+		b.Error(err)
+	}
+	for i := 0; i < b.N; i++ {
+		var tsm TransactionStreamMsg
+		if err := json.Unmarshal(bites, &tsm); err != nil {
+			b.Error(err)
+		}
+	}
+}
+func BenchmarkTransactionStreamJSON(b *testing.B) {
+	bites, err := ioutil.ReadFile("testdata/transactions_stream.json")
+	if err != nil {
+		b.Error(err)
+	}
+	for i := 0; i < b.N; i++ {
+		var tsm TransactionStreamMsg
+		if err := json.Unmarshal(bites, &tsm); err != nil {
+			b.Error(err)
+		}
+	}
 }
