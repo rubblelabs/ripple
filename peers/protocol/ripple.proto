@@ -32,6 +32,11 @@ enum MessageType
 // token, response = give solution to proof of work
 // token, result = report result of pow
 
+//------------------------------------------------------------------------------
+
+/*  Requests or responds to a proof of work.
+    Unimplemented and unused currently.
+*/
 message TMProofWork
 {
     required string token       = 1;
@@ -51,6 +56,8 @@ message TMProofWork
     }
     optional PowResult result   = 6;
 }
+
+//------------------------------------------------------------------------------
 
 // Sent on connect
 message TMHello
@@ -120,7 +127,7 @@ message TMTransaction
     required bytes rawTransaction           = 1;
     required TransactionStatus status       = 2;
     optional uint64 receiveTimestamp        = 3;
-    optional bool checkedSignature          = 4;    // no vouches for signature being correct
+    optional bool deferred                  = 4;    // not applied to open ledger
 }
 
 
@@ -185,7 +192,7 @@ message TMHaveTransactionSet
 // Used to sign a final closed ledger after reprocessing
 message TMValidation
 {
-    required bytes validation       = 1;        // in SerializedValidation signed form
+    required bytes validation       = 1;        // in STValidation signed form
     optional bool checkedSignature  = 2;        // node vouches signature is correct
 }
 

@@ -2,15 +2,42 @@
 // source: ripple.proto
 // DO NOT EDIT!
 
+/*
+Package protocol is a generated protocol buffer package.
+
+It is generated from these files:
+	ripple.proto
+
+It has these top-level messages:
+	TMProofWork
+	TMHello
+	TMClusterNode
+	TMLoadSource
+	TMCluster
+	TMTransaction
+	TMStatusChange
+	TMProposeSet
+	TMHaveTransactionSet
+	TMValidation
+	TMGetPeers
+	TMIPv4Endpoint
+	TMPeers
+	TMEndpoint
+	TMEndpoints
+	TMIndexedObject
+	TMGetObjectByHash
+	TMLedgerNode
+	TMGetLedger
+	TMLedgerData
+	TMPing
+*/
 package protocol
 
-import proto "code.google.com/p/goprotobuf/proto"
-import json "encoding/json"
+import proto "github.com/golang/protobuf/proto"
 import math "math"
 
-// Reference proto, json, and math imports to suppress error if they are not otherwise used.
+// Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
-var _ = &json.SyntaxError{}
 var _ = math.Inf
 
 type MessageType int32
@@ -517,6 +544,8 @@ func (x *TMPingPingType) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+//  Requests or responds to a proof of work.
+// Unimplemented and unused currently.
 type TMProofWork struct {
 	Token            *string                `protobuf:"bytes,1,req,name=token" json:"token,omitempty"`
 	Iterations       *uint32                `protobuf:"varint,2,opt,name=iterations" json:"iterations,omitempty"`
@@ -800,7 +829,7 @@ type TMTransaction struct {
 	RawTransaction   []byte             `protobuf:"bytes,1,req,name=rawTransaction" json:"rawTransaction,omitempty"`
 	Status           *TransactionStatus `protobuf:"varint,2,req,name=status,enum=protocol.TransactionStatus" json:"status,omitempty"`
 	ReceiveTimestamp *uint64            `protobuf:"varint,3,opt,name=receiveTimestamp" json:"receiveTimestamp,omitempty"`
-	CheckedSignature *bool              `protobuf:"varint,4,opt,name=checkedSignature" json:"checkedSignature,omitempty"`
+	Deferred         *bool              `protobuf:"varint,4,opt,name=deferred" json:"deferred,omitempty"`
 	XXX_unrecognized []byte             `json:"-"`
 }
 
@@ -829,9 +858,9 @@ func (m *TMTransaction) GetReceiveTimestamp() uint64 {
 	return 0
 }
 
-func (m *TMTransaction) GetCheckedSignature() bool {
-	if m != nil && m.CheckedSignature != nil {
-		return *m.CheckedSignature
+func (m *TMTransaction) GetDeferred() bool {
+	if m != nil && m.Deferred != nil {
+		return *m.Deferred
 	}
 	return false
 }

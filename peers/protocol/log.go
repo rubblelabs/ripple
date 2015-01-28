@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"github.com/rubblelabs/ripple/data"
 	"strings"
+
+	"github.com/rubblelabs/ripple/data"
 )
 
 func b2h(b []byte) string {
@@ -48,7 +49,7 @@ func (m *TMValidation) Log() string {
 
 func (m *TMTransaction) Log() string {
 	received := data.NewRippleTime(uint32(m.GetReceiveTimestamp()))
-	return fmt.Sprintf("Transaction: Status: %s Checked: %t Received: %s Raw:%s", m.GetStatus(), m.GetCheckedSignature(), received.String(), short(b2h(m.RawTransaction)))
+	return fmt.Sprintf("Transaction: Status: %s Deferred: %t Received: %s Raw:%s", m.GetStatus(), m.GetDeferred(), received.String(), short(b2h(m.RawTransaction)))
 }
 
 func (m *TMStatusChange) Log() string {
