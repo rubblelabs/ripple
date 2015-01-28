@@ -1,9 +1,10 @@
 package crypto
 
 import (
-	. "github.com/rubblelabs/ripple/testing"
-	. "launchpad.net/gocheck"
 	"testing"
+
+	. "github.com/rubblelabs/ripple/testing"
+	. "gopkg.in/check.v1"
 )
 
 func Test(t *testing.T) { TestingT(t) }

@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	// "fmt"
 	"io/ioutil"
-	. "launchpad.net/gocheck"
+
+	. "gopkg.in/check.v1"
 )
 
 type RippleSuite struct{}

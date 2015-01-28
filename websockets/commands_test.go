@@ -2,10 +2,11 @@ package websockets
 
 import (
 	"encoding/json"
-	"github.com/rubblelabs/ripple/data"
 	"io/ioutil"
-	. "launchpad.net/gocheck"
 	"testing"
+
+	"github.com/rubblelabs/ripple/data"
+	. "gopkg.in/check.v1"
 )
 
 func Test(t *testing.T) { TestingT(t) }

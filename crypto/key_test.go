@@ -3,7 +3,8 @@ package crypto
 import (
 	"encoding/hex"
 	"fmt"
-	. "launchpad.net/gocheck"
+
+	. "gopkg.in/check.v1"
 )
 
 type KeySuite struct{}

@@ -2,10 +2,11 @@ package data
 
 import (
 	"encoding/json"
-	"github.com/juju/testing/checkers"
 	"io/ioutil"
-	. "launchpad.net/gocheck"
 	"path/filepath"
+
+	"github.com/juju/testing/checkers"
+	. "gopkg.in/check.v1"
 )
 
 type JSONSuite struct{}

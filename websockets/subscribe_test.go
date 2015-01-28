@@ -2,7 +2,7 @@ package websockets
 
 import (
 	"github.com/rubblelabs/ripple/data"
-	. "launchpad.net/gocheck"
+	. "gopkg.in/check.v1"
 )
 
 func (s *MessagesSuite) TestLedgerSubscribeResponse(c *C) {

@@ -4,7 +4,8 @@ import (
 	"bytes"
 	"encoding/hex"
 	"flag"
-	. "launchpad.net/gocheck"
+
+	. "gopkg.in/check.v1"
 )
 
 var RunSlow = flag.Bool("slow", false, "Enable slow tests")

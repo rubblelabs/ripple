@@ -2,7 +2,7 @@ package data
 
 import (
 	. "github.com/rubblelabs/ripple/testing"
-	. "launchpad.net/gocheck"
+	. "gopkg.in/check.v1"
 )
 
 type ValueSuite struct{}

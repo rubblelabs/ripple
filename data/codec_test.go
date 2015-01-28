@@ -2,8 +2,9 @@ package data
 
 import (
 	"encoding/json"
+
 	internal "github.com/rubblelabs/ripple/testing"
-	. "launchpad.net/gocheck"
+	. "gopkg.in/check.v1"
 )
 
 type CodecSuite struct{}

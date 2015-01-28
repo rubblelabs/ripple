@@ -5,7 +5,7 @@ import (
 
 	"github.com/rubblelabs/ripple/data"
 	"github.com/rubblelabs/ripple/storage/memdb"
-	. "launchpad.net/gocheck"
+	. "gopkg.in/check.v1"
 )
 
 func Test(t *testing.T) { TestingT(t) }
