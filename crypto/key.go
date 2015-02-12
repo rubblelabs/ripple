@@ -2,7 +2,7 @@ package crypto
 
 import (
 	"crypto/rand"
-	"github.com/conformal/btcec"
+	"github.com/btcsuite/btcd/btcec"
 	"math/big"
 )
 
