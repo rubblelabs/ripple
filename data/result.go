@@ -45,6 +45,15 @@ const (
 	tecNO_ISSUER
 	tecNO_AUTH
 	tecNO_LINE
+	tecINSUFF_FEE
+	tecFROZEN
+	tecNO_TARGET
+	tecNO_PERMISSION
+	tecNO_ENTRY
+	tecINSUFFICIENT_RESERVE
+	tecNEED_MASTER_KEY
+	tecDST_TAG_NEEDED
+	tecINTERNAL
 )
 
 const (
@@ -179,6 +188,15 @@ var resultNames = map[TransactionResult]struct {
 	tecNO_ISSUER:              {"tecNO_ISSUER", "Issuer account does not exist."},
 	tecNO_AUTH:                {"tecNO_AUTH", "Not authorized to hold asset."},
 	tecNO_LINE:                {"tecNO_LINE", "No such line."},
+	tecINSUFF_FEE:             {"tecINSUFF_FEE", "Insufficient balance to pay fee."},
+	tecFROZEN:                 {"tecFROZEN", "Asset is frozen."},
+	tecNO_TARGET:              {"tecNO_TARGET", "Target account does not exist."},
+	tecNO_PERMISSION:          {"tecNO_PERMISSION", "No permission to perform requested operation."},
+	tecNO_ENTRY:               {"tecNO_ENTRY", "No matching entry found."},
+	tecINSUFFICIENT_RESERVE:   {"tecINSUFFICIENT_RESERVE", "Insufficient reserve to complete requested operation."},
+	tecNEED_MASTER_KEY:        {"tecNEED_MASTER_KEY", "The operation requires the use of the Master Key."},
+	tecDST_TAG_NEEDED:         {"tecDST_TAG_NEEDED", "A destination tag is required."},
+	tecINTERNAL:               {"tecINTERNAL", "An internal error has occurred during processing."},
 	tefFAILURE:                {"tefFAILURE", "Failed to apply."},
 	tefALREADY:                {"tefALREADY", "The exact transaction was already in this ledger."},
 	tefBAD_ADD_AUTH:           {"tefBAD_ADD_AUTH", "Not authorized to add account."},
