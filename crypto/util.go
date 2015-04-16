@@ -1,9 +1,10 @@
 package crypto
 
 import (
-	"code.google.com/p/go.crypto/ripemd160"
 	"crypto/sha256"
 	"crypto/sha512"
+
+	"golang.org/x/crypto/ripemd160"
 )
 
 // Write operations in a hash.Hash never return an error
