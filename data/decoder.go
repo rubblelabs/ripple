@@ -14,7 +14,7 @@ func ReadWire(r Reader, typ NodeType, ledgerSequence uint32, nodeId Hash256) (Ha
 	}
 	switch version {
 	case HP_LEAF_NODE:
-		return readLedgerEntry(r, nodeId)
+		return ReadLedgerEntry(r, nodeId)
 	case HP_TRANSACTION_NODE:
 		return readTransactionWithMetadata(r, ledgerSequence, nodeId)
 	case HP_INNER_NODE:
@@ -42,7 +42,7 @@ func ReadPrefix(r Reader, nodeId Hash256) (Storer, error) {
 	case header.NodeType == NT_TRANSACTION_NODE:
 		return readTransactionWithMetadata(r, header.LedgerSequence, nodeId)
 	case header.NodeType == NT_ACCOUNT_NODE:
-		return readLedgerEntry(r, nodeId)
+		return ReadLedgerEntry(r, nodeId)
 	default:
 		return nil, fmt.Errorf("Unknown node type")
 	}
@@ -155,7 +155,7 @@ func readCompressedInnerNode(r Reader, typ NodeType, nodeId Hash256) (*InnerNode
 	return &inner, nil
 }
 
-func readLedgerEntry(r Reader, nodeId Hash256) (LedgerEntry, error) {
+func ReadLedgerEntry(r Reader, nodeId Hash256) (LedgerEntry, error) {
 	leType, err := expectType(r, "LedgerEntryType")
 	if err != nil {
 		return nil, err
