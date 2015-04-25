@@ -1,6 +1,8 @@
 package websockets
 
 import (
+	"bytes"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -223,6 +225,43 @@ func (r *Remote) LedgerData(ledger interface{}, marker *data.Hash256) (*LedgerDa
 		return nil, cmd.CommandError
 	}
 	return cmd.Result, nil
+}
+
+func (r *Remote) streamLedgerData(ledger interface{}, c chan data.LedgerEntrySlice) {
+	defer close(c)
+	cmd := newBinaryLedgerDataCommand(ledger, nil)
+	for ; ; cmd = newBinaryLedgerDataCommand(ledger, cmd.Result.Marker) {
+		r.outgoing <- cmd
+		<-cmd.Ready
+		if cmd.CommandError != nil {
+			glog.Errorln(cmd.Error())
+			return
+		}
+		les := make(data.LedgerEntrySlice, len(cmd.Result.State))
+		for i, state := range cmd.Result.State {
+			b, err := hex.DecodeString(state.Data + state.Index)
+			if err != nil {
+				glog.Errorln(cmd.Error())
+				return
+			}
+			les[i], err = data.ReadLedgerEntry(bytes.NewReader(b), data.Hash256{})
+			if err != nil {
+				glog.Errorln(err.Error())
+				return
+			}
+		}
+		c <- les
+		if cmd.Result.Marker == nil {
+			return
+		}
+	}
+}
+
+// Asynchronously retrieve all data for a ledger using the binary form
+func (r *Remote) StreamLedgerData(ledger interface{}) chan data.LedgerEntrySlice {
+	c := make(chan data.LedgerEntrySlice)
+	go r.streamLedgerData(ledger, c)
+	return c
 }
 
 // Synchronously gets a single ledger

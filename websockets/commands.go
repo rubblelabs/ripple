@@ -3,8 +3,9 @@ package websockets
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/rubblelabs/ripple/data"
 	"sync/atomic"
+
+	"github.com/rubblelabs/ripple/data"
 )
 
 var counter uint64
@@ -86,6 +87,14 @@ func newAccountTxCommand(account data.Account, pageSize int, marker map[string]i
 	}
 }
 
+func newBinaryLedgerDataCommand(ledger interface{}, marker *data.Hash256) *BinaryLedgerDataCommand {
+	return &BinaryLedgerDataCommand{
+		Command: newCommand("ledger_data"),
+		Binary:  true,
+		Marker:  marker,
+	}
+}
+
 type TxCommand struct {
 	*Command
 	Transaction data.Hash256 `json:"transaction"`
@@ -155,11 +164,31 @@ type LedgerDataCommand struct {
 	Result *LedgerDataResult `json:"result,omitempty"`
 }
 
+type BinaryLedgerDataCommand struct {
+	*Command
+	Ledger interface{}             `json:"ledger"`
+	Binary bool                    `json:"binary"`
+	Marker *data.Hash256           `json:"marker,omitempty"`
+	Result *BinaryLedgerDataResult `json:"result,omitempty"`
+}
+
 type LedgerDataResult struct {
 	LedgerSequence uint32                `json:"ledger_index,string"`
 	Hash           data.Hash256          `json:"ledger_hash"`
 	Marker         *data.Hash256         `json:"marker"`
 	State          data.LedgerEntrySlice `json:"state"`
+}
+
+type BinaryLedgerData struct {
+	Data  string `json:"data"`
+	Index string `json:"index"`
+}
+
+type BinaryLedgerDataResult struct {
+	LedgerSequence uint32             `json:"ledger_index,string"`
+	Hash           data.Hash256       `json:"ledger_hash"`
+	Marker         *data.Hash256      `json:"marker"`
+	State          []BinaryLedgerData `json:"state"`
 }
 
 type RipplePathFindCommand struct {
