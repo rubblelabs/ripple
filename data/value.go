@@ -117,19 +117,19 @@ func NewValue(s string, native bool) (*Value, error) {
 	}
 	if len(matches[4]) == 0 {
 		if v.num, err = strconv.ParseUint(matches[2], 10, 64); err != nil {
-			return nil, fmt.Errorf("Invalid Number: %s", s)
+			return nil, fmt.Errorf("Invalid Number: %s Reason: %s", s, err.Error())
 		}
 		v.offset = 0
 	} else {
 		if v.num, err = strconv.ParseUint(matches[2]+matches[4], 10, 64); err != nil {
-			return nil, fmt.Errorf("Invalid Number: %s", s)
+			return nil, fmt.Errorf("Invalid Number: %s Reason: %s", s, err.Error())
 		}
 		v.offset = -int64(len(matches[4]))
 	}
 	if len(matches[5]) > 0 {
 		exp, err := strconv.ParseInt(matches[7], 10, 64)
 		if err != nil {
-			return nil, fmt.Errorf("Invalid Number: %s", s)
+			return nil, fmt.Errorf("Invalid Number: %s %s", s, err.Error())
 		}
 		if matches[6] == "-" {
 			v.offset -= exp
