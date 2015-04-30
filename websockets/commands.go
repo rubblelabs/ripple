@@ -128,7 +128,7 @@ type SubmitResult struct {
 	EngineResultCode    int                    `json:"engine_result_code"`
 	EngineResultMessage string                 `json:"engine_result_message"`
 	TxBlob              string                 `json:"tx_blob"`
-	Tx                  interface{}            `json:"tx_json"`
+	Tx                  data.Transaction       `json:"tx_json"`
 }
 
 type LedgerCommand struct {
