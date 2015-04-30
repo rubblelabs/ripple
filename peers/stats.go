@@ -1,16 +1,17 @@
 package peers
 
 import (
-	"code.google.com/p/goprotobuf/proto"
 	"encoding/json"
 	"fmt"
-	"github.com/rubblelabs/ripple/peers/protocol"
-	metrics "github.com/rcrowley/go-metrics"
 	"reflect"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/golang/protobuf/proto"
+	metrics "github.com/rcrowley/go-metrics"
+	"github.com/rubblelabs/ripple/peers/protocol"
 )
 
 type MessageStatus int

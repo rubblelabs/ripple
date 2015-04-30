@@ -2,12 +2,13 @@ package protocol
 
 import (
 	"bytes"
-	"code.google.com/p/goprotobuf/proto"
 	"encoding/binary"
 	"fmt"
 	"io"
 	"reflect"
 	"strings"
+
+	"github.com/golang/protobuf/proto"
 )
 
 var messageFactory = map[MessageType]func() Message{

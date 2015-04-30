@@ -1,11 +1,12 @@
 package protocol
 
 import (
-	"code.google.com/p/goprotobuf/proto"
 	"encoding/binary"
 	"fmt"
-	"github.com/rubblelabs/ripple/data"
 	"net"
+
+	"github.com/golang/protobuf/proto"
+	"github.com/rubblelabs/ripple/data"
 )
 
 // Simple factories

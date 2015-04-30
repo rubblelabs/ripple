@@ -1,7 +1,7 @@
 package protocol
 
 import (
-	"code.google.com/p/goprotobuf/proto"
+	"github.com/golang/protobuf/proto"
 )
 
 type Message interface {

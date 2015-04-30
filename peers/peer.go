@@ -2,15 +2,16 @@ package peers
 
 import (
 	"bytes"
-	"code.google.com/p/goprotobuf/proto"
+	"strconv"
+	"sync"
+	"time"
+
+	"github.com/golang/glog"
+	"github.com/golang/protobuf/proto"
 	"github.com/rubblelabs/ripple/crypto"
 	"github.com/rubblelabs/ripple/data"
 	"github.com/rubblelabs/ripple/ledger"
 	"github.com/rubblelabs/ripple/peers/protocol"
-	"github.com/golang/glog"
-	"strconv"
-	"sync"
-	"time"
 )
 
 var (
