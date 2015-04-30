@@ -2,16 +2,17 @@ package peers
 
 import (
 	"bufio"
-	"code.google.com/p/goprotobuf/proto"
 	"crypto/sha512"
 	"fmt"
-	"github.com/donovanhide/sslconn"
-	"github.com/golang/glog"
-	"github.com/rubblelabs/ripple/crypto"
-	"github.com/rubblelabs/ripple/peers/protocol"
 	"math/big"
 	"net"
 	"time"
+
+	"github.com/donovanhide/sslconn"
+	"github.com/golang/glog"
+	"github.com/golang/protobuf/proto"
+	"github.com/rubblelabs/ripple/crypto"
+	"github.com/rubblelabs/ripple/peers/protocol"
 )
 
 type ConnectionStatus int
