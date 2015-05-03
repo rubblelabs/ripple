@@ -6,6 +6,7 @@ import (
 
 func Sign(s Signer, key crypto.Key, sequence *uint32) error {
 	s.InitialiseForSigning()
+	copy(s.GetPublicKey().Bytes(), key.Public(sequence))
 	hash, msg, err := SigningHash(s)
 	if err != nil {
 		return err
@@ -19,7 +20,6 @@ func Sign(s Signer, key crypto.Key, sequence *uint32) error {
 		return err
 	}
 	copy(s.GetHash().Bytes(), hash.Bytes())
-	copy(s.GetPublicKey().Bytes(), key.Public(sequence))
 	*s.GetSignature() = VariableLength(sig)
 	return nil
 }
