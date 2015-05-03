@@ -36,25 +36,29 @@ type Trial struct {
 
 func search(c chan *Trial) {
 	sequence := uint32(0)
+	batch := make([]byte, 1024*4)
 	for {
-		trial := &Trial{
-			Seed: make([]byte, 16),
-		}
-		_, err := rand.Read(trial.Seed)
+		_, err := rand.Read(batch)
 		checkErr(err)
-		if *ed25519key {
-			trial.Key, err = crypto.NewEd25519Key(trial.Seed)
-		} else {
-			trial.Key, err = crypto.NewECDSAKey(trial.Seed)
+		for i := 0; i < len(batch)-16; i++ {
+			trial := &Trial{
+				Seed: make([]byte, 16),
+			}
+			copy(trial.Seed, batch[i:])
+			if *ed25519key {
+				trial.Key, err = crypto.NewEd25519Key(trial.Seed)
+			} else {
+				trial.Key, err = crypto.NewECDSAKey(trial.Seed)
+			}
+			checkErr(err)
+			if *ed25519key {
+				trial.Id, err = crypto.AccountId(trial.Key, nil)
+			} else {
+				trial.Id, err = crypto.AccountId(trial.Key, &sequence)
+			}
+			checkErr(err)
+			c <- trial
 		}
-		checkErr(err)
-		if *ed25519key {
-			trial.Id, err = crypto.AccountId(trial.Key, nil)
-		} else {
-			trial.Id, err = crypto.AccountId(trial.Key, &sequence)
-		}
-		checkErr(err)
-		c <- trial
 	}
 }
 
