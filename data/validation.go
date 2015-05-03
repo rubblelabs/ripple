@@ -23,3 +23,4 @@ func (v Validation) Prefix() HashPrefix              { return HP_VALIDATION }
 func (v Validation) SigningPrefix() HashPrefix       { return HP_VALIDATION }
 func (v Validation) SuppressionId() (Hash256, error) { return NodeId(&v) }
 func (v Validation) GetHash() *Hash256               { return &v.Hash }
+func (v Validation) InitialiseForSigning()           {}

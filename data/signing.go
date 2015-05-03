@@ -4,24 +4,30 @@ import (
 	"github.com/rubblelabs/ripple/crypto"
 )
 
-func Sign(s Signer, key crypto.Key) error {
-	signingHash, err := SigningHash(s)
+func Sign(s Signer, key crypto.Key, sequence *uint32) error {
+	s.InitialiseForSigning()
+	hash, msg, err := SigningHash(s)
 	if err != nil {
 		return err
 	}
-	sig, err := key.Sign(signingHash.Bytes())
+	sig, err := crypto.Sign(key.Private(sequence), hash.Bytes(), msg)
 	if err != nil {
 		return err
 	}
-	copy(s.GetPublicKey().Bytes(), key.PublicCompressed())
+	hash, _, err = Raw(s)
+	if err != nil {
+		return err
+	}
+	copy(s.GetHash().Bytes(), hash.Bytes())
+	copy(s.GetPublicKey().Bytes(), key.Public(sequence))
 	*s.GetSignature() = VariableLength(sig)
 	return nil
 }
 
 func CheckSignature(s Signer) (bool, error) {
-	signingHash, err := SigningHash(s)
+	hash, msg, err := SigningHash(s)
 	if err != nil {
 		return false, err
 	}
-	return crypto.Verify(s.GetPublicKey().Bytes(), s.GetSignature().Bytes(), signingHash.Bytes())
+	return crypto.Verify(s.GetPublicKey().Bytes(), hash.Bytes(), msg, s.GetSignature().Bytes())
 }

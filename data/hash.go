@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"github.com/rubblelabs/ripple/crypto"
 	"strings"
+
+	"github.com/rubblelabs/ripple/crypto"
 )
 
 type Hash128 [16]byte
@@ -139,7 +140,7 @@ func (v *VariableLength) Bytes() []byte {
 }
 
 func (p PublicKey) NodePublicKey() string {
-	hash, err := crypto.NewRipplePublicNode(p[:])
+	hash, err := crypto.NewNodePublicKey(p[:])
 	if err != nil {
 		return "Bad node public key"
 	}
@@ -174,7 +175,7 @@ func NewAccountFromAddress(s string) (*Account, error) {
 }
 
 func (a Account) Hash() (crypto.Hash, error) {
-	return crypto.NewRippleAccount(a[:])
+	return crypto.NewAccountId(a[:])
 }
 
 func (a Account) String() string {
@@ -222,7 +223,7 @@ func NewRegularKeyFromAddress(s string) (*RegularKey, error) {
 }
 
 func (r RegularKey) Hash() (crypto.Hash, error) {
-	return crypto.NewRippleAccount(r[:])
+	return crypto.NewAccountId(r[:])
 }
 
 func (r RegularKey) String() string {

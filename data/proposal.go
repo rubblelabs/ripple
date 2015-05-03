@@ -16,6 +16,7 @@ func (p *Proposal) GetSignature() *VariableLength { return &p.Signature }
 func (p *Proposal) Prefix() HashPrefix            { return HP_PROPOSAL }
 func (p *Proposal) SigningPrefix() HashPrefix     { return HP_PROPOSAL }
 func (p *Proposal) GetHash() *Hash256             { return &p.Hash }
+func (p *Proposal) InitialiseForSigning()         {}
 
 func (p Proposal) SigningValues() []interface{} {
 	return []interface{}{

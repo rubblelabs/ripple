@@ -86,6 +86,15 @@ func (t *TxBase) SigningPrefix() HashPrefix           { return HP_TRANSACTION_SI
 func (t *TxBase) PathSet() PathSet                    { return PathSet(nil) }
 func (t *TxBase) GetHash() *Hash256                   { return &t.Hash }
 
+func (t *TxBase) InitialiseForSigning() {
+	if t.SigningPubKey == nil {
+		t.SigningPubKey = new(PublicKey)
+	}
+	if t.TxnSignature == nil {
+		t.TxnSignature = new(VariableLength)
+	}
+}
+
 func (o *OfferCreate) Ratio() *Value {
 	return o.TakerPays.Ratio(o.TakerGets)
 }

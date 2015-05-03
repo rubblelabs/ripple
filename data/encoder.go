@@ -19,9 +19,8 @@ func NodeId(h Hashable) (Hash256, error) {
 	return nodeid, err
 }
 
-func SigningHash(s Signer) (Hash256, error) {
-	hash, _, err := raw(s, s.SigningPrefix(), true)
-	return hash, err
+func SigningHash(s Signer) (Hash256, []byte, error) {
+	return raw(s, s.SigningPrefix(), true)
 }
 
 func Node(h Storer) (Hash256, []byte, error) {
