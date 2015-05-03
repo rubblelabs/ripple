@@ -73,7 +73,7 @@ func main() {
 	signal.Notify(kill, os.Interrupt, os.Kill)
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	log.Printf("Searching for \"%s\" with %d processors", *name, runtime.NumCPU())
-	c := make(chan *Trial)
+	c := make(chan *Trial, 1000)
 	for i := 0; i < runtime.NumCPU(); i++ {
 		go search(c)
 	}
