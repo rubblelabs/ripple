@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"regexp"
 	"runtime"
+	"sync/atomic"
 	"time"
 
 	"github.com/rubblelabs/ripple/crypto"
@@ -28,13 +29,15 @@ func checkErr(err error) {
 	}
 }
 
+var count uint64
+
 type Trial struct {
 	Seed []byte
 	Id   crypto.Hash
 	Key  crypto.Key
 }
 
-func search(c chan *Trial) {
+func search(c chan *Trial, target *regexp.Regexp) {
 	sequence := uint32(0)
 	batch := make([]byte, 1024*4)
 	for {
@@ -57,7 +60,10 @@ func search(c chan *Trial) {
 				trial.Id, err = crypto.AccountId(trial.Key, &sequence)
 			}
 			checkErr(err)
-			c <- trial
+			atomic.AddUint64(&count, 1)
+			if target.MatchString(trial.Id.String()) {
+				c <- trial
+			}
 		}
 	}
 }
@@ -79,22 +85,19 @@ func main() {
 	log.Printf("Searching for \"%s\" with %d processors", *name, runtime.NumCPU())
 	c := make(chan *Trial, 1000)
 	for i := 0; i < runtime.NumCPU(); i++ {
-		go search(c)
+		go search(c, target)
 	}
-	count := 0
 	start := time.Now()
 	for {
 		select {
 		case <-kill:
-			log.Printf("Tested: %d seeds at %.2f/sec", count, float64(count)/time.Since(start).Seconds())
+			num := atomic.LoadUint64(&count)
+			log.Printf("Tested: %d seeds at %.2f/sec", num, float64(num)/time.Since(start).Seconds())
 			return
 		case trial := <-c:
-			count++
-			if target.MatchString(trial.Id.String()) {
-				s, err := crypto.NewFamilySeed(trial.Seed)
-				checkErr(err)
-				log.Println(s, trial.Id)
-			}
+			s, err := crypto.NewFamilySeed(trial.Seed)
+			checkErr(err)
+			log.Println(s, trial.Id)
 		}
 	}
 }
