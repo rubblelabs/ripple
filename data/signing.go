@@ -1,11 +1,10 @@
 package data
 
-import (
-	"github.com/rubblelabs/ripple/crypto"
-)
+import "github.com/rubblelabs/ripple/crypto"
 
 func Sign(s Signer, key crypto.Key, sequence *uint32) error {
 	s.InitialiseForSigning()
+	*s.GetSignature() = nil
 	copy(s.GetPublicKey().Bytes(), key.Public(sequence))
 	hash, msg, err := SigningHash(s)
 	if err != nil {
