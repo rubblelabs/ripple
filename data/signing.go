@@ -4,7 +4,6 @@ import "github.com/rubblelabs/ripple/crypto"
 
 func Sign(s Signer, key crypto.Key, sequence *uint32) error {
 	s.InitialiseForSigning()
-	*s.GetSignature() = nil
 	copy(s.GetPublicKey().Bytes(), key.Public(sequence))
 	hash, msg, err := SigningHash(s)
 	if err != nil {
@@ -14,12 +13,12 @@ func Sign(s Signer, key crypto.Key, sequence *uint32) error {
 	if err != nil {
 		return err
 	}
+	*s.GetSignature() = VariableLength(sig)
 	hash, _, err = Raw(s)
 	if err != nil {
 		return err
 	}
 	copy(s.GetHash().Bytes(), hash.Bytes())
-	*s.GetSignature() = VariableLength(sig)
 	return nil
 }
 
