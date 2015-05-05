@@ -9,7 +9,7 @@ func Sign(s Signer, key crypto.Key, sequence *uint32) error {
 	if err != nil {
 		return err
 	}
-	sig, err := crypto.Sign(key.Private(sequence), hash.Bytes(), msg)
+	sig, err := crypto.Sign(key.Private(sequence), hash.Bytes(), append(s.SigningPrefix().Bytes(), msg...))
 	if err != nil {
 		return err
 	}
