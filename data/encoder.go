@@ -143,19 +143,21 @@ func (s *fieldSlice) Append(e enc, v interface{}, children fieldSlice) {
 
 func getFields(v *reflect.Value, depth int) fieldSlice {
 	// fmt.Println(v, v.Kind(), v.Type().Name())
-	var fields fieldSlice
-	for i, length := 0, v.NumField(); i < length; i++ {
-		f := v.Field(i)
-		fieldName := v.Type().Field(i).Name
+	length := v.NumField()
+	fields := make(fieldSlice, 0, length)
+	typ := v.Type()
+	for i := 0; i < length; i++ {
+		fieldName := typ.Field(i).Name
 		if fieldName == "Hash" || fieldName == "Id" {
 			continue
 		}
 		// Stops LedgerEntryType being encoded for Fields
-		if fieldName == "LedgerEntryType" && depth > 1 && v.Type().Name() == "leBase" {
+		if fieldName == "LedgerEntryType" && depth > 1 && typ.Name() == "leBase" {
 			continue
 		}
 		encoding := reverseEncodings[fieldName]
 		// fmt.Println(fieldName, encoding, f, f.Kind())
+		f := v.Field(i)
 		if f.Kind() == reflect.Interface {
 			f = f.Elem()
 		}

@@ -279,16 +279,18 @@ func readEncoding(r Reader) (*enc, error) {
 }
 
 func writeEncoding(w io.Writer, e enc) error {
+	var err error
 	switch {
 	case e.typ < 16 && e.field < 16:
-		return write(w, e.typ<<4|e.field)
+		_, err = w.Write([]uint8{e.typ<<4 | e.field})
 	case e.typ < 16:
-		return write(w, [2]uint8{e.typ << 4, e.field})
+		_, err = w.Write([]uint8{e.typ << 4, e.field})
 	case e.field < 16:
-		return write(w, [2]uint8{e.field, e.typ})
+		_, err = w.Write([]uint8{e.field, e.typ})
 	default:
-		return write(w, [3]uint8{0, e.typ, e.field})
+		_, err = w.Write([]uint8{0, e.typ, e.field})
 	}
+	return err
 }
 
 func write(w io.Writer, v interface{}) error {
@@ -315,19 +317,19 @@ func writeVariableLength(w io.Writer, b []byte) error {
 	case n < 0 || n > 918744:
 		return fmt.Errorf("Unsupported Variable Length encoding: %d", n)
 	case n <= 192:
-		err = binary.Write(w, binary.BigEndian, uint8(n))
+		_, err = w.Write([]uint8{uint8(n)})
 	case n <= 12480:
 		n -= 193
-		err = binary.Write(w, binary.BigEndian, [2]uint8{193 + uint8(n>>8), uint8(n)})
+		_, err = w.Write([]uint8{193 + uint8(n>>8), uint8(n)})
 	case n <= 918744:
 		n -= 12481
-		v := [3]uint8{uint8(241 + (n >> 16)), uint8(n >> 8), uint8(n)}
-		err = binary.Write(w, binary.BigEndian, v)
+		_, err = w.Write([]uint8{241 + uint8(n>>16), uint8(n >> 8), uint8(n)})
 	}
 	if err != nil {
 		return err
 	}
-	return binary.Write(w, binary.BigEndian, b)
+	_, err = w.Write(b)
+	return err
 }
 
 func readVariableLength(r Reader) (int, error) {
