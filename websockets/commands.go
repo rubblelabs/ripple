@@ -90,6 +90,7 @@ func newAccountTxCommand(account data.Account, pageSize int, marker map[string]i
 func newBinaryLedgerDataCommand(ledger interface{}, marker *data.Hash256) *BinaryLedgerDataCommand {
 	return &BinaryLedgerDataCommand{
 		Command: newCommand("ledger_data"),
+		Ledger:  ledger,
 		Binary:  true,
 		Marker:  marker,
 	}
