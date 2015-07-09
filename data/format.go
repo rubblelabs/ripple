@@ -174,6 +174,7 @@ var encodings = map[enc]string{
 	enc{ST_VL, 11}: "CreateCode",
 	enc{ST_VL, 12}: "MemoType",
 	enc{ST_VL, 13}: "MemoData",
+	enc{ST_VL, 14}: "MemoFormat",
 	// account
 	enc{ST_ACCOUNT, 1}: "Account",
 	enc{ST_ACCOUNT, 2}: "Owner",
