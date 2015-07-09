@@ -284,7 +284,7 @@ func readObject(r Reader, v *reflect.Value) error {
 			}
 			field := getField(v, enc)
 			if !field.CanAddr() {
-				return fmt.Errorf("Missing field: %s", name)
+				return fmt.Errorf("Missing field: %s %+v", name, enc)
 			}
 			switch v := field.Addr().Interface().(type) {
 			case Wire:
