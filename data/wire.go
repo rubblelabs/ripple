@@ -172,7 +172,7 @@ func (p *PathSet) Unmarshal(r Reader) error {
 			if entry == PATH_END {
 				return nil
 			}
-			var pe pathElem
+			var pe PathElem
 			if entry&PATH_ACCOUNT > 0 {
 				pe.Account = new(Account)
 				if _, err := r.Read(pe.Account.Bytes()); err != nil {
