@@ -54,6 +54,7 @@ const (
 	tecNEED_MASTER_KEY
 	tecDST_TAG_NEEDED
 	tecINTERNAL
+	tecOVERSIZE
 )
 
 const (
@@ -197,6 +198,7 @@ var resultNames = map[TransactionResult]struct {
 	tecNEED_MASTER_KEY:        {"tecNEED_MASTER_KEY", "The operation requires the use of the Master Key."},
 	tecDST_TAG_NEEDED:         {"tecDST_TAG_NEEDED", "A destination tag is required."},
 	tecINTERNAL:               {"tecINTERNAL", "An internal error has occurred during processing."},
+	tecOVERSIZE:               {"tecOVERSIZE", "Object exceeded serialization limits"},
 	tefFAILURE:                {"tefFAILURE", "Failed to apply."},
 	tefALREADY:                {"tefALREADY", "The exact transaction was already in this ledger."},
 	tefBAD_ADD_AUTH:           {"tefBAD_ADD_AUTH", "Not authorized to add account."},
