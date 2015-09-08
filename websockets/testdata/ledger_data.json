@@ -2,7 +2,7 @@
     "id": 2,
     "result": {
         "ledger_hash": "83CC350B1CDD9792D47F60D3DBB7673518FD6E71821070673E6EAE65DE69086B",
-        "ledger_index": "6281820",
+        "ledger_index": 6281820,
         "marker": "02DE1A2AD4332A1AF01C59F16E45218FA70E5792BD963B6D7ACF188D6D150607",
         "state": [
             {
