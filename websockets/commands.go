@@ -174,7 +174,7 @@ type BinaryLedgerDataCommand struct {
 }
 
 type LedgerDataResult struct {
-	LedgerSequence uint32                `json:"ledger_index,string"`
+	LedgerSequence uint32                `json:"ledger_index"`
 	Hash           data.Hash256          `json:"ledger_hash"`
 	Marker         *data.Hash256         `json:"marker"`
 	State          data.LedgerEntrySlice `json:"state"`
@@ -186,7 +186,7 @@ type BinaryLedgerData struct {
 }
 
 type BinaryLedgerDataResult struct {
-	LedgerSequence uint32             `json:"ledger_index,string"`
+	LedgerSequence uint32             `json:"ledger_index"`
 	Hash           data.Hash256       `json:"ledger_hash"`
 	Marker         *data.Hash256      `json:"marker"`
 	State          []BinaryLedgerData `json:"state"`
