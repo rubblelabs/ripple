@@ -7,13 +7,14 @@ import (
 	"encoding/hex"
 	"flag"
 	"fmt"
+	"os"
+	"regexp"
+	"strconv"
+
 	"github.com/golang/glog"
 	"github.com/rubblelabs/ripple/data"
 	"github.com/rubblelabs/ripple/terminal"
 	"github.com/rubblelabs/ripple/websockets"
-	"os"
-	"regexp"
-	"strconv"
 )
 
 const usage = `Usage: explain [tx hash|ledger sequence|ripple address|-] [options]

@@ -300,6 +300,7 @@ func (r *Remote) Ledger(ledger interface{}, transactions bool) (*LedgerResult, e
 	if cmd.CommandError != nil {
 		return nil, cmd.CommandError
 	}
+	cmd.Result.Ledger.Transactions.Sort()
 	return cmd.Result, nil
 }
 
