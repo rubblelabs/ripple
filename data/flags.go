@@ -26,6 +26,7 @@ const (
 	TxSetAccountTxnID  TransactionFlag = 0x00000005
 	TxNoFreeze         TransactionFlag = 0x00000006
 	TxGlobalFreeze     TransactionFlag = 0x00000007
+	TxDefaultRipple    TransactionFlag = 0x00000008
 	TxRequireDestTag   TransactionFlag = 0x00010000
 	TxOptionalDestTag  TransactionFlag = 0x00020000
 	TxRequireAuth      TransactionFlag = 0x00040000
@@ -56,6 +57,8 @@ const (
 	LsDisallowXRP    LedgerEntryFlag = 0x00080000
 	LsDisableMaster  LedgerEntryFlag = 0x00100000
 	LsNoFreeze       LedgerEntryFlag = 0x00200000
+	LsGlobalFreeze   LedgerEntryFlag = 0x00400000
+	LsDefaultRipple  LedgerEntryFlag = 0x00800000
 
 	// Offer flags
 	LsPassive LedgerEntryFlag = 0x00010000
