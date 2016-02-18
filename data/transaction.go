@@ -21,6 +21,7 @@ type Payment struct {
 	Destination    Account
 	Amount         Amount
 	SendMax        *Amount  `json:",omitempty"`
+	DeliverMin     *Amount  `json:",omitempty"`
 	Paths          *PathSet `json:",omitempty"`
 	DestinationTag *uint32  `json:",omitempty"`
 	InvoiceID      *Hash256 `json:",omitempty"`

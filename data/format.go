@@ -86,6 +86,7 @@ var encodings = map[enc]string{
 	// 16-bit unsigned integers (common)
 	enc{ST_UINT16, 1}: "LedgerEntryType",
 	enc{ST_UINT16, 2}: "TransactionType",
+	enc{ST_UINT16, 3}: "SignerWeight",
 	// 32-bit unsigned integers (common)
 	enc{ST_UINT32, 2}:  "Flags",
 	enc{ST_UINT32, 3}:  "SourceTag",
@@ -120,6 +121,10 @@ var encodings = map[enc]string{
 	enc{ST_UINT32, 32}: "ReserveIncrement",
 	enc{ST_UINT32, 33}: "SetFlag",
 	enc{ST_UINT32, 34}: "ClearFlag",
+	enc{ST_UINT32, 35}: "SignerQuorum",
+	enc{ST_UINT32, 36}: "CancelAfter",
+	enc{ST_UINT32, 37}: "FinishAfter",
+	enc{ST_UINT32, 38}: "SignerListID",
 	// 64-bit unsigned integers (common)
 	enc{ST_UINT64, 1}: "IndexNext",
 	enc{ST_UINT64, 2}: "IndexPrevious",
@@ -146,16 +151,19 @@ var encodings = map[enc]string{
 	enc{ST_HASH256, 17}: "InvoiceID",
 	enc{ST_HASH256, 18}: "Nickname",
 	enc{ST_HASH256, 19}: "Amendment",
+	enc{ST_HASH256, 20}: "TicketID",
+	enc{ST_HASH256, 21}: "Digest",
 	// currency amount (common)
-	enc{ST_AMOUNT, 1}: "Amount",
-	enc{ST_AMOUNT, 2}: "Balance",
-	enc{ST_AMOUNT, 3}: "LimitAmount",
-	enc{ST_AMOUNT, 4}: "TakerPays",
-	enc{ST_AMOUNT, 5}: "TakerGets",
-	enc{ST_AMOUNT, 6}: "LowLimit",
-	enc{ST_AMOUNT, 7}: "HighLimit",
-	enc{ST_AMOUNT, 8}: "Fee",
-	enc{ST_AMOUNT, 9}: "SendMax",
+	enc{ST_AMOUNT, 1}:  "Amount",
+	enc{ST_AMOUNT, 2}:  "Balance",
+	enc{ST_AMOUNT, 3}:  "LimitAmount",
+	enc{ST_AMOUNT, 4}:  "TakerPays",
+	enc{ST_AMOUNT, 5}:  "TakerGets",
+	enc{ST_AMOUNT, 6}:  "LowLimit",
+	enc{ST_AMOUNT, 7}:  "HighLimit",
+	enc{ST_AMOUNT, 8}:  "Fee",
+	enc{ST_AMOUNT, 9}:  "SendMax",
+	enc{ST_AMOUNT, 10}: "DeliverMin",
 	// currency amount (uncommon)
 	enc{ST_AMOUNT, 16}: "MinimumOffer",
 	enc{ST_AMOUNT, 17}: "RippleEscrow",
@@ -175,6 +183,8 @@ var encodings = map[enc]string{
 	enc{ST_VL, 12}: "MemoType",
 	enc{ST_VL, 13}: "MemoData",
 	enc{ST_VL, 14}: "MemoFormat",
+	// variable length (uncommon)
+	enc{ST_VL, 17}: "Proof",
 	// account
 	enc{ST_ACCOUNT, 1}: "Account",
 	enc{ST_ACCOUNT, 2}: "Owner",
@@ -193,19 +203,25 @@ var encodings = map[enc]string{
 	enc{ST_OBJECT, 8}:  "NewFields",
 	enc{ST_OBJECT, 9}:  "TemplateEntry",
 	enc{ST_OBJECT, 10}: "Memo",
+	enc{ST_OBJECT, 11}: "SignerEntry",
+	// inner object (uncommon)
+	enc{ST_OBJECT, 16}: "Signer",
+	enc{ST_OBJECT, 18}: "Majority",
 	// array of objects
 	enc{ST_ARRAY, 1}: "EndOfArray",
 	enc{ST_ARRAY, 2}: "SigningAccounts",
-	enc{ST_ARRAY, 3}: "TxnSignatures",
-	enc{ST_ARRAY, 4}: "Signatures",
+	enc{ST_ARRAY, 3}: "Signers",
+	enc{ST_ARRAY, 4}: "SignerEntries",
 	enc{ST_ARRAY, 5}: "Template",
 	enc{ST_ARRAY, 6}: "Necessary",
 	enc{ST_ARRAY, 7}: "Sufficient",
 	enc{ST_ARRAY, 8}: "AffectedNodes",
 	enc{ST_ARRAY, 9}: "Memos",
+	// array of objects (uncommon)
+	enc{ST_ARRAY, 16}: "Majorities",
 	// 8-bit unsigned integers (common)
 	enc{ST_UINT8, 1}: "CloseResolution",
-	enc{ST_UINT8, 2}: "TemplateEntryType",
+	enc{ST_UINT8, 2}: "Method",
 	enc{ST_UINT8, 3}: "TransactionResult",
 	// 160-bit (common)
 	enc{ST_HASH160, 1}: "TakerPaysCurrency",
