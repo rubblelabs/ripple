@@ -348,6 +348,37 @@ func (r *Remote) AccountInfo(a data.Account) (*AccountInfoResult, error) {
 	return cmd.Result, nil
 }
 
+// Synchronously requests account line info
+func (r *Remote) AccountLines(a data.Account) (*AccountLinesResult, error) {
+	cmd := &AccountLinesCommand{
+		Command: newCommand("account_lines"),
+		Account: a,
+	}
+	r.outgoing <- cmd
+	<-cmd.Ready
+	if cmd.CommandError != nil {
+		return nil, cmd.CommandError
+	}
+	return cmd.Result, nil
+}
+
+func (r *Remote) BookOffers(taker data.Account, ledger uint32, pays, gets data.Asset) (*BookOffersResult, error) {
+	cmd := &BookOffersCommand{
+		Command:        newCommand("book_offers"),
+		LedgerSequence: ledger,
+		Taker:          taker,
+		TakerPays:      pays,
+		TakerGets:      gets,
+		Limit:          5000, // Marker not implemented....
+	}
+	r.outgoing <- cmd
+	<-cmd.Ready
+	if cmd.CommandError != nil {
+		return nil, cmd.CommandError
+	}
+	return cmd.Result, nil
+}
+
 // Synchronously subscribe to streams and receive a confirmation message
 // Streams are recived asynchronously over the Incoming channel
 func (r *Remote) Subscribe(ledger, transactions, transactionsProposed, server bool) (*SubscribeResult, error) {
@@ -381,7 +412,27 @@ func (r *Remote) Subscribe(ledger, transactions, transactionsProposed, server bo
 		return nil, fmt.Errorf("Missing server subscribe response")
 	}
 	return cmd.Result, nil
+}
 
+type OrderBookSubscription struct {
+	TakerGets data.Asset `json:"taker_gets"`
+	TakerPays data.Asset `json:"taker_pays"`
+	Snapshot  bool       `json:"snapshot"`
+	Both      bool       `json:"both"`
+}
+
+func (r *Remote) SubscribeOrderBooks(books []OrderBookSubscription) (*SubscribeResult, error) {
+	cmd := &SubscribeCommand{
+		Command: newCommand("subscribe"),
+		Streams: []string{"ledger", "server"},
+		Books:   books,
+	}
+	r.outgoing <- cmd
+	<-cmd.Ready
+	if cmd.CommandError != nil {
+		return nil, cmd.CommandError
+	}
+	return cmd.Result, nil
 }
 
 // readPump reads from the websocket and sends to inbound channel.

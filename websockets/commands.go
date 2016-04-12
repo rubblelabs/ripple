@@ -221,3 +221,30 @@ type AccountInfoResult struct {
 	LedgerSequence uint32           `json:"ledger_current_index"`
 	AccountData    data.AccountRoot `json:"account_data"`
 }
+
+type AccountLinesCommand struct {
+	*Command
+	Account data.Account        `json:"account"`
+	Result  *AccountLinesResult `json:"result,omitempty"`
+}
+
+type AccountLinesResult struct {
+	LedgerSequence uint32             `json:"ledger_current_index"`
+	Account        data.Account       `json:"account"`
+	Lines          []data.AccountLine `json:"lines"`
+}
+
+type BookOffersCommand struct {
+	*Command
+	LedgerSequence uint32       `json:"ledger_index"`
+	Taker          data.Account `json:"taker"`
+	TakerPays      data.Asset   `json:"taker_pays"`
+	TakerGets      data.Asset   `json:"taker_gets"`
+	Limit          uint32       `json:"limit"`
+	Result         *BookOffersResult
+}
+
+type BookOffersResult struct {
+	LedgerSequence uint32                `json:"ledger_index"`
+	Offers         []data.OrderBookOffer `json:"offers"`
+}

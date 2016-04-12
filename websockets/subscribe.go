@@ -47,14 +47,17 @@ var streamMessageFactory = map[string]func() interface{}{
 
 type SubscribeCommand struct {
 	*Command
-	Streams []string         `json:"streams"`
-	Result  *SubscribeResult `json:"result,omitempty"`
+	Streams []string                `json:"streams"`
+	Books   []OrderBookSubscription `json:"books,omitempty"`
+	Result  *SubscribeResult        `json:"result,omitempty"`
 }
 
 type SubscribeResult struct {
 	// Contains one or both of these, depending what streams were subscribed
 	*LedgerStreamMsg
 	*ServerStreamMsg
+	Asks []data.OrderBookOffer
+	Bids []data.OrderBookOffer
 }
 
 // Wrapper to stop recursive unmarshalling
