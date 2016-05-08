@@ -77,6 +77,46 @@ type Amendment struct {
 	Amendment Hash256
 }
 
+type SuspendedPaymentCreate struct {
+	TxBase
+	Destination    Account
+	Amount         Amount
+	Digest         *Hash256 `json:",omitempty"`
+	CancelAfter    *uint32  `json:",omitempty"`
+	FinishAfter    *uint32  `json:",omitempty"`
+	DestinationTag *uint32  `json:",omitempty"`
+}
+
+type SuspendedPaymentFinish struct {
+	TxBase
+	Owner         Account
+	OfferSequence uint32
+	Method        *uint8   `json:",omitempty"`
+	Digest        *Hash256 `json:",omitempty"`
+	Proof         *Hash256 `json:",omitempty"`
+}
+
+type SuspendedPaymentCancel struct {
+	TxBase
+	Owner         Account
+	OfferSequence uint32
+}
+
+type TicketCreate struct {
+	Target     *Account `json:",omitempty"`
+	Expiration *uint32  `json:",omitempty"`
+}
+
+type TicketCancel struct {
+	TicketID Hash256
+}
+
+type SignerListSet struct {
+	TxBase
+	SignerQuorum  uint32        `json:",omitempty"`
+	SignerEntries []SignerEntry `json:",omitempty"`
+}
+
 func (t *TxBase) GetBase() *TxBase                    { return t }
 func (t *TxBase) GetType() string                     { return txNames[t.TransactionType] }
 func (t *TxBase) GetTransactionType() TransactionType { return t.TransactionType }

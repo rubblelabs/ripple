@@ -268,6 +268,12 @@ func readObject(r Reader, v *reflect.Value) error {
 				e.Elem().FieldByName(name).Set(n)
 				v.Set(e.Elem())
 				return readObject(r, &n)
+			case "Majority":
+				var majority Majority
+				m := reflect.ValueOf(&majority)
+				err := readObject(r, &m)
+				v.Set(m.Elem())
+				return err
 			case "Memo":
 				var memo Memo
 				m := reflect.ValueOf(&memo)

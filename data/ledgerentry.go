@@ -79,10 +79,16 @@ type LedgerHashes struct {
 	Hashes              *Vector256       `json:",omitempty"`
 }
 
+type Majority struct {
+	Amendment *Hash256 `json:",omitempty"`
+	CloseTime *uint32  `json:",omitempty"`
+}
+
 type Amendments struct {
 	leBase
 	Flags      *LedgerEntryFlag `json:",omitempty"`
 	Amendments *Hash256         `json:",omitempty"`
+	Majorities []Majority       `json:",omitempty"`
 }
 
 type FeeSettings struct {
@@ -92,6 +98,44 @@ type FeeSettings struct {
 	ReferenceFeeUnits *uint32          `json:",omitempty"`
 	ReserveBase       *uint32          `json:",omitempty"`
 	ReserveIncrement  *uint32          `json:",omitempty"`
+}
+
+type SuspendedPayment struct {
+	leBase
+	Flags          *LedgerEntryFlag `json:",omitempty"`
+	Account        *Account         `json:",omitempty"`
+	Destination    *Account         `json:",omitempty"`
+	Amount         Amount           `json:",omitempty"`
+	Digest         *Hash256         `json:",omitempty"`
+	CancelAfter    *uint32          `json:",omitempty"`
+	FinishAfter    *uint32          `json:",omitempty"`
+	SourceTag      *uint32          `json:",omitempty"`
+	DestinationTag *uint32          `json:",omitempty"`
+	OwnerNode      *NodeIndex       `json:",omitempty"`
+}
+
+type SignerEntry struct {
+	Account      *Account `json:",omitempty"`
+	SignerWeight *uint16  `json:",omitempty"`
+}
+
+type SignerList struct {
+	leBase
+	Flags         *LedgerEntryFlag `json:",omitempty"`
+	OwnerNode     *NodeIndex       `json:",omitempty"`
+	SignerQuorum  *uint32          `json:",omitempty"`
+	SignerEntries []SignerEntry    `json:",omitempty"`
+	SignerListID  *uint32          `json:",omitempty"`
+}
+
+type Ticket struct {
+	leBase
+	Flags      *LedgerEntryFlag `json:",omitempty"`
+	Account    *Account         `json:",omitempty"`
+	Sequence   *uint32          `json:",omitempty"`
+	OwnerNode  *NodeIndex       `json:",omitempty"`
+	Target     *Account         `json:",omitempty"`
+	Expiration *uint32          `json:",omitempty"`
 }
 
 func (le *leBase) GetType() string                     { return ledgerEntryNames[le.LedgerEntryType] }

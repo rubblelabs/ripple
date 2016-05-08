@@ -46,6 +46,10 @@ const (
 	TxClearNoRipple TransactionFlag = 0x00040000
 	TxSetFreeze     TransactionFlag = 0x00100000
 	TxClearFreeze   TransactionFlag = 0x00200000
+
+	// EnableAmendments flags
+	TxGotMajority  = 0x00010000
+	TxLostMajority = 0x00020000
 )
 
 // Ledger entry flags

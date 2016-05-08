@@ -45,6 +45,9 @@ const (
 	NS_SKIP_LIST       LedgerNamespace = 's'
 	NS_AMENDMENT       LedgerNamespace = 'f'
 	NS_FEE             LedgerNamespace = 'e'
+	NS_SUSPAY          LedgerNamespace = 'u'
+	NS_TICKET          LedgerNamespace = 'T'
+	NS_SIGNER_LIST     LedgerNamespace = 'S'
 )
 
 var nodeTypes = [...]string{
