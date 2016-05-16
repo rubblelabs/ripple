@@ -9,6 +9,24 @@ import (
 	"github.com/rubblelabs/ripple/crypto"
 )
 
+type KeyType int
+
+const (
+	ECDSA   KeyType = 0
+	Ed25519 KeyType = 1
+)
+
+func (keyType KeyType) String() string {
+	switch keyType {
+	case ECDSA:
+		return "ECDSA"
+	case Ed25519:
+		return "Ed25519"
+	default:
+		return "unknown key type"
+	}
+}
+
 type Hash128 [16]byte
 type Hash160 [20]byte
 type Hash256 [32]byte
@@ -17,10 +35,12 @@ type VariableLength []byte
 type PublicKey [33]byte
 type Account [20]byte
 type RegularKey [20]byte
+type Seed [16]byte
 
 var zero256 Hash256
 var zeroAccount Account
 var zeroPublicKey PublicKey
+var zeroSeed Seed
 
 func (h *Hash128) Bytes() []byte {
 	if h == nil {
@@ -239,4 +259,57 @@ func (r *RegularKey) Bytes() []byte {
 		return r[:]
 	}
 	return []byte(nil)
+}
+
+// Expects address in base58 form
+func NewSeedFromAddress(s string) (*Seed, error) {
+	hash, err := crypto.NewRippleHashCheck(s, crypto.RIPPLE_FAMILY_SEED)
+	if err != nil {
+		return nil, err
+	}
+	var seed Seed
+	copy(seed[:], hash.Payload())
+	return &seed, nil
+}
+
+func (s Seed) Hash() (crypto.Hash, error) {
+	return crypto.NewFamilySeed(s[:])
+}
+
+func (s Seed) String() string {
+	address, err := s.Hash()
+	if err != nil {
+		return fmt.Sprintf("Bad Address: %s", b2h(s[:]))
+	}
+	return address.String()
+}
+
+func (s *Seed) Bytes() []byte {
+	if s != nil {
+		return s[:]
+	}
+	return []byte(nil)
+}
+
+func (s *Seed) Key(keyType KeyType) crypto.Key {
+	var (
+		key crypto.Key
+		err error
+	)
+	switch keyType {
+	case Ed25519:
+		key, err = crypto.NewEd25519Key(s[:])
+	case ECDSA:
+		key, err = crypto.NewECDSAKey(s[:])
+	}
+	if err != nil {
+		panic(fmt.Sprintf("bad seed: %v", err))
+	}
+	return key
+}
+
+func (s *Seed) AccountId(keyType KeyType, sequence *uint32) Account {
+	var account Account
+	copy(account[:], s.Key(keyType).Id(sequence))
+	return account
 }
