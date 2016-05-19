@@ -71,6 +71,7 @@ const (
 	telFAILED_PROCESSING
 	telINSUF_FEE_P
 	telNO_DST_PARTIAL
+	telCAN_NOT_QUEUE
 )
 const (
 	// -299 .. -200: M Malformed (bad signature)
@@ -83,33 +84,34 @@ const (
 	// - Can not succeed in any imagined ledger.
 	temMALFORMED TransactionResult = iota - 299
 	temBAD_AMOUNT
-	temBAD_AUTH_MASTER
 	temBAD_CURRENCY
-	temBAD_FEE
 	temBAD_EXPIRATION
+	temBAD_FEE
 	temBAD_ISSUER
 	temBAD_LIMIT
 	temBAD_OFFER
 	temBAD_PATH
 	temBAD_PATH_LOOP
-	temBAD_PUBLISH
-	temBAD_TRANSFER_RATE
 	temBAD_SEND_XRP_LIMIT
 	temBAD_SEND_XRP_MAX
 	temBAD_SEND_XRP_NO_DIRECT
 	temBAD_SEND_XRP_PARTIAL
 	temBAD_SEND_XRP_PATHS
+	temBAD_SEQUENCE
 	temBAD_SIGNATURE
 	temBAD_SRC_ACCOUNT
-	temBAD_SEQUENCE
+	temBAD_TRANSFER_RATE
 	temDST_IS_SRC
 	temDST_NEEDED
 	temINVALID
 	temINVALID_FLAG
 	temREDUNDANT
-	temREDUNDANT_SEND_MAX
 	temRIPPLE_EMPTY
-	temUNCERTAIN // An intermediate result used internally, should never be returned.
+	temDISABLED
+	temBAD_SIGNER
+	temBAD_QUORUM
+	temBAD_WEIGHT
+	temUNCERTAIN
 	temUNKNOWN
 )
 const (
@@ -140,6 +142,10 @@ const (
 	tefWRONG_PRIOR
 	tefMASTER_DISABLED
 	tefMAX_LEDGER
+	tefBAD_SIGNATURE
+	tefBAD_QUORUM
+	tefNOT_MULTI_SIGNING
+	tefBAD_AUTH_MASTER
 )
 const (
 	// -99 .. -1: R Retry (sequence too high, no funds for txn fee, originating account non-existent)
@@ -161,6 +167,7 @@ const (
 	terPRE_SEQ                       // Can't pay fee, no point in forwarding, therefore don't burden network.
 	terLAST                          // Process after all other transactions
 	terNO_RIPPLE                     // Rippling not allowed
+	terQUEUED                        // Transaction is being held in TxQ until fee drops
 )
 
 var resultNames = map[TransactionResult]struct {
@@ -217,6 +224,7 @@ var resultNames = map[TransactionResult]struct {
 	tefWRONG_PRIOR:            {"tefWRONG_PRIOR", "This previous transaction does not match."},
 	tefMASTER_DISABLED:        {"tefMASTER_DISABLED", "Master key is disabled."},
 	tefMAX_LEDGER:             {"tefMAX_LEDGER", "Ledger sequence too high."},
+	tefBAD_AUTH_MASTER:        {"tefBAD_AUTH_MASTER", "Auth for unclaimed account needs correct master key."},
 	telLOCAL_ERROR:            {"telLOCAL_ERROR", "Local failure."},
 	telBAD_DOMAIN:             {"telBAD_DOMAIN", "Domain too long."},
 	telBAD_PATH_COUNT:         {"telBAD_PATH_COUNT", "Malformed: Too many paths."},
@@ -224,9 +232,9 @@ var resultNames = map[TransactionResult]struct {
 	telFAILED_PROCESSING:      {"telFAILED_PROCESSING", "Failed to correctly process transaction."},
 	telINSUF_FEE_P:            {"telINSUF_FEE_P", "Fee insufficient."},
 	telNO_DST_PARTIAL:         {"telNO_DST_PARTIAL", "Partial payment to create account not allowed."},
+	telCAN_NOT_QUEUE:          {"telCAN_NOT_QUEUE", "Can not queue at this time."},
 	temMALFORMED:              {"temMALFORMED", "Malformed transaction."},
 	temBAD_AMOUNT:             {"temBAD_AMOUNT", "Can only send positive amounts."},
-	temBAD_AUTH_MASTER:        {"temBAD_AUTH_MASTER", "Auth for unclaimed account needs correct master key."},
 	temBAD_CURRENCY:           {"temBAD_CURRENCY", "Malformed: Bad currency."},
 	temBAD_FEE:                {"temBAD_FEE", "Invalid fee, negative or not XRP."},
 	temBAD_EXPIRATION:         {"temBAD_EXPIRATION", "Malformed: Bad expiration."},
@@ -235,7 +243,6 @@ var resultNames = map[TransactionResult]struct {
 	temBAD_OFFER:              {"temBAD_OFFER", "Malformed: Bad offer."},
 	temBAD_PATH:               {"temBAD_PATH", "Malformed: Bad path."},
 	temBAD_PATH_LOOP:          {"temBAD_PATH_LOOP", "Malformed: Loop in path."},
-	temBAD_PUBLISH:            {"temBAD_PUBLISH", "Malformed: Bad publish."},
 	temBAD_SIGNATURE:          {"temBAD_SIGNATURE", "Malformed: Bad signature."},
 	temBAD_SRC_ACCOUNT:        {"temBAD_SRC_ACCOUNT", "Malformed: Bad source account."},
 	temBAD_TRANSFER_RATE:      {"temBAD_TRANSFER_RATE", "Malformed: Transfer rate must be >= 1.0"},
@@ -250,7 +257,6 @@ var resultNames = map[TransactionResult]struct {
 	temINVALID:                {"temINVALID", "The transaction is ill-formed."},
 	temINVALID_FLAG:           {"temINVALID_FLAG", "The transaction has an invalid flag."},
 	temREDUNDANT:              {"temREDUNDANT", "Sends same currency to self."},
-	temREDUNDANT_SEND_MAX:     {"temREDUNDANT_SEND_MAX", "Send max is redundant."},
 	temRIPPLE_EMPTY:           {"temRIPPLE_EMPTY", "PathSet with no paths."},
 	temUNCERTAIN:              {"temUNCERTAIN", "In process of determining result. Never returned."},
 	temUNKNOWN:                {"temUNKNOWN", "The transactions requires logic not implemented yet."},
@@ -264,6 +270,7 @@ var resultNames = map[TransactionResult]struct {
 	terNO_LINE:                {"terNO_LINE", "No such line."},
 	terPRE_SEQ:                {"terPRE_SEQ", "Missing/inapplicable prior transaction."},
 	terOWNERS:                 {"terOWNERS", "Non-zero owner count."},
+	terQUEUED:                 {"terQUEUED", "Held until escalated fee drops."},
 }
 
 var reverseResults map[string]TransactionResult
