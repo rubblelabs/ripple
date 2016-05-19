@@ -286,7 +286,7 @@ func readObject(r Reader, v *reflect.Value) error {
 			}
 		default:
 			if v.Kind() == reflect.Struct {
-				return fmt.Errorf("Unexpected object: %s for field: %s", v.Type(), name)
+				return fmt.Errorf("Unexpected struct: %s for field: %s", v.Type(), name)
 			}
 			field := getField(v, enc)
 			if !field.CanAddr() {

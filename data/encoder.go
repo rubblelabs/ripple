@@ -156,8 +156,8 @@ func getFields(v *reflect.Value, depth int) fieldSlice {
 			continue
 		}
 		encoding := reverseEncodings[fieldName]
-		// fmt.Println(fieldName, encoding, f, f.Kind())
 		f := v.Field(i)
+		// fmt.Println(fieldName, encoding, f, f.Kind())
 		if f.Kind() == reflect.Interface {
 			f = f.Elem()
 		}

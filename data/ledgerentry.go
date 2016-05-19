@@ -87,7 +87,7 @@ type Majority struct {
 type Amendments struct {
 	leBase
 	Flags      *LedgerEntryFlag `json:",omitempty"`
-	Amendments *Hash256         `json:",omitempty"`
+	Amendments []Hash256        `json:",omitempty"`
 	Majorities []Majority       `json:",omitempty"`
 }
 
