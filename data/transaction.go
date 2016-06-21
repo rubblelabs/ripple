@@ -127,6 +127,24 @@ func (t *TxBase) SigningPrefix() HashPrefix           { return HP_TRANSACTION_SI
 func (t *TxBase) PathSet() PathSet                    { return PathSet(nil) }
 func (t *TxBase) GetHash() *Hash256                   { return &t.Hash }
 
+func (t *TxBase) Compare(other *TxBase) int {
+	switch {
+	case t.Account.Equals(other.Account):
+		switch {
+		case t.Sequence == other.Sequence:
+			return t.GetHash().Compare(*other.GetHash())
+		case t.Sequence < other.Sequence:
+			return -1
+		default:
+			return 1
+		}
+	case t.Account.Less(other.Account):
+		return -1
+	default:
+		return 1
+	}
+}
+
 func (t *TxBase) InitialiseForSigning() {
 	if t.SigningPubKey == nil {
 		t.SigningPubKey = new(PublicKey)
