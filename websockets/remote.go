@@ -212,7 +212,7 @@ func (r *Remote) Submit(tx data.Transaction) (*SubmitResult, error) {
 	return cmd.Result, nil
 }
 
-// Synchronously submit a single transaction
+// Synchronously submit multiple transactions
 func (r *Remote) SubmitBatch(txs []data.Transaction) ([]*SubmitResult, error) {
 	commands := make([]*SubmitCommand, len(txs))
 	results := make([]*SubmitResult, len(txs))
@@ -428,6 +428,18 @@ func (r *Remote) SubscribeOrderBooks(books []OrderBookSubscription) (*SubscribeR
 		Command: newCommand("subscribe"),
 		Streams: []string{"ledger", "server"},
 		Books:   books,
+	}
+	r.outgoing <- cmd
+	<-cmd.Ready
+	if cmd.CommandError != nil {
+		return nil, cmd.CommandError
+	}
+	return cmd.Result, nil
+}
+
+func (r *Remote) Fee() (*FeeResult, error) {
+	cmd := &FeeCommand{
+		Command: newCommand("fee"),
 	}
 	r.outgoing <- cmd
 	<-cmd.Ready

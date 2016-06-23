@@ -248,3 +248,28 @@ type BookOffersResult struct {
 	LedgerSequence uint32                `json:"ledger_index"`
 	Offers         []data.OrderBookOffer `json:"offers"`
 }
+
+type FeeCommand struct {
+	*Command
+	Result *FeeResult
+}
+
+type FeeResult struct {
+	CurrentLedgerSize uint32 `json:"current_ledger_size,string"`
+	CurrentQueueSize  uint32 `json:"current_queue_size,string"`
+	Drops             struct {
+		BaseFee       data.Value `json:"base_fee"`
+		MedianFee     data.Value `json:"base_fee"`
+		MinimumFee    data.Value `json:"minimum_fee"`
+		OpenLedgerFee data.Value `json:"open_ledger_fee"`
+	} `json:"drops"`
+	ExpectedLedgerSize uint32 `json:"expected_ledger_size,string"`
+	Levels             struct {
+		MedianLevel     data.Value `json:"median_level"`
+		MinimumLevel    data.Value `json:"minimum_level"`
+		OpenLedgerLevel data.Value `json:"open_ledger_level"`
+		ReferenceLevel  data.Value `json:"reference_level"`
+	} `json:"levels"`
+	MaxQueueSize uint32 `json:"max_queue_size,string"`
+	Status       string `json:"status"`
+}
