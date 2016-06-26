@@ -58,11 +58,21 @@ type TransactionWithMetaData struct {
 	Id             Hash256  `json:"-"`
 }
 
-func (t TransactionWithMetaData) GetType() string    { return t.Transaction.GetType() }
-func (t TransactionWithMetaData) Prefix() HashPrefix { return HP_TRANSACTION_NODE }
-func (t TransactionWithMetaData) NodeType() NodeType { return NT_TRANSACTION_NODE }
-func (t TransactionWithMetaData) Ledger() uint32     { return t.LedgerSequence }
-func (t TransactionWithMetaData) NodeId() *Hash256   { return &t.Id }
+func (t *TransactionWithMetaData) GetType() string    { return t.Transaction.GetType() }
+func (t *TransactionWithMetaData) Prefix() HashPrefix { return HP_TRANSACTION_NODE }
+func (t *TransactionWithMetaData) NodeType() NodeType { return NT_TRANSACTION_NODE }
+func (t *TransactionWithMetaData) Ledger() uint32     { return t.LedgerSequence }
+func (t *TransactionWithMetaData) NodeId() *Hash256   { return &t.Id }
+
+func (t *TransactionWithMetaData) Affects(account Account) bool {
+	for _, effect := range t.MetaData.AffectedNodes {
+		node, _, _, _ := effect.AffectedNode()
+		if node.FinalFields.Affects(account) {
+			return true
+		}
+	}
+	return false
+}
 
 func NewTransactionWithMetadata(typ TransactionType) *TransactionWithMetaData {
 	return &TransactionWithMetaData{Transaction: TxFactory[typ]()}

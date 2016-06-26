@@ -138,6 +138,28 @@ type Ticket struct {
 	Expiration *uint32          `json:",omitempty"`
 }
 
+func (a *AccountRoot) Affects(account Account) bool { return a.Account.Equals(account) }
+func (r *RippleState) Affects(account Account) bool {
+	return r.LowLimit.Issuer.Equals(account) || r.HighLimit.Issuer.Equals(account)
+}
+func (o *Offer) Affects(account Account) bool        { return o.Account.Equals(account) }
+func (d *Directory) Affects(account Account) bool    { return false }
+func (l *LedgerHashes) Affects(account Account) bool { return false }
+func (a *Amendments) Affects(account Account) bool   { return false }
+func (f *FeeSettings) Affects(account Account) bool  { return false }
+func (s *SuspendedPayment) Affects(account Account) bool {
+	return s.Account.Equals(account) || s.Destination.Equals(account)
+}
+func (s *SignerList) Affects(account Account) bool {
+	for _, entry := range s.SignerEntries {
+		if entry.Account.Equals(account) {
+			return true
+		}
+	}
+	return false
+}
+func (t *Ticket) Affects(account Account) bool { return t.Account.Equals(account) }
+
 func (le *leBase) GetType() string                     { return ledgerEntryNames[le.LedgerEntryType] }
 func (le *leBase) GetLedgerEntryType() LedgerEntryType { return le.LedgerEntryType }
 func (le *leBase) Prefix() HashPrefix                  { return HP_LEAF_NODE }

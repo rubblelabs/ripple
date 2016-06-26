@@ -35,6 +35,7 @@ type LedgerEntry interface {
 	GetLedgerEntryType() LedgerEntryType
 	GetLedgerIndex() *Hash256
 	GetPreviousTxnId() *Hash256
+	Affects(Account) bool
 }
 
 type Transaction interface {
