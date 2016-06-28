@@ -306,7 +306,11 @@ func (t *rippleHumanTime) UnmarshalJSON(b []byte) error {
 
 func (v *Value) MarshalText() ([]byte, error) {
 	if v.IsNative() {
-		return []byte(strconv.FormatUint(v.num, 10)), nil
+		num := strconv.FormatUint(v.num, 10)
+		if v.IsNegative() {
+			num = "-" + num
+		}
+		return []byte(num), nil
 	}
 	return []byte(v.String()), nil
 }
