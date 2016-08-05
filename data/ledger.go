@@ -6,10 +6,10 @@ type LedgerHeader struct {
 	PreviousLedger  Hash256    `json:"parent_hash"`
 	TransactionHash Hash256    `json:"transaction_hash"`
 	StateHash       Hash256    `json:"account_hash"`
-	ParentCloseTime RippleTime `json:"-"`
+	ParentCloseTime RippleTime `json:"parent_close_time"`
 	CloseTime       RippleTime `json:"close_time"`
 	CloseResolution uint8      `json:"close_time_resolution"`
-	CloseFlags      uint8      `json:"-"`
+	CloseFlags      uint8      `json:"close_flags"`
 }
 
 type Ledger struct {
