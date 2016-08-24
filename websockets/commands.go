@@ -224,24 +224,44 @@ type AccountInfoResult struct {
 
 type AccountLinesCommand struct {
 	*Command
-	Account data.Account        `json:"account"`
-	Result  *AccountLinesResult `json:"result,omitempty"`
+	Account     data.Account        `json:"account"`
+	Limit       uint32              `json:"limit"`
+	LedgerIndex interface{}         `json:"ledger_index,omitempty"`
+	Marker      *data.Hash256       `json:"marker,omitempty"`
+	Result      *AccountLinesResult `json:"result,omitempty"`
 }
 
 type AccountLinesResult struct {
-	LedgerSequence uint32             `json:"ledger_current_index"`
-	Account        data.Account       `json:"account"`
-	Lines          []data.AccountLine `json:"lines"`
+	LedgerSequence *uint32               `json:"ledger_index"`
+	Account        data.Account          `json:"account"`
+	Marker         *data.Hash256         `json:"marker"`
+	Lines          data.AccountLineSlice `json:"lines"`
+}
+
+type AccountOffersCommand struct {
+	*Command
+	Account     data.Account         `json:"account"`
+	Limit       uint32               `json:"limit"`
+	LedgerIndex interface{}          `json:"ledger_index,omitempty"`
+	Marker      *data.Hash256        `json:"marker,omitempty"`
+	Result      *AccountOffersResult `json:"result,omitempty"`
+}
+
+type AccountOffersResult struct {
+	LedgerSequence *uint32                `json:"ledger_index"`
+	Account        data.Account           `json:"account"`
+	Marker         *data.Hash256          `json:"marker"`
+	Offers         data.AccountOfferSlice `json:"offers"`
 }
 
 type BookOffersCommand struct {
 	*Command
-	LedgerSequence uint32       `json:"ledger_index"`
-	Taker          data.Account `json:"taker"`
-	TakerPays      data.Asset   `json:"taker_pays"`
-	TakerGets      data.Asset   `json:"taker_gets"`
-	Limit          uint32       `json:"limit"`
-	Result         *BookOffersResult
+	LedgerIndex interface{}  `json:"ledger_index,omitempty"`
+	Taker       data.Account `json:"taker"`
+	TakerPays   data.Asset   `json:"taker_pays"`
+	TakerGets   data.Asset   `json:"taker_gets"`
+	Limit       uint32       `json:"limit"`
+	Result      *BookOffersResult
 }
 
 type BookOffersResult struct {

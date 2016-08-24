@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/url"
 	"reflect"
+	"sort"
 	"time"
 
 	"github.com/golang/glog"
@@ -351,27 +352,81 @@ func (r *Remote) AccountInfo(a data.Account) (*AccountInfoResult, error) {
 }
 
 // Synchronously requests account line info
-func (r *Remote) AccountLines(a data.Account) (*AccountLinesResult, error) {
-	cmd := &AccountLinesCommand{
-		Command: newCommand("account_lines"),
-		Account: a,
+func (r *Remote) AccountLines(account data.Account) (*AccountLinesResult, error) {
+	var (
+		lines  data.AccountLineSlice
+		marker *data.Hash256
+		ledger = interface{}("closed")
+	)
+	for {
+		cmd := &AccountLinesCommand{
+			Command:     newCommand("account_lines"),
+			Account:     account,
+			Limit:       400,
+			Marker:      marker,
+			LedgerIndex: ledger,
+		}
+		r.outgoing <- cmd
+		<-cmd.Ready
+		switch {
+		case cmd.CommandError != nil:
+			return nil, cmd.CommandError
+		case cmd.Result.Marker != nil:
+			lines = append(lines, cmd.Result.Lines...)
+			marker = cmd.Result.Marker
+			if cmd.Result.LedgerSequence != nil {
+				ledger = *cmd.Result.LedgerSequence
+			}
+		default:
+			cmd.Result.Lines = append(lines, cmd.Result.Lines...)
+			sort.Sort(cmd.Result.Lines)
+			return cmd.Result, nil
+		}
 	}
-	r.outgoing <- cmd
-	<-cmd.Ready
-	if cmd.CommandError != nil {
-		return nil, cmd.CommandError
-	}
-	return cmd.Result, nil
 }
 
-func (r *Remote) BookOffers(taker data.Account, ledger uint32, pays, gets data.Asset) (*BookOffersResult, error) {
+// Synchronously requests account offers
+func (r *Remote) AccountOffers(account data.Account) (*AccountOffersResult, error) {
+	var (
+		offers data.AccountOfferSlice
+		marker *data.Hash256
+		ledger = interface{}("closed")
+	)
+	for {
+		cmd := &AccountOffersCommand{
+			Command:     newCommand("account_offers"),
+			Account:     account,
+			Limit:       400,
+			Marker:      marker,
+			LedgerIndex: ledger,
+		}
+		r.outgoing <- cmd
+		<-cmd.Ready
+		switch {
+		case cmd.CommandError != nil:
+			return nil, cmd.CommandError
+		case cmd.Result.Marker != nil:
+			offers = append(offers, cmd.Result.Offers...)
+			marker = cmd.Result.Marker
+			if cmd.Result.LedgerSequence != nil {
+				ledger = *cmd.Result.LedgerSequence
+			}
+		default:
+			cmd.Result.Offers = append(offers, cmd.Result.Offers...)
+			sort.Sort(cmd.Result.Offers)
+			return cmd.Result, nil
+		}
+	}
+}
+
+func (r *Remote) BookOffers(taker data.Account, ledger interface{}, pays, gets data.Asset) (*BookOffersResult, error) {
 	cmd := &BookOffersCommand{
-		Command:        newCommand("book_offers"),
-		LedgerSequence: ledger,
-		Taker:          taker,
-		TakerPays:      pays,
-		TakerGets:      gets,
-		Limit:          5000, // Marker not implemented....
+		Command:     newCommand("book_offers"),
+		LedgerIndex: ledger,
+		Taker:       taker,
+		TakerPays:   pays,
+		TakerGets:   gets,
+		Limit:       5000, // Marker not implemented....
 	}
 	r.outgoing <- cmd
 	<-cmd.Ready

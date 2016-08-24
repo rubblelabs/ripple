@@ -47,7 +47,7 @@ type Offer struct {
 	leBase
 	Flags         *LedgerEntryFlag `json:",omitempty"`
 	Account       *Account         `json:",omitempty"`
-	Sequence      *uint32          `json:",omitempty"`
+	Sequence      *uint32          `json:"sequence,omitempty"`
 	TakerPays     *Amount          `json:",omitempty"`
 	TakerGets     *Amount          `json:",omitempty"`
 	BookDirectory *Hash256         `json:",omitempty"`

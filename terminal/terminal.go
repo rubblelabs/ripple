@@ -32,28 +32,32 @@ var (
 	tradeStyle      = color.New(color.FgBlue)
 	balanceStyle    = color.New(color.FgMagenta)
 	pathStyle       = color.New(color.FgYellow)
+	offerStyle      = color.New(color.FgYellow)
+	lineStyle       = color.New(color.FgYellow)
 	infoStyle       = color.New(color.FgRed)
 )
+
+func BoolSymbol(v bool) string {
+	if v {
+		return "✓"
+	}
+	return "✗"
+}
+
+func MemoSymbol(tx data.Transaction) string {
+	return BoolSymbol(len(tx.GetBase().Memos) > 0)
+}
+
+func SignSymbol(s data.Signer) string {
+	valid, err := data.CheckSignature(s)
+	return BoolSymbol(!valid || err != nil)
+}
 
 type bundle struct {
 	color  *color.Color
 	format string
 	values []interface{}
 	flag   Flag
-}
-
-func MemoSymbol(tx data.Transaction) string {
-	if len(tx.GetBase().Memos) > 0 {
-		return "✐"
-	}
-	return " "
-}
-
-func SignSymbol(s data.Signer) string {
-	if valid, err := data.CheckSignature(s); !valid || err != nil {
-		return "✗"
-	}
-	return "✓"
 }
 
 func newLeBundle(v interface{}, flag Flag) (*bundle, error) {
@@ -223,6 +227,27 @@ func newBundle(value interface{}, flag Flag) (*bundle, error) {
 			color:  pathStyle,
 			format: "Path: %08X %s",
 			values: []interface{}{sig, v.String()},
+			flag:   flag,
+		}, nil
+	case data.OrderBookOffer:
+		return &bundle{
+			color:  offerStyle,
+			format: "Offer: %34s %8d %s %25s %62s %62s",
+			values: []interface{}{v.Account, *v.Sequence, BoolSymbol(v.Expiration != nil && *v.Expiration > 0), v.Quality, v.TakerGets, v.TakerPays},
+			flag:   flag,
+		}, nil
+	case data.AccountOffer:
+		return &bundle{
+			color:  offerStyle,
+			format: "Offer: %08X %9d %34s %62s %62s",
+			values: []interface{}{v.Flags, v.Sequence, v.Quality, v.TakerGets, v.TakerPays},
+			flag:   flag,
+		}, nil
+	case data.AccountLine:
+		return &bundle{
+			color:  lineStyle,
+			format: "Line: %20s %3s %34s %34s %20s %s %s %8d %8d",
+			values: []interface{}{v.Balance, v.Currency, v.Account, v.Limit, v.LimitPeer, BoolSymbol(v.NoRipple), BoolSymbol(v.NoRipplePeer), v.QualityIn, v.QualityOut},
 			flag:   flag,
 		}, nil
 	default:

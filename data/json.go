@@ -324,23 +324,21 @@ func (v *Value) UnmarshalText(b []byte) error {
 	return nil
 }
 
-type nonNativeValue Value
+type NonNativeValue struct {
+	Value
+}
 
-func (v *nonNativeValue) UnmarshalText(b []byte) error {
+func (v *NonNativeValue) UnmarshalText(b []byte) error {
 	value, err := NewValue(string(b), false)
 	if err != nil {
 		return err
 	}
-	*v = nonNativeValue(*value)
+	v.Value = *value
 	return nil
 }
 
-func (v *nonNativeValue) MarshalText() ([]byte, error) {
-	return (*Value)(v).MarshalText()
-}
-
 type amountJSON struct {
-	Value    *nonNativeValue `json:"value"`
+	Value    *NonNativeValue `json:"value"`
 	Currency Currency        `json:"currency"`
 	Issuer   Account         `json:"issuer"`
 }
@@ -352,7 +350,7 @@ func (a Amount) MarshalJSON() ([]byte, error) {
 	if a.IsNative() {
 		return []byte(`"` + strconv.FormatUint(a.num, 10) + `"`), nil
 	}
-	return json.Marshal(amountJSON{(*nonNativeValue)(a.Value), a.Currency, a.Issuer})
+	return json.Marshal(amountJSON{&NonNativeValue{*a.Value}, a.Currency, a.Issuer})
 }
 
 func (a *Amount) UnmarshalJSON(b []byte) (err error) {
@@ -364,7 +362,7 @@ func (a *Amount) UnmarshalJSON(b []byte) (err error) {
 	if err := json.Unmarshal(b, &dummy); err != nil {
 		return err
 	}
-	a.Value, a.Currency, a.Issuer = (*Value)(dummy.Value), dummy.Currency, dummy.Issuer
+	a.Value, a.Currency, a.Issuer = &dummy.Value.Value, dummy.Currency, dummy.Issuer
 	return nil
 }
 
