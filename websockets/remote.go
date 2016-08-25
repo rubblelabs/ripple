@@ -352,11 +352,10 @@ func (r *Remote) AccountInfo(a data.Account) (*AccountInfoResult, error) {
 }
 
 // Synchronously requests account line info
-func (r *Remote) AccountLines(account data.Account) (*AccountLinesResult, error) {
+func (r *Remote) AccountLines(account data.Account, ledgerIndex interface{}) (*AccountLinesResult, error) {
 	var (
 		lines  data.AccountLineSlice
 		marker *data.Hash256
-		ledger = interface{}("closed")
 	)
 	for {
 		cmd := &AccountLinesCommand{
@@ -364,7 +363,7 @@ func (r *Remote) AccountLines(account data.Account) (*AccountLinesResult, error)
 			Account:     account,
 			Limit:       400,
 			Marker:      marker,
-			LedgerIndex: ledger,
+			LedgerIndex: ledgerIndex,
 		}
 		r.outgoing <- cmd
 		<-cmd.Ready
@@ -375,7 +374,7 @@ func (r *Remote) AccountLines(account data.Account) (*AccountLinesResult, error)
 			lines = append(lines, cmd.Result.Lines...)
 			marker = cmd.Result.Marker
 			if cmd.Result.LedgerSequence != nil {
-				ledger = *cmd.Result.LedgerSequence
+				ledgerIndex = *cmd.Result.LedgerSequence
 			}
 		default:
 			cmd.Result.Lines = append(lines, cmd.Result.Lines...)
@@ -386,11 +385,10 @@ func (r *Remote) AccountLines(account data.Account) (*AccountLinesResult, error)
 }
 
 // Synchronously requests account offers
-func (r *Remote) AccountOffers(account data.Account) (*AccountOffersResult, error) {
+func (r *Remote) AccountOffers(account data.Account, ledgerIndex interface{}) (*AccountOffersResult, error) {
 	var (
 		offers data.AccountOfferSlice
 		marker *data.Hash256
-		ledger = interface{}("closed")
 	)
 	for {
 		cmd := &AccountOffersCommand{
@@ -398,7 +396,7 @@ func (r *Remote) AccountOffers(account data.Account) (*AccountOffersResult, erro
 			Account:     account,
 			Limit:       400,
 			Marker:      marker,
-			LedgerIndex: ledger,
+			LedgerIndex: ledgerIndex,
 		}
 		r.outgoing <- cmd
 		<-cmd.Ready
@@ -409,7 +407,7 @@ func (r *Remote) AccountOffers(account data.Account) (*AccountOffersResult, erro
 			offers = append(offers, cmd.Result.Offers...)
 			marker = cmd.Result.Marker
 			if cmd.Result.LedgerSequence != nil {
-				ledger = *cmd.Result.LedgerSequence
+				ledgerIndex = *cmd.Result.LedgerSequence
 			}
 		default:
 			cmd.Result.Offers = append(offers, cmd.Result.Offers...)
@@ -419,10 +417,10 @@ func (r *Remote) AccountOffers(account data.Account) (*AccountOffersResult, erro
 	}
 }
 
-func (r *Remote) BookOffers(taker data.Account, ledger interface{}, pays, gets data.Asset) (*BookOffersResult, error) {
+func (r *Remote) BookOffers(taker data.Account, ledgerIndex interface{}, pays, gets data.Asset) (*BookOffersResult, error) {
 	cmd := &BookOffersCommand{
 		Command:     newCommand("book_offers"),
-		LedgerIndex: ledger,
+		LedgerIndex: ledgerIndex,
 		Taker:       taker,
 		TakerPays:   pays,
 		TakerGets:   gets,

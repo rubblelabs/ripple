@@ -47,7 +47,7 @@ func main() {
 	checkErr(err)
 	account, err := data.NewAccountFromAddress(os.Args[1])
 	checkErr(err)
-	result, err := remote.AccountOffers(*account)
+	result, err := remote.AccountOffers(*account, "closed")
 	checkErr(err)
 	fmt.Println(*result.LedgerSequence)
 	for _, offer := range result.Offers {
