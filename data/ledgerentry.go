@@ -138,7 +138,9 @@ type Ticket struct {
 	Expiration *uint32          `json:",omitempty"`
 }
 
-func (a *AccountRoot) Affects(account Account) bool { return a.Account.Equals(account) }
+func (a *AccountRoot) Affects(account Account) bool {
+	return a.Account != nil && a.Account.Equals(account)
+}
 func (r *RippleState) Affects(account Account) bool {
 	return r.LowLimit.Issuer.Equals(account) || r.HighLimit.Issuer.Equals(account)
 }

@@ -66,8 +66,7 @@ func (t *TransactionWithMetaData) NodeId() *Hash256   { return &t.Id }
 
 func (t *TransactionWithMetaData) Affects(account Account) bool {
 	for _, effect := range t.MetaData.AffectedNodes {
-		node, _, _, _ := effect.AffectedNode()
-		if node.FinalFields != nil && node.FinalFields.Affects(account) {
+		if _, final, _, _ := effect.AffectedNode(); final.Affects(account) {
 			return true
 		}
 	}

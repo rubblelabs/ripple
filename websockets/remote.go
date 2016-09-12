@@ -53,7 +53,7 @@ func NewRemote(endpoint string) (*Remote, error) {
 		return nil, err
 	}
 	r := &Remote{
-		Incoming: make(chan interface{}, 10),
+		Incoming: make(chan interface{}, 1000),
 		outgoing: make(chan Syncer, 10),
 		ws:       ws,
 	}
@@ -378,7 +378,7 @@ func (r *Remote) AccountLines(account data.Account, ledgerIndex interface{}) (*A
 			}
 		default:
 			cmd.Result.Lines = append(lines, cmd.Result.Lines...)
-			sort.Sort(cmd.Result.Lines)
+			cmd.Result.Lines.SortByCurrencyAmount()
 			return cmd.Result, nil
 		}
 	}

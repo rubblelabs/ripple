@@ -233,14 +233,14 @@ func newBundle(value interface{}, flag Flag) (*bundle, error) {
 		return &bundle{
 			color:  offerStyle,
 			format: "Offer: %34s %8d %s %25s %62s %62s",
-			values: []interface{}{v.Account, *v.Sequence, BoolSymbol(v.Expiration != nil && *v.Expiration > 0), v.Quality, v.TakerGets, v.TakerPays},
+			values: []interface{}{v.Account, *v.Sequence, BoolSymbol(v.Expiration != nil && *v.Expiration > 0), v.Quality, v.TakerPays, v.TakerGets},
 			flag:   flag,
 		}, nil
 	case data.AccountOffer:
 		return &bundle{
 			color:  offerStyle,
 			format: "Offer: %08X %9d %34s %62s %62s",
-			values: []interface{}{v.Flags, v.Sequence, v.Quality, v.TakerGets, v.TakerPays},
+			values: []interface{}{v.Flags, v.Sequence, v.Quality, v.TakerPays, v.TakerGets},
 			flag:   flag,
 		}, nil
 	case data.AccountLine:

@@ -2,6 +2,8 @@ package data
 
 import (
 	"fmt"
+	"log"
+	"sort"
 	"strings"
 )
 
@@ -41,27 +43,107 @@ type OrderBookOffer struct {
 	Offer
 	OwnerFunds      Value          `json:"owner_funds"`
 	Quality         NonNativeValue `json:"quality"`
-	TakerGetsFunded Amount         `json:"taker_gets_funded"`
-	TakerPaysFunded Amount         `json:"taker_pays_funded"`
+	TakerGetsFunded *Amount        `json:"taker_gets_funded"`
+	TakerPaysFunded *Amount        `json:"taker_pays_funded"`
 }
 
 type AccountOffer struct {
-	Flags     uint32         `json:"flags"`
-	Quality   NonNativeValue `json:"quality"`
-	Sequence  uint32         `json:"seq"`
-	TakerGets Amount         `json:"taker_gets"`
-	TakerPays Amount         `json:"taker_pays"`
+	Flags      LedgerEntryFlag `json:"flags"`
+	Quality    NonNativeValue  `json:"quality"`
+	Sequence   uint32          `json:"seq"`
+	TakerGets  Amount          `json:"taker_gets"`
+	TakerPays  Amount          `json:"taker_pays"`
+	Expiration *uint32         `json:"expiration"`
 }
 
 type AccountOfferSlice []AccountOffer
 
 func (s AccountOfferSlice) Len() int           { return len(s) }
 func (s AccountOfferSlice) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
-func (s AccountOfferSlice) Less(i, j int) bool { return s[i].Sequence < s[j].Sequence }
+func (s AccountOfferSlice) Less(i, j int) bool { return s[i].Sequence > s[j].Sequence }
+
+func (s AccountOfferSlice) GetSequences(pays, gets *Asset) []uint32 {
+	// TODO: improve performance
+	var sequences []uint32
+	for i := range s {
+		if s[i].TakerPays.Currency.String() == pays.Currency &&
+			s[i].TakerPays.Issuer.String() == pays.Issuer &&
+			s[i].TakerGets.Currency.String() == gets.Currency &&
+			s[i].TakerGets.Issuer.String() == gets.Issuer {
+			sequences = append(sequences, s[i].Sequence)
+		}
+	}
+	return sequences
+}
+
+func (s AccountOfferSlice) Find(sequence uint32) int {
+	return sort.Search(len(s), func(i int) bool {
+		return s[i].Sequence <= sequence
+	})
+}
+
+func (s AccountOfferSlice) Get(sequence uint32) *AccountOffer {
+	if i := s.Find(sequence); i < len(s) && s[i].Sequence == sequence {
+		return &s[i]
+	}
+	return nil
+}
+
+func defaultUint32(v *uint32) uint32 {
+	if v == nil {
+		return 0
+	}
+	return *v
+}
+
+func (s *AccountOfferSlice) Add(offer *Offer) bool {
+	quality, err := offer.TakerPays.Divide(offer.TakerGets)
+	if err != nil {
+		panic(fmt.Sprintf("impossible quality: %s %s", offer.TakerPays, offer.TakerGets))
+	}
+	o := AccountOffer{
+		Flags:      LedgerEntryFlag(defaultUint32((*uint32)(offer.Flags))),
+		Sequence:   *offer.Sequence,
+		TakerGets:  *offer.TakerGets,
+		TakerPays:  *offer.TakerPays,
+		Quality:    NonNativeValue{*quality.Value},
+		Expiration: offer.Expiration,
+	}
+	i := s.Find(*offer.Sequence)
+	switch {
+	case i == len(*s):
+		*s = append(*s, o)
+		return true
+	case (*s)[i].Sequence != *offer.Sequence:
+		*s = append(*s, AccountOffer{})
+		copy((*s)[i+1:], (*s)[i:])
+		(*s)[i] = o
+		return true
+	default:
+		return false
+	}
+}
+
+func (s AccountOfferSlice) Update(offer *Offer) bool {
+	if existing := s.Get(*offer.Sequence); existing != nil {
+		existing.TakerGets = *offer.TakerGets
+		existing.TakerPays = *offer.TakerPays
+		return true
+	}
+	return false
+}
+
+func (s *AccountOfferSlice) Delete(offer *Offer) bool {
+	if i := s.Find(*offer.Sequence); i < len(*s) && (*s)[i].Sequence == *offer.Sequence {
+		*s = append((*s)[:i], (*s)[i+1:]...)
+		return true
+	}
+	return false
+}
 
 type AccountLine struct {
 	Account      Account        `json:"account"`
-	Balance      Value          `json:"balance"`
+	Balance      NonNativeValue `json:"balance"`
 	Currency     Currency       `json:"currency"`
 	Limit        NonNativeValue `json:"limit"`
 	LimitPeer    NonNativeValue `json:"limit_peer"`
@@ -71,13 +153,135 @@ type AccountLine struct {
 	QualityOut   uint32         `json:"quality_out"`
 }
 
+func (l *AccountLine) Asset() *Asset {
+	return &Asset{
+		Currency: l.Currency.String(),
+		Issuer:   l.Account.String(),
+	}
+}
+
+func (l *AccountLine) CompareByCurrencyAccount(other *AccountLine) int {
+	if cmp := l.Currency.Compare(other.Currency); cmp != 0 {
+		return cmp
+	}
+	return l.Account.Compare(other.Account)
+}
+
+func (l *AccountLine) CompareByCurrencyAmount(other *AccountLine) int {
+	if cmp := l.Currency.Compare(other.Currency); cmp != 0 {
+		return cmp
+	}
+	return l.Balance.Abs().Compare(*other.Balance.Abs())
+}
+
 type AccountLineSlice []AccountLine
 
-func (s AccountLineSlice) Len() int      { return len(s) }
-func (s AccountLineSlice) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
-func (s AccountLineSlice) Less(i, j int) bool {
-	if s[i].Currency.Equals(s[j].Currency) {
-		return !s[i].Balance.Abs().Less(*s[j].Balance.Abs())
+type byCurrencyAccount struct {
+	AccountLineSlice
+}
+
+func (by *byCurrencyAccount) Less(i, j int) bool {
+	return by.AccountLineSlice[i].CompareByCurrencyAccount(&by.AccountLineSlice[j]) < 0
+}
+
+type byCurrencyAmount struct {
+	AccountLineSlice
+}
+
+func (by *byCurrencyAmount) Less(i, j int) bool {
+	return by.AccountLineSlice[i].CompareByCurrencyAmount(&by.AccountLineSlice[j]) < 0
+}
+
+func (s AccountLineSlice) Len() int               { return len(s) }
+func (s AccountLineSlice) Swap(i, j int)          { s[i], s[j] = s[j], s[i] }
+func (s AccountLineSlice) SortbyCurrencyAccount() { sort.Sort(&byCurrencyAccount{s}) }
+func (s AccountLineSlice) SortByCurrencyAmount()  { sort.Sort(&byCurrencyAmount{s}) }
+
+func (s AccountLineSlice) Find(account Account, currency Currency) int {
+	return sort.Search(len(s), func(i int) bool {
+		switch s[i].Currency.Compare(currency) {
+		case 1:
+			return true
+		case -1:
+			return false
+		default:
+			return s[i].Account.Compare(account) >= 0
+		}
+	})
+}
+
+type highLowFunc func(balance, limit, limitPeer *Amount, noRipple, noRipplePeer bool, qualityIn, qualityOut uint32) bool
+
+func highLow(account Account, rs *RippleState, f highLowFunc) bool {
+	high, low := account.Equals(rs.HighLimit.Issuer), account.Equals(rs.LowLimit.Issuer)
+	log.Println("highlow", high, low, account)
+	switch {
+	case high == low:
+		return false
+	case high:
+		noRipple, noRipplePeer := *rs.Flags&LsHighNoRipple > 0, *rs.Flags&LsLowNoRipple > 0
+		return f(rs.Balance.Negate(), rs.HighLimit, rs.LowLimit, noRipple, noRipplePeer, defaultUint32(rs.HighQualityIn), defaultUint32(rs.HighQualityOut))
+	default:
+		noRipple, noRipplePeer := *rs.Flags&LsLowNoRipple > 0, *rs.Flags&LsHighNoRipple > 0
+		return f(rs.Balance, rs.LowLimit, rs.HighLimit, noRipple, noRipplePeer, defaultUint32(rs.LowQualityIn), defaultUint32(rs.LowQualityOut))
 	}
-	return s[i].Currency.Less(s[j].Currency)
+}
+
+func (s *AccountLineSlice) Add(account Account, rs *RippleState) bool {
+	var add = func(balance, limit, limitPeer *Amount, noRipple, noRipplePeer bool, qualityIn, qualityOut uint32) bool {
+		line := AccountLine{
+			Account:      limitPeer.Issuer,
+			Balance:      NonNativeValue{*balance.Value},
+			Currency:     limit.Currency,
+			Limit:        NonNativeValue{*limit.Value},
+			LimitPeer:    NonNativeValue{*limitPeer.Value},
+			NoRipple:     noRipple,
+			NoRipplePeer: noRipplePeer,
+			QualityIn:    qualityIn,
+			QualityOut:   qualityOut,
+		}
+		i := s.Find(limitPeer.Issuer, limitPeer.Currency)
+		log.Println("Add", account, limitPeer.Issuer, limitPeer.Currency, len(*s), i)
+		switch {
+		case i == len(*s):
+			*s = append(*s, line)
+			return true
+		case (*s)[i].Account.Equals(limitPeer.Issuer) && (*s)[i].Currency.Equals(limitPeer.Currency):
+			return false
+		default:
+			*s = append((*s)[:i], append(AccountLineSlice{line}, (*s)[i:]...)...)
+			return true
+		}
+	}
+	return highLow(account, rs, add)
+}
+
+func (s AccountLineSlice) Update(account Account, rs *RippleState) bool {
+	var update = func(balance, limit, limitPeer *Amount, noripple, noRipplePeer bool, qualityIn, qualityOut uint32) bool {
+		i := s.Find(limitPeer.Issuer, limitPeer.Currency)
+		log.Println("Update:", account, limitPeer.Issuer, limitPeer.Currency, len(s), i)
+		if i == len(s) || !s[i].Account.Equals(limitPeer.Issuer) || !s[i].Currency.Equals(limitPeer.Currency) {
+			return false
+		}
+		s[i].Balance = NonNativeValue{*balance.Value}
+		s[i].Limit = NonNativeValue{*limit.Value}
+		s[i].LimitPeer = NonNativeValue{*limitPeer.Value}
+		s[i].NoRipple = noripple
+		s[i].NoRipplePeer = noRipplePeer
+		return true
+	}
+	return highLow(account, rs, update)
+}
+
+func (s *AccountLineSlice) Delete(account Account, rs *RippleState) bool {
+	var del = func(balance, limit, limitPeer *Amount, noripple, noRipplePeer bool, qualityIn, qualityOut uint32) bool {
+		i := s.Find(limitPeer.Issuer, limitPeer.Currency)
+		log.Println("Delete:", account, limitPeer.Issuer, limitPeer.Currency, len(*s), i)
+		if i < len(*s) && (*s)[i].Account.Equals(limitPeer.Issuer) && (*s)[i].Currency.Equals(limitPeer.Currency) {
+			*s = append((*s)[:i], (*s)[i+1:]...)
+			return true
+		}
+		return false
+	}
+	return highLow(account, rs, del)
 }

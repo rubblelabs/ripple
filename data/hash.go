@@ -217,8 +217,12 @@ func (a *Account) Bytes() []byte {
 	return []byte(nil)
 }
 
+func (a Account) Compare(b Account) int {
+	return bytes.Compare(a[:], b[:])
+}
+
 func (a Account) Less(b Account) bool {
-	return bytes.Compare(a[:], b[:]) < 0
+	return a.Compare(b) < 0
 }
 
 func (a Account) Equals(b Account) bool {
