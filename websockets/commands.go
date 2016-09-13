@@ -114,7 +114,13 @@ func (txr *TxResult) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &extract); err != nil {
 		return err
 	}
-	txr.Validated = extract["validated"].(bool)
+	// "validated" can be absent, when tx result is provisional.
+	validated, ok := extract["validated"]
+	if !ok {
+		txr.Validated = false
+	} else {
+		txr.Validated = validated.(bool)
+	}
 	return json.Unmarshal(b, &txr.TransactionWithMetaData)
 }
 
