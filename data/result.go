@@ -294,6 +294,10 @@ func (r TransactionResult) Success() bool {
 	return r == tesSUCCESS || r == tecCLAIM
 }
 
+func (r TransactionResult) Queued() bool {
+	return r == terQUEUED
+}
+
 func (r TransactionResult) Symbol() string {
 	switch r {
 	case tesSUCCESS, tecCLAIM:
