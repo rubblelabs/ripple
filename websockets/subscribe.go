@@ -36,6 +36,7 @@ type ServerStreamMsg struct {
 	Status     string `json:"server_status"`
 	LoadBase   int    `json:"load_base"`
 	LoadFactor int    `json:"load_factor"`
+	HostID     string `json:"hostid"`
 }
 
 // Map message types to the appropriate data structure
