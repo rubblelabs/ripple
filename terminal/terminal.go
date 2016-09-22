@@ -37,6 +37,13 @@ var (
 	infoStyle       = color.New(color.FgRed)
 )
 
+func defaultUint32(v *uint32) uint32 {
+	if v != nil {
+		return *v
+	}
+	return 0
+}
+
 func BoolSymbol(v bool) string {
 	if v {
 		return "✓"
@@ -114,11 +121,11 @@ func newTxBundle(v data.Transaction, insert string, flag Flag) (*bundle, error) 
 		format += "=> %-34s %-60s %-60s"
 		values = append(values, []interface{}{tx.Destination, tx.Amount, tx.SendMax}...)
 	case *data.OfferCreate:
-		format += "%-60s %-60s %-18s"
-		values = append(values, []interface{}{tx.TakerPays, tx.TakerGets, tx.Ratio()}...)
+		format += "%-9d %-60s %-60s %-18s"
+		values = append(values, []interface{}{defaultUint32(tx.OfferSequence), tx.TakerPays, tx.TakerGets, tx.Ratio()}...)
 	case *data.OfferCancel:
 		format += "%-9d"
-		values = append(values, tx.Sequence)
+		values = append(values, tx.OfferSequence)
 	case *data.AccountSet:
 		format += "%-9d"
 		values = append(values, tx.Sequence)
@@ -233,7 +240,7 @@ func newBundle(value interface{}, flag Flag) (*bundle, error) {
 		return &bundle{
 			color:  offerStyle,
 			format: "Offer: %34s %8d %s %25s %62s %62s",
-			values: []interface{}{v.Account, *v.Sequence, BoolSymbol(v.Expiration != nil && *v.Expiration > 0), v.Quality, v.TakerPays, v.TakerGets},
+			values: []interface{}{v.Account, v.Sequence, BoolSymbol(v.Expiration != nil && *v.Expiration > 0), v.Quality, v.TakerPays, v.TakerGets},
 			flag:   flag,
 		}, nil
 	case data.AccountOffer:
