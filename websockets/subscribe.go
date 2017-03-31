@@ -57,8 +57,11 @@ type SubscribeResult struct {
 	// Contains one or both of these, depending what streams were subscribed
 	*LedgerStreamMsg
 	*ServerStreamMsg
+	// Contains "bids" and "asks" when "both" is true.
 	Asks []data.OrderBookOffer
 	Bids []data.OrderBookOffer
+	// Contains "offers" when "both" is false.
+	Offers []data.OrderBookOffer
 }
 
 // Wrapper to stop recursive unmarshalling
