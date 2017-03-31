@@ -48,6 +48,7 @@ const (
 	NS_SUSPAY          LedgerNamespace = 'u'
 	NS_TICKET          LedgerNamespace = 'T'
 	NS_SIGNER_LIST     LedgerNamespace = 'S'
+	NS_XRPU_CHANNEL    LedgerNamespace = 'x'
 )
 
 var nodeTypes = [...]string{

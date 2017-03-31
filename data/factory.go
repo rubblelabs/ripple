@@ -17,6 +17,7 @@ const (
 	RIPPLE_STATE  LedgerEntryType = 0x72 // 'r'
 	FEE_SETTINGS  LedgerEntryType = 0x73 // 's'
 	SUS_PAY       LedgerEntryType = 0x75 // 'u'
+	PAY_CHANNEL   LedgerEntryType = 0x78 // 'x'
 
 	PAYMENT         TransactionType = 0
 	SUS_PAY_CREATE  TransactionType = 1
@@ -49,6 +50,7 @@ var LedgerEntryFactory = [...]func() LedgerEntry{
 	SUS_PAY:       func() LedgerEntry { return &SuspendedPayment{leBase: leBase{LedgerEntryType: SUS_PAY}} },
 	SIGNER_LIST:   func() LedgerEntry { return &SignerList{leBase: leBase{LedgerEntryType: SIGNER_LIST}} },
 	TICKET:        func() LedgerEntry { return &Ticket{leBase: leBase{LedgerEntryType: TICKET}} },
+	PAY_CHANNEL:   func() LedgerEntry { return &PayChannel{leBase: leBase{LedgerEntryType: PAY_CHANNEL}} },
 }
 
 var TxFactory = [...]func() Transaction{
@@ -77,6 +79,7 @@ var ledgerEntryNames = [...]string{
 	SUS_PAY:       "SuspendedPayment",
 	SIGNER_LIST:   "SignerList",
 	TICKET:        "Ticket",
+	PAY_CHANNEL:   "PaymentChannel",
 }
 
 var ledgerEntryTypes = map[string]LedgerEntryType{
@@ -90,6 +93,7 @@ var ledgerEntryTypes = map[string]LedgerEntryType{
 	"SuspendedPayment": SUS_PAY,
 	"SignerList":       SIGNER_LIST,
 	"Ticket":           TICKET,
+	"PaymentChannel":   PAY_CHANNEL,
 }
 
 var txNames = [...]string{

@@ -138,6 +138,19 @@ type Ticket struct {
 	Expiration *uint32          `json:",omitempty"`
 }
 
+type PayChannel struct {
+	leBase
+	Account     Account   `json:",omitempty"`
+	Destination Account   `json:",omitempty"`
+	Amount      Amount    `json:",omitempty"`
+	Balance     Amount    `json:",omitempty"`
+	PublicKey   PublicKey `json:",omitempty"`
+	SettleDelay uint32    `json:",omitempty"`
+	OwnerNode   uint64    `json:",omitempty"`
+	Expiration  uint32    `json:",omitempty"`
+	CancelAfter uint32    `json:",omitempty"`
+}
+
 func (a *AccountRoot) Affects(account Account) bool {
 	return a.Account != nil && a.Account.Equals(account)
 }
@@ -161,6 +174,9 @@ func (s *SignerList) Affects(account Account) bool {
 	return false
 }
 func (t *Ticket) Affects(account Account) bool { return t.Account.Equals(account) }
+func (p *PayChannel) Affects(account Account) bool {
+	return p.Account.Equals(account) || p.Destination.Equals(account)
+}
 
 func (le *leBase) GetType() string                     { return ledgerEntryNames[le.LedgerEntryType] }
 func (le *leBase) GetLedgerEntryType() LedgerEntryType { return le.LedgerEntryType }
