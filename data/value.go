@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"math"
 	"math/big"
 	"regexp"
 	"strconv"
@@ -450,6 +451,19 @@ func (v Value) Rat() *big.Rat {
 	res := big.NewRat(0, 1)
 	res.SetFrac(n, d)
 	return res
+}
+
+func (v Value) Float() float64 {
+	switch {
+	case v.negative && v.native:
+		return -float64(v.num) / 1000000
+	case v.native:
+		return float64(v.num) / 1000000
+	case v.negative:
+		return float64(-v.num) * math.Pow10(int(v.offset))
+	default:
+		return float64(v.num) * math.Pow10(int(v.offset))
+	}
 }
 
 // String returns the Value as a string for human consumption. Native values are
