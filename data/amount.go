@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"github.com/rubblelabs/ripple/crypto"
 	"strings"
+
+	"github.com/rubblelabs/ripple/crypto"
 )
 
 type Amount struct {
@@ -222,6 +223,20 @@ func (a Amount) Machine() string {
 		return a.Value.String() + "/" + a.Currency.Machine()
 	default:
 		return a.Value.String() + "/" + a.Currency.Machine() + "/" + a.Issuer.String()
+	}
+}
+
+func (a Amount) Asset() *Asset {
+	switch {
+	case a.IsNative():
+		return &Asset{
+			Currency: "XRP",
+		}
+	default:
+		return &Asset{
+			Currency: a.Currency.String(),
+			Issuer:   a.Issuer.String(),
+		}
 	}
 }
 
