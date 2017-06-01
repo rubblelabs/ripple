@@ -129,6 +129,7 @@ var encodings = map[enc]string{
 	enc{ST_UINT32, 36}: "CancelAfter",
 	enc{ST_UINT32, 37}: "FinishAfter",
 	enc{ST_UINT32, 38}: "SignerListID",
+	enc{ST_UINT32, 39}: "SettleDelay",
 	// 64-bit unsigned integers (common)
 	enc{ST_UINT64, 1}: "IndexNext",
 	enc{ST_UINT64, 2}: "IndexPrevious",
@@ -157,6 +158,7 @@ var encodings = map[enc]string{
 	enc{ST_HASH256, 19}: "Amendment",
 	enc{ST_HASH256, 20}: "TicketID",
 	enc{ST_HASH256, 21}: "Digest",
+	enc{ST_HASH256, 22}: "Channel",
 	// currency amount (common)
 	enc{ST_AMOUNT, 1}:  "Amount",
 	enc{ST_AMOUNT, 2}:  "Balance",
@@ -188,7 +190,9 @@ var encodings = map[enc]string{
 	enc{ST_VL, 13}: "MemoData",
 	enc{ST_VL, 14}: "MemoFormat",
 	// variable length (uncommon)
-	enc{ST_VL, 17}: "Proof",
+	enc{ST_VL, 16}: "Fulfillment",
+	enc{ST_VL, 17}: "Condition",
+	enc{ST_VL, 18}: "MasterSignature",
 	// account
 	enc{ST_ACCOUNT, 1}: "Account",
 	enc{ST_ACCOUNT, 2}: "Owner",
@@ -227,6 +231,8 @@ var encodings = map[enc]string{
 	enc{ST_UINT8, 1}: "CloseResolution",
 	enc{ST_UINT8, 2}: "Method",
 	enc{ST_UINT8, 3}: "TransactionResult",
+	// 8-bit unsigned integers (uncommon)
+	enc{ST_UINT8, 16}: "TickSize",
 	// 160-bit (common)
 	enc{ST_HASH160, 1}: "TakerPaysCurrency",
 	enc{ST_HASH160, 2}: "TakerPaysIssuer",

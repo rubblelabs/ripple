@@ -16,20 +16,23 @@ const (
 	OFFER         LedgerEntryType = 0x6f // 'o'
 	RIPPLE_STATE  LedgerEntryType = 0x72 // 'r'
 	FEE_SETTINGS  LedgerEntryType = 0x73 // 's'
-	SUS_PAY       LedgerEntryType = 0x75 // 'u'
+	ESCROW        LedgerEntryType = 0x75 // 'u'
 	PAY_CHANNEL   LedgerEntryType = 0x78 // 'x'
 
 	PAYMENT         TransactionType = 0
-	SUS_PAY_CREATE  TransactionType = 1
-	SUS_PAY_FINISH  TransactionType = 2
+	ESCROW_CREATE   TransactionType = 1
+	ESCROW_FINISH   TransactionType = 2
 	ACCOUNT_SET     TransactionType = 3
-	SUS_PAY_CANCEL  TransactionType = 4
+	ESCROW_CANCEL   TransactionType = 4
 	SET_REGULAR_KEY TransactionType = 5
 	OFFER_CREATE    TransactionType = 7
 	OFFER_CANCEL    TransactionType = 8
 	TICKET_CREATE   TransactionType = 10
 	TICKET_CANCEL   TransactionType = 11
 	SIGNER_LIST_SET TransactionType = 12
+	PAYCHAN_CREATE  TransactionType = 13
+	PAYCHAN_FUND    TransactionType = 14
+	PAYCHAN_CLAIM   TransactionType = 15
 	TRUST_SET       TransactionType = 20
 	AMENDMENT       TransactionType = 100
 	SET_FEE         TransactionType = 101
@@ -47,7 +50,7 @@ var LedgerEntryFactory = [...]func() LedgerEntry{
 	OFFER:         func() LedgerEntry { return &Offer{leBase: leBase{LedgerEntryType: OFFER}} },
 	RIPPLE_STATE:  func() LedgerEntry { return &RippleState{leBase: leBase{LedgerEntryType: RIPPLE_STATE}} },
 	FEE_SETTINGS:  func() LedgerEntry { return &FeeSettings{leBase: leBase{LedgerEntryType: FEE_SETTINGS}} },
-	SUS_PAY:       func() LedgerEntry { return &SuspendedPayment{leBase: leBase{LedgerEntryType: SUS_PAY}} },
+	ESCROW:        func() LedgerEntry { return &Escrow{leBase: leBase{LedgerEntryType: ESCROW}} },
 	SIGNER_LIST:   func() LedgerEntry { return &SignerList{leBase: leBase{LedgerEntryType: SIGNER_LIST}} },
 	TICKET:        func() LedgerEntry { return &Ticket{leBase: leBase{LedgerEntryType: TICKET}} },
 	PAY_CHANNEL:   func() LedgerEntry { return &PayChannel{leBase: leBase{LedgerEntryType: PAY_CHANNEL}} },
@@ -62,10 +65,13 @@ var TxFactory = [...]func() Transaction{
 	TRUST_SET:       func() Transaction { return &TrustSet{TxBase: TxBase{TransactionType: TRUST_SET}} },
 	AMENDMENT:       func() Transaction { return &Amendment{TxBase: TxBase{TransactionType: AMENDMENT}} },
 	SET_FEE:         func() Transaction { return &SetFee{TxBase: TxBase{TransactionType: SET_FEE}} },
-	SUS_PAY_CREATE:  func() Transaction { return &SuspendedPaymentCreate{TxBase: TxBase{TransactionType: SUS_PAY_CREATE}} },
-	SUS_PAY_FINISH:  func() Transaction { return &SuspendedPaymentFinish{TxBase: TxBase{TransactionType: SUS_PAY_FINISH}} },
-	SUS_PAY_CANCEL:  func() Transaction { return &SuspendedPaymentCancel{TxBase: TxBase{TransactionType: SUS_PAY_CANCEL}} },
+	ESCROW_CREATE:   func() Transaction { return &EscrowCreate{TxBase: TxBase{TransactionType: ESCROW_CREATE}} },
+	ESCROW_FINISH:   func() Transaction { return &EscrowFinish{TxBase: TxBase{TransactionType: ESCROW_FINISH}} },
+	ESCROW_CANCEL:   func() Transaction { return &EscrowCancel{TxBase: TxBase{TransactionType: ESCROW_CANCEL}} },
 	SIGNER_LIST_SET: func() Transaction { return &SignerListSet{TxBase: TxBase{TransactionType: SIGNER_LIST_SET}} },
+	PAYCHAN_CREATE:  func() Transaction { return &PaymentChannelCreate{TxBase: TxBase{TransactionType: PAYCHAN_CREATE}} },
+	PAYCHAN_FUND:    func() Transaction { return &PaymentChannelFund{TxBase: TxBase{TransactionType: PAYCHAN_FUND}} },
+	PAYCHAN_CLAIM:   func() Transaction { return &PaymentChannelClaim{TxBase: TxBase{TransactionType: PAYCHAN_CLAIM}} },
 }
 
 var ledgerEntryNames = [...]string{
@@ -76,24 +82,24 @@ var ledgerEntryNames = [...]string{
 	OFFER:         "Offer",
 	RIPPLE_STATE:  "RippleState",
 	FEE_SETTINGS:  "FeeSettings",
-	SUS_PAY:       "SuspendedPayment",
+	ESCROW:        "Escrow",
 	SIGNER_LIST:   "SignerList",
 	TICKET:        "Ticket",
-	PAY_CHANNEL:   "PaymentChannel",
+	PAY_CHANNEL:   "PayChannel",
 }
 
 var ledgerEntryTypes = map[string]LedgerEntryType{
-	"AccountRoot":      ACCOUNT_ROOT,
-	"DirectoryNode":    DIRECTORY,
-	"Amendments":       AMENDMENTS,
-	"LedgerHashes":     LEDGER_HASHES,
-	"Offer":            OFFER,
-	"RippleState":      RIPPLE_STATE,
-	"FeeSettings":      FEE_SETTINGS,
-	"SuspendedPayment": SUS_PAY,
-	"SignerList":       SIGNER_LIST,
-	"Ticket":           TICKET,
-	"PaymentChannel":   PAY_CHANNEL,
+	"AccountRoot":   ACCOUNT_ROOT,
+	"DirectoryNode": DIRECTORY,
+	"Amendments":    AMENDMENTS,
+	"LedgerHashes":  LEDGER_HASHES,
+	"Offer":         OFFER,
+	"RippleState":   RIPPLE_STATE,
+	"FeeSettings":   FEE_SETTINGS,
+	"Escrow":        ESCROW,
+	"SignerList":    SIGNER_LIST,
+	"Ticket":        TICKET,
+	"PayChannel":    PAY_CHANNEL,
 }
 
 var txNames = [...]string{
@@ -105,25 +111,31 @@ var txNames = [...]string{
 	TRUST_SET:       "TrustSet",
 	AMENDMENT:       "Amendment",
 	SET_FEE:         "SetFee",
-	SUS_PAY_CREATE:  "SuspendedPaymentCreate",
-	SUS_PAY_FINISH:  "SuspendedPaymentFinish",
-	SUS_PAY_CANCEL:  "SuspendedPaymentCancel",
+	ESCROW_CREATE:   "EscrowCreate",
+	ESCROW_FINISH:   "EscrowFinish",
+	ESCROW_CANCEL:   "EscrowCancel",
 	SIGNER_LIST_SET: "SignerListSet",
+	PAYCHAN_CREATE:  "PaymentChannelCreate",
+	PAYCHAN_FUND:    "PaymentChannelFund",
+	PAYCHAN_CLAIM:   "PaymentChannelClaim",
 }
 
 var txTypes = map[string]TransactionType{
-	"Payment":                PAYMENT,
-	"AccountSet":             ACCOUNT_SET,
-	"SetRegularKey":          SET_REGULAR_KEY,
-	"OfferCreate":            OFFER_CREATE,
-	"OfferCancel":            OFFER_CANCEL,
-	"TrustSet":               TRUST_SET,
-	"Amendment":              AMENDMENT,
-	"SetFee":                 SET_FEE,
-	"SuspendedPaymentCreate": SUS_PAY_CREATE,
-	"SuspendedPaymentFinish": SUS_PAY_FINISH,
-	"SuspendedPaymentCancel": SUS_PAY_CANCEL,
-	"SignerListSet":          SIGNER_LIST_SET,
+	"Payment":              PAYMENT,
+	"AccountSet":           ACCOUNT_SET,
+	"SetRegularKey":        SET_REGULAR_KEY,
+	"OfferCreate":          OFFER_CREATE,
+	"OfferCancel":          OFFER_CANCEL,
+	"TrustSet":             TRUST_SET,
+	"Amendment":            AMENDMENT,
+	"SetFee":               SET_FEE,
+	"EscrowCreate":         ESCROW_CREATE,
+	"EscrowFinish":         ESCROW_FINISH,
+	"EscrowCancel":         ESCROW_CANCEL,
+	"SignerListSet":        SIGNER_LIST_SET,
+	"PaymentChannelCreate": PAYCHAN_CREATE,
+	"PaymentChannelFund":   PAYCHAN_FUND,
+	"PaymentChannelClaim":  PAYCHAN_CLAIM,
 }
 
 var HashableTypes []string

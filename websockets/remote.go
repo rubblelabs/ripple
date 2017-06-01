@@ -271,8 +271,8 @@ func (r *Remote) streamLedgerData(ledger interface{}, c chan data.LedgerEntrySli
 			les[i], err = data.ReadLedgerEntry(bytes.NewReader(b), data.Hash256{})
 			if err != nil {
 				glog.Errorln(err.Error())
-				//TODO: Fix this HACK!
-				les[i] = data.LedgerEntryFactory[data.AMENDMENTS]()
+				glog.Errorln(state.Data)
+				glog.Errorln(state.Index)
 				continue
 			}
 		}

@@ -35,6 +35,7 @@ type AccountSet struct {
 	MessageKey    *VariableLength `json:",omitempty"`
 	Domain        *VariableLength `json:",omitempty"`
 	TransferRate  *uint32         `json:",omitempty"`
+	TickSize      *uint8          `json:",omitempty"`
 	SetFlag       *uint32         `json:",omitempty"`
 	ClearFlag     *uint32         `json:",omitempty"`
 }
@@ -77,7 +78,7 @@ type Amendment struct {
 	Amendment Hash256
 }
 
-type SuspendedPaymentCreate struct {
+type EscrowCreate struct {
 	TxBase
 	Destination    Account
 	Amount         Amount
@@ -87,7 +88,7 @@ type SuspendedPaymentCreate struct {
 	DestinationTag *uint32  `json:",omitempty"`
 }
 
-type SuspendedPaymentFinish struct {
+type EscrowFinish struct {
 	TxBase
 	Owner         Account
 	OfferSequence uint32
@@ -96,10 +97,37 @@ type SuspendedPaymentFinish struct {
 	Proof         *Hash256 `json:",omitempty"`
 }
 
-type SuspendedPaymentCancel struct {
+type EscrowCancel struct {
 	TxBase
 	Owner         Account
 	OfferSequence uint32
+}
+
+type PaymentChannelCreate struct {
+	TxBase
+	Amount         Amount
+	Destination    Account
+	SettleDelay    uint32
+	PublicKey      PublicKey
+	CancelAfter    *uint32 `json:",omitempty"`
+	DestinationTag *uint32 `json:",omitempty"`
+	SourceTag      *uint32 `json:",omitempty"`
+}
+
+type PaymentChannelFund struct {
+	TxBase
+	Channel    Hash256
+	Amount     Amount
+	Expiration *uint32 `json:",omitempty"`
+}
+
+type PaymentChannelClaim struct {
+	TxBase
+	Channel   Hash256
+	Balance   *Amount         `json:",omitempty"`
+	Amount    *Amount         `json:",omitempty"`
+	Signature *VariableLength `json:",omitempty"`
+	PublicKey *PublicKey      `json:",omitempty"`
 }
 
 type TicketCreate struct {

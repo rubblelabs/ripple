@@ -24,6 +24,7 @@ type AccountRoot struct {
 	WalletLocator *Hash256         `json:",omitempty"`
 	WalletSize    *uint32          `json:",omitempty"`
 	MessageKey    *VariableLength  `json:",omitempty"`
+	TickSize      *uint8           `json:",omitempty"`
 	TransferRate  *uint32          `json:",omitempty"`
 	Domain        *VariableLength  `json:",omitempty"`
 	Signers       *VariableLength  `json:",omitempty"`
@@ -87,7 +88,7 @@ type Majority struct {
 type Amendments struct {
 	leBase
 	Flags      *LedgerEntryFlag `json:",omitempty"`
-	Amendments []Hash256        `json:",omitempty"`
+	Amendments *Vector256       `json:",omitempty"`
 	Majorities []Majority       `json:",omitempty"`
 }
 
@@ -100,13 +101,13 @@ type FeeSettings struct {
 	ReserveIncrement  *uint32          `json:",omitempty"`
 }
 
-type SuspendedPayment struct {
+type Escrow struct {
 	leBase
 	Flags          *LedgerEntryFlag `json:",omitempty"`
-	Account        *Account         `json:",omitempty"`
-	Destination    *Account         `json:",omitempty"`
+	Account        Account          `json:",omitempty"`
+	Destination    Account          `json:",omitempty"`
 	Amount         Amount           `json:",omitempty"`
-	Digest         *Hash256         `json:",omitempty"`
+	Condition      *VariableLength  `json:",omitempty"`
 	CancelAfter    *uint32          `json:",omitempty"`
 	FinishAfter    *uint32          `json:",omitempty"`
 	SourceTag      *uint32          `json:",omitempty"`
@@ -140,15 +141,18 @@ type Ticket struct {
 
 type PayChannel struct {
 	leBase
-	Account     Account   `json:",omitempty"`
-	Destination Account   `json:",omitempty"`
-	Amount      Amount    `json:",omitempty"`
-	Balance     Amount    `json:",omitempty"`
-	PublicKey   PublicKey `json:",omitempty"`
-	SettleDelay uint32    `json:",omitempty"`
-	OwnerNode   uint64    `json:",omitempty"`
-	Expiration  uint32    `json:",omitempty"`
-	CancelAfter uint32    `json:",omitempty"`
+	Flags          *LedgerEntryFlag `json:",omitempty"`
+	Account        *Account         `json:",omitempty"`
+	Destination    *Account         `json:",omitempty"`
+	Amount         *Amount          `json:",omitempty"`
+	Balance        *Amount          `json:",omitempty"`
+	PublicKey      *PublicKey       `json:",omitempty"`
+	SettleDelay    *uint32          `json:",omitempty"`
+	OwnerNode      *NodeIndex       `json:",omitempty"`
+	Expiration     *uint32          `json:",omitempty"`
+	CancelAfter    *uint32          `json:",omitempty"`
+	DestinationTag *uint32          `json:",omitempty"`
+	SourceTag      *uint32          `json:",omitempty"`
 }
 
 func (a *AccountRoot) Affects(account Account) bool {
@@ -162,7 +166,7 @@ func (d *Directory) Affects(account Account) bool    { return false }
 func (l *LedgerHashes) Affects(account Account) bool { return false }
 func (a *Amendments) Affects(account Account) bool   { return false }
 func (f *FeeSettings) Affects(account Account) bool  { return false }
-func (s *SuspendedPayment) Affects(account Account) bool {
+func (s *Escrow) Affects(account Account) bool {
 	return s.Account.Equals(account) || s.Destination.Equals(account)
 }
 func (s *SignerList) Affects(account Account) bool {

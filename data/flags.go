@@ -48,8 +48,12 @@ const (
 	TxClearFreeze   TransactionFlag = 0x00200000
 
 	// EnableAmendments flags
-	TxGotMajority  = 0x00010000
-	TxLostMajority = 0x00020000
+	TxGotMajority  TransactionFlag = 0x00010000
+	TxLostMajority TransactionFlag = 0x00020000
+
+	// PaymentChannelClaim flags
+	TxRenew TransactionFlag = 0x00010000
+	TxClose TransactionFlag = 0x00020000
 )
 
 // Ledger entry flags
