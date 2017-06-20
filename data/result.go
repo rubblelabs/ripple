@@ -39,7 +39,7 @@ const (
 	tecNO_LINE_REDUNDANT
 	tecPATH_DRY
 	tecUNFUNDED
-	tecMASTER_DISABLED
+	tecNO_ALTERNATIVE_KEY
 	tecNO_REGULAR_KEY
 	tecOWNERS
 	tecNO_ISSUER
@@ -55,6 +55,8 @@ const (
 	tecDST_TAG_NEEDED
 	tecINTERNAL
 	tecOVERSIZE
+	tecCRYPTOCONDITION_ERROR
+	tecINVARIANT_FAILED
 )
 
 const (
@@ -111,6 +113,7 @@ const (
 	temBAD_SIGNER
 	temBAD_QUORUM
 	temBAD_WEIGHT
+	temBAD_TICK_SIZE
 	temUNCERTAIN
 	temUNKNOWN
 )
@@ -146,6 +149,7 @@ const (
 	tefBAD_QUORUM
 	tefNOT_MULTI_SIGNING
 	tefBAD_AUTH_MASTER
+	tefINVARIANT_FAILED
 )
 const (
 	// -99 .. -1: R Retry (sequence too high, no funds for txn fee, originating account non-existent)
@@ -186,7 +190,7 @@ var resultNames = map[TransactionResult]struct {
 	tecNO_LINE_REDUNDANT:      {"tecNO_LINE_REDUNDANT", "Can't set non-existant line to default."},
 	tecPATH_DRY:               {"tecPATH_DRY", "Path could not send partial amount."},
 	tecPATH_PARTIAL:           {"tecPATH_PARTIAL", "Path could not send full amount."},
-	tecMASTER_DISABLED:        {"tecMASTER_DISABLED", "Master key is disabled."},
+	tecNO_ALTERNATIVE_KEY:     {"tecNO_ALTERNATIVE_KEY", "The operation would remove the ability to sign transactions with the account."},
 	tecNO_REGULAR_KEY:         {"tecNO_REGULAR_KEY", "Regular key is not set."},
 	tecUNFUNDED:               {"tecUNFUNDED", "One of _ADD, _OFFER, or _SEND. Deprecated."},
 	tecUNFUNDED_ADD:           {"tecUNFUNDED_ADD", "Insufficient XRP balance for WalletAdd."},
@@ -205,6 +209,8 @@ var resultNames = map[TransactionResult]struct {
 	tecNEED_MASTER_KEY:        {"tecNEED_MASTER_KEY", "The operation requires the use of the Master Key."},
 	tecDST_TAG_NEEDED:         {"tecDST_TAG_NEEDED", "A destination tag is required."},
 	tecINTERNAL:               {"tecINTERNAL", "An internal error has occurred during processing."},
+	tecCRYPTOCONDITION_ERROR:  {"tecCRYPTOCONDITION_ERROR", "Malformed, invalid, or mismatched conditional or fulfillment."},
+	tecINVARIANT_FAILED:       {"tecINVARIANT_FAILED", "One or more invariants for the transaction were not satisfied."},
 	tecOVERSIZE:               {"tecOVERSIZE", "Object exceeded serialization limits"},
 	tefFAILURE:                {"tefFAILURE", "Failed to apply."},
 	tefALREADY:                {"tefALREADY", "The exact transaction was already in this ledger."},
@@ -225,6 +231,7 @@ var resultNames = map[TransactionResult]struct {
 	tefMASTER_DISABLED:        {"tefMASTER_DISABLED", "Master key is disabled."},
 	tefMAX_LEDGER:             {"tefMAX_LEDGER", "Ledger sequence too high."},
 	tefBAD_AUTH_MASTER:        {"tefBAD_AUTH_MASTER", "Auth for unclaimed account needs correct master key."},
+	tefINVARIANT_FAILED:       {"tefINVARIANT_FAILED", "Fee claim violated invariants for the transaction."},
 	telLOCAL_ERROR:            {"telLOCAL_ERROR", "Local failure."},
 	telBAD_DOMAIN:             {"telBAD_DOMAIN", "Domain too long."},
 	telBAD_PATH_COUNT:         {"telBAD_PATH_COUNT", "Malformed: Too many paths."},
@@ -260,6 +267,8 @@ var resultNames = map[TransactionResult]struct {
 	temRIPPLE_EMPTY:           {"temRIPPLE_EMPTY", "PathSet with no paths."},
 	temUNCERTAIN:              {"temUNCERTAIN", "In process of determining result. Never returned."},
 	temUNKNOWN:                {"temUNKNOWN", "The transactions requires logic not implemented yet."},
+	temDISABLED:               {"temDISABLED", "The transaction requires logic that is currently disabled."},
+	temBAD_TICK_SIZE:          {"temBAD_TICK_SIZE", "Malformed: Tick size out of range."},
 	terRETRY:                  {"terRETRY", "Retry transaction."},
 	terFUNDS_SPENT:            {"terFUNDS_SPENT", "Can't set password, password set funds already spent."},
 	terINSUF_FEE_B:            {"terINSUF_FEE_B", "Account balance can't pay fee."},
