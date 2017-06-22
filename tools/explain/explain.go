@@ -71,7 +71,7 @@ func explain(txm *data.TransactionWithMetaData, flag terminal.Flag) {
 		}
 	}
 	if !*trades {
-		trades, err := txm.Trades()
+		trades, err := data.NewTradeSlice(txm)
 		checkErr(err)
 		for _, trade := range trades {
 			terminal.Println(trade, flag|terminal.Indent)

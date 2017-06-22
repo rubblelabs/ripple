@@ -214,8 +214,8 @@ func newBundle(value interface{}, flag Flag) (*bundle, error) {
 	case data.Trade:
 		return &bundle{
 			color:  tradeStyle,
-			format: "Trade: %-34s => %-34s %-18s %60s => %-60s",
-			values: []interface{}{v.Seller, v.Buyer, v.Price(), v.Paid, v.Got},
+			format: "Trade: %-34s => %-34s  %22.8f  %60s =>  %-60s",
+			values: []interface{}{v.Giver, v.Taker, v.Rate(), v.Got, v.Paid},
 			flag:   flag,
 		}, nil
 	case data.Balance:
@@ -240,7 +240,7 @@ func newBundle(value interface{}, flag Flag) (*bundle, error) {
 		return &bundle{
 			color:  offerStyle,
 			format: "Offer: %34s %8d %s %25s %62s %62s",
-			values: []interface{}{v.Account, v.Sequence, BoolSymbol(v.Expiration != nil && *v.Expiration > 0), v.Quality, v.TakerPays, v.TakerGets},
+			values: []interface{}{v.Account, v.Sequence, BoolSymbol(v.Expiration != nil && *v.Expiration > 0), v.Ratio(), v.TakerPays, v.TakerGets},
 			flag:   flag,
 		}, nil
 	case data.AccountOffer:

@@ -5,22 +5,6 @@ import (
 	"sort"
 )
 
-// Trade
-type Trade struct {
-	Buyer  Account
-	Seller Account
-	Paid   Amount
-	Got    Amount
-}
-
-func (t Trade) Price() *Value {
-	price, err := t.Paid.Value.Ratio(*t.Got.Value)
-	if err != nil {
-		return nil
-	}
-	return price
-}
-
 // Transfer is a directional representation of a RippleState or AccountRoot balance change.
 // Payments and OfferCreates lead to the creation of zero or more Transfers.
 //
@@ -50,20 +34,11 @@ type Balance struct {
 	Currency Currency
 }
 
-// func (t Trade) String() string {
-// 	return fmt.Sprintf("%-34s=>%-34s %18s@%18s", t.Currency, t.Issuer, t.Seller, t.Buyer, t.Bought.Value, t.Price())
-// }
-
 func (b Balance) String() string {
 	return fmt.Sprintf("Account: %-34s  Currency: %s Balance: %20s Change: %20s", b.Account, b.Currency, b.Balance, b.Change)
 }
 
-type TradeSlice []Trade
 type BalanceSlice []Balance
-
-func (s TradeSlice) Len() int           { return len(s) }
-func (s TradeSlice) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
-func (s TradeSlice) Less(i, j int) bool { return s[i].Price().Less(*s[j].Price()) }
 
 func (s BalanceSlice) Len() int      { return len(s) }
 func (s BalanceSlice) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
@@ -78,115 +53,8 @@ func (s BalanceSlice) Less(i, j int) bool {
 	}
 }
 
-func (s *TradeSlice) Add(buyer, seller *Account, paid, got *Amount) {
-	*s = append(*s, Trade{*buyer, *seller, *paid, *got})
-}
-
-func (s TradeSlice) Sum() (*Amount, error) {
-	if len(s) == 0 {
-		return nil, nil
-	}
-	return nil, nil
-	// sum, err := NewAmount(fmt.Sprintf("0/%s/%s", s[0].Currency, s[0].Issuer))
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// for _, trade := range s {
-	// 	if sum.Value, err = sum.Value.Add(trade.Amount); err != nil {
-	// 		return nil, err
-	// 	}
-	// }
-	// return sum, nil
-}
-
 func (s *BalanceSlice) Add(account *Account, balance, change *Value, currency *Currency) {
 	*s = append(*s, Balance{*account, *balance, *change, *currency})
-}
-
-func (txm *TransactionWithMetaData) Trades() (TradeSlice, error) {
-	if txm.GetTransactionType() != OFFER_CREATE && txm.GetTransactionType() != PAYMENT {
-		return nil, nil
-	}
-	var (
-		trades  TradeSlice
-		account = txm.Transaction.GetBase().Account
-	)
-	for _, node := range txm.MetaData.AffectedNodes {
-		var reason = ""
-		switch {
-		case node.CreatedNode != nil && node.CreatedNode.LedgerEntryType == OFFER:
-			// No actual side effect
-		case node.DeletedNode != nil && node.DeletedNode.LedgerEntryType == OFFER:
-			// An OfferCreate specifying previous OfferSequence has no side effect
-			if node.DeletedNode.PreviousFields == nil {
-				// reason = "No side effect"
-				break
-			}
-			// Fully consumed offer
-			var (
-				previous = node.DeletedNode.PreviousFields.(*Offer)
-				final    = node.DeletedNode.FinalFields.(*Offer)
-			)
-			if previous.TakerPays == nil {
-				reason = "Deleted Offer PreviousFields missing TakerPays"
-				break
-			}
-			if final.TakerPays == nil {
-				reason = "Deleted Offer FinalFields missing TakerPays"
-				break
-			}
-			if previous.TakerGets == nil {
-				reason = "Deleted Offer PreviousFields missing TakerGets"
-				break
-			}
-			if final.TakerGets == nil {
-				reason = "Deleted Offer FinalFields missing TakerGets"
-				break
-			}
-			trades.Add(&account, final.Account, previous.TakerPays, previous.TakerGets)
-		case node.ModifiedNode != nil && node.ModifiedNode.LedgerEntryType == OFFER:
-			// No change?
-			if node.ModifiedNode.PreviousFields == nil {
-				reason = "no change"
-				break
-			}
-			// Partially consumed offer
-			var (
-				previous = node.ModifiedNode.PreviousFields.(*Offer)
-				current  = node.ModifiedNode.FinalFields.(*Offer)
-			)
-			if previous.TakerPays == nil {
-				reason = "Modified Offer PreviousFields missing TakerPays"
-				break
-			}
-			if current.TakerPays == nil {
-				reason = "Modified Offer FinalFields missing TakerPays"
-				break
-			}
-			paid, err := previous.TakerPays.Subtract(current.TakerPays)
-			if err != nil {
-				return nil, err
-			}
-			if previous.TakerGets == nil {
-				reason = "Modified Offer PreviousFields missing TakerGets"
-				break
-			}
-			if current.TakerGets == nil {
-				reason = "Modified Offer FinalFields missing TakerGets"
-				break
-			}
-			got, err := previous.TakerGets.Subtract(current.TakerGets)
-			if err != nil {
-				return nil, err
-			}
-			trades.Add(&account, current.Account, paid, got)
-		}
-		if reason != "" {
-			fmt.Println(txm.LedgerSequence, txm.GetHash().String(), reason)
-		}
-	}
-	sort.Sort(trades)
-	return trades, nil
 }
 
 func (txm *TransactionWithMetaData) Balances() (BalanceSlice, error) {

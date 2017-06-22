@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/rubblelabs/ripple/data"
 	"github.com/rubblelabs/ripple/terminal"
 	"github.com/rubblelabs/ripple/websockets"
 )
@@ -19,7 +20,8 @@ func checkErr(err error, quit bool) {
 }
 
 var (
-	host = flag.String("host", "wss://s-east.ripple.com:443", "websockets host to connect to")
+	host     = flag.String("host", "wss://s-east.ripple.com:443", "websockets host to connect to")
+	proposed = flag.Bool("proposed", false, "include proposed transacions")
 )
 
 func main() {
@@ -27,8 +29,7 @@ func main() {
 	r, err := websockets.NewRemote(*host)
 	checkErr(err, true)
 
-	// Subscribe to all streams
-	confirmation, err := r.Subscribe(true, false, true, true)
+	confirmation, err := r.Subscribe(true, !*proposed, *proposed, true)
 	checkErr(err, true)
 	terminal.Println(fmt.Sprint("Subscribed at: ", confirmation.LedgerSequence), terminal.Default)
 
@@ -47,7 +48,7 @@ func main() {
 			for _, path := range msg.Transaction.PathSet() {
 				terminal.Println(path, terminal.DoubleIndent)
 			}
-			trades, err := msg.Transaction.Trades()
+			trades, err := data.NewTradeSlice(&msg.Transaction)
 			checkErr(err, false)
 			for _, trade := range trades {
 				terminal.Println(trade, terminal.DoubleIndent)

@@ -36,7 +36,7 @@ func (a Asset) String() string {
 	if a.IsNative() {
 		return a.Currency
 	}
-	return a.Currency + "/" + a.Issuer
+	return fmt.Sprintf("%s/%34s", a.Currency, a.Issuer)
 }
 
 type OrderBookOffer struct {
