@@ -214,7 +214,6 @@ type highLowFunc func(balance, limit, limitPeer *Amount, noRipple, noRipplePeer 
 
 func highLow(account Account, rs *RippleState, f highLowFunc) bool {
 	high, low := account.Equals(rs.HighLimit.Issuer), account.Equals(rs.LowLimit.Issuer)
-	log.Println("highlow", high, low, account)
 	switch {
 	case high == low:
 		return false
