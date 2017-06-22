@@ -35,7 +35,7 @@ func NewAmount(v interface{}) (*Amount, error) {
 	case string:
 		var err error
 		amount := new(Amount)
-		parts := strings.Split(n, "/")
+		parts := strings.Split(strings.TrimSpace(n), "/")
 		native := false
 		switch {
 		case len(parts) == 1:
