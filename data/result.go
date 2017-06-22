@@ -300,7 +300,7 @@ func (r TransactionResult) Human() string {
 }
 
 func (r TransactionResult) Success() bool {
-	return r == tesSUCCESS || r == tecCLAIM
+	return r == tesSUCCESS
 }
 
 func (r TransactionResult) Queued() bool {
