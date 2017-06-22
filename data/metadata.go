@@ -35,7 +35,7 @@ type MetaData struct {
 	AffectedNodes     NodeEffects
 	TransactionIndex  uint32
 	TransactionResult TransactionResult
-	DeliveredAmount   *Amount `json:",omitempty"`
+	DeliveredAmount   *Amount `json:"delivered_amount,omitempty"`
 }
 
 type TransactionSlice []*TransactionWithMetaData
