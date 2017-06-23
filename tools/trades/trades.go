@@ -48,6 +48,7 @@ func main() {
 		}
 		switch msg := msg.(type) {
 		case *websockets.TransactionStreamMsg:
+			msg.Transaction.LedgerSequence = msg.LedgerSequence
 			trades, err := data.NewTradeSlice(&msg.Transaction)
 			checkErr(err, false)
 			if filter != nil {
