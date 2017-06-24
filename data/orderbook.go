@@ -258,7 +258,6 @@ func (s *AccountLineSlice) Add(account Account, rs *RippleState) bool {
 func (s AccountLineSlice) Update(account Account, rs *RippleState) bool {
 	var update = func(balance, limit, limitPeer *Amount, noripple, noRipplePeer bool, qualityIn, qualityOut uint32) bool {
 		i := s.Find(limitPeer.Issuer, limitPeer.Currency)
-		log.Println("Update:", account, limitPeer.Issuer, limitPeer.Currency, len(s), i)
 		if i == len(s) || !s[i].Account.Equals(limitPeer.Issuer) || !s[i].Currency.Equals(limitPeer.Currency) {
 			return false
 		}
