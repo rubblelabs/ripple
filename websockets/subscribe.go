@@ -33,10 +33,19 @@ type TransactionStreamMsg struct {
 
 // Fields from subscribed server status stream messages
 type ServerStreamMsg struct {
-	Status     string `json:"server_status"`
-	LoadBase   int    `json:"load_base"`
-	LoadFactor int    `json:"load_factor"`
-	HostID     string `json:"hostid"`
+	Status                  string `json:"server_status"`
+	BaseFee                 uint64 `json:"base_fee"`
+	LoadBase                uint64 `json:"load_base"`
+	LoadFactor              uint64 `json:"load_factor"`
+	LoadFactorFeeEscalation uint64 `json:"load_factor_fee_escalation"`
+	LoadFactorFeeQueue      uint64 `json:"load_factor_fee_queue"`
+	LoadFactorFeeReference  uint64 `json:"load_factor_fee_reference"`
+	LoadFactorServer        uint64 `json:"load_factor_server"`
+	HostID                  string `json:"hostid"`
+}
+
+func (s *ServerStreamMsg) TransactionCost() uint64 {
+	return (s.BaseFee * s.LoadFactor) / s.LoadBase
 }
 
 // Map message types to the appropriate data structure
