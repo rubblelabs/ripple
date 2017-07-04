@@ -52,11 +52,11 @@ func newTrade(txm *TransactionWithMetaData, i int) (*Trade, error) {
 }
 
 func (t *Trade) Rate() float64 {
-	return t.Paid.Ratio(*t.Got).Float()
+	return t.Got.Ratio(*t.Paid).Float()
 }
 
 func (t Trade) String() string {
-	return fmt.Sprintf("%8d %3d %22.8f %22.8f %-38s %-38s %34s %34s %11s %s", t.LedgerSequence, t.TransactionIndex, t.Paid.Float(), t.Rate(), t.Got.Asset(), t.Paid.Asset(), t.Taker, t.Giver, t.TransactionType, t.Op)
+	return fmt.Sprintf("%8d %3d %22.8f %22.8f %-38s %22.8f %-38s %34s %34s %11s %s", t.LedgerSequence, t.TransactionIndex, t.Rate(), t.Paid.Float(), t.Paid.Asset(), t.Got.Float(), t.Got.Asset(), t.Taker, t.Giver, t.TransactionType, t.Op)
 
 }
 
