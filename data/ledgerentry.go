@@ -171,15 +171,15 @@ func (s *Escrow) Affects(account Account) bool {
 }
 func (s *SignerList) Affects(account Account) bool {
 	for _, entry := range s.SignerEntries {
-		if entry.Account.Equals(account) {
+		if entry.Account != nil && entry.Account.Equals(account) {
 			return true
 		}
 	}
 	return false
 }
-func (t *Ticket) Affects(account Account) bool { return t.Account.Equals(account) }
+func (t *Ticket) Affects(account Account) bool { return t.Account != nil && t.Account.Equals(account) }
 func (p *PayChannel) Affects(account Account) bool {
-	return p.Account.Equals(account) || p.Destination.Equals(account)
+	return (p.Account != nil && p.Account.Equals(account)) || (p.Destination != nil && p.Destination.Equals(account))
 }
 
 func (le *leBase) GetType() string                     { return ledgerEntryNames[le.LedgerEntryType] }
