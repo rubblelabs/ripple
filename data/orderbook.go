@@ -2,7 +2,6 @@ package data
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"strings"
 )
@@ -240,7 +239,6 @@ func (s *AccountLineSlice) Add(account Account, rs *RippleState) bool {
 			QualityOut:   qualityOut,
 		}
 		i := s.Find(limitPeer.Issuer, limitPeer.Currency)
-		log.Println("Add", account, limitPeer.Issuer, limitPeer.Currency, len(*s), i)
 		switch {
 		case i == len(*s):
 			*s = append(*s, line)
@@ -274,7 +272,6 @@ func (s AccountLineSlice) Update(account Account, rs *RippleState) bool {
 func (s *AccountLineSlice) Delete(account Account, rs *RippleState) bool {
 	var del = func(balance, limit, limitPeer *Amount, noripple, noRipplePeer bool, qualityIn, qualityOut uint32) bool {
 		i := s.Find(limitPeer.Issuer, limitPeer.Currency)
-		log.Println("Delete:", account, limitPeer.Issuer, limitPeer.Currency, len(*s), i)
 		if i < len(*s) && (*s)[i].Account.Equals(limitPeer.Issuer) && (*s)[i].Currency.Equals(limitPeer.Currency) {
 			*s = append((*s)[:i], (*s)[i+1:]...)
 			return true
