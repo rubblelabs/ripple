@@ -31,6 +31,11 @@ func (a *Asset) IsNative() bool {
 	return a.Currency == "XRP"
 }
 
+func (a *Asset) Matches(amount *Amount) bool {
+	return (a.IsNative() && amount.IsNative()) ||
+		(a.Currency == amount.Currency.String() && a.Issuer == amount.Issuer.String())
+}
+
 func (a Asset) String() string {
 	if a.IsNative() {
 		return a.Currency
@@ -65,10 +70,7 @@ func (s AccountOfferSlice) GetSequences(pays, gets *Asset) []uint32 {
 	// TODO: improve performance
 	var sequences []uint32
 	for i := range s {
-		if s[i].TakerPays.Currency.String() == pays.Currency &&
-			s[i].TakerPays.Issuer.String() == pays.Issuer &&
-			s[i].TakerGets.Currency.String() == gets.Currency &&
-			s[i].TakerGets.Issuer.String() == gets.Issuer {
+		if pays.Matches(&s[i].TakerPays) && gets.Matches(&s[i].TakerGets) {
 			sequences = append(sequences, s[i].Sequence)
 		}
 	}
@@ -207,6 +209,13 @@ func (s AccountLineSlice) Find(account Account, currency Currency) int {
 			return s[i].Account.Compare(account) >= 0
 		}
 	})
+}
+
+func (s AccountLineSlice) Get(account Account, currency Currency) *AccountLine {
+	if i := s.Find(account, currency); i < len(s) && s[i].Account.Equals(account) && s[i].Currency.Equals(currency) {
+		return &s[i]
+	}
+	return nil
 }
 
 type highLowFunc func(balance, limit, limitPeer *Amount, noRipple, noRipplePeer bool, qualityIn, qualityOut uint32) bool
