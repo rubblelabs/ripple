@@ -97,7 +97,7 @@ func (s TradeSlice) Less(i, j int) bool {
 				if s[i].Got.Issuer.Equals(s[j].Got.Issuer) {
 					if s[i].Paid.Currency.Equals(s[j].Paid.Currency) {
 						if s[i].Paid.Issuer.Equals(s[j].Paid.Issuer) {
-							return s[i].Rate() < s[j].Rate()
+							return s[i].Rate() > s[j].Rate()
 						}
 						return s[i].Paid.Issuer.Less(s[j].Paid.Issuer)
 					}
