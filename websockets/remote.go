@@ -169,10 +169,10 @@ func (r *Remote) Tx(hash data.Hash256) (*TxResult, error) {
 	return cmd.Result, nil
 }
 
-func (r *Remote) accountTx(account data.Account, c chan *data.TransactionWithMetaData, pageSize int) {
+func (r *Remote) accountTx(account data.Account, c chan *data.TransactionWithMetaData, pageSize int, minLedger, maxLedger int64) {
 	defer close(c)
-	cmd := newAccountTxCommand(account, pageSize, nil)
-	for ; ; cmd = newAccountTxCommand(account, pageSize, cmd.Result.Marker) {
+	cmd := newAccountTxCommand(account, pageSize, nil, minLedger, maxLedger)
+	for ; ; cmd = newAccountTxCommand(account, pageSize, cmd.Result.Marker, minLedger, maxLedger) {
 		r.outgoing <- cmd
 		<-cmd.Ready
 		if cmd.CommandError != nil {
@@ -188,10 +188,17 @@ func (r *Remote) accountTx(account data.Account, c chan *data.TransactionWithMet
 	}
 }
 
-// Asynchronously retrieve all transactions for an account
-func (r *Remote) AccountTx(account data.Account, pageSize int) chan *data.TransactionWithMetaData {
+// Retrieve all transactions for an account via
+// https://ripple.com/build/rippled-apis/#account-tx. Will call
+// `account_tx` multiple times, if a marker is returned.  Transactions
+// are returned asynchonously to the channel returned by this
+// function.
+//
+// Use minLedger -1 for the earliest ledger available.
+// Use maxLedger -1 for the most recent validated ledger.
+func (r *Remote) AccountTx(account data.Account, pageSize int, minLedger, maxLedger int64) chan *data.TransactionWithMetaData {
 	c := make(chan *data.TransactionWithMetaData)
-	go r.accountTx(account, c, pageSize)
+	go r.accountTx(account, c, pageSize, minLedger, maxLedger)
 	return c
 }
 
