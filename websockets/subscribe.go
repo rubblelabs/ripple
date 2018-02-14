@@ -53,6 +53,7 @@ var streamMessageFactory = map[string]func() interface{}{
 	"ledgerClosed": func() interface{} { return &LedgerStreamMsg{} },
 	"transaction":  func() interface{} { return &TransactionStreamMsg{} },
 	"serverStatus": func() interface{} { return &ServerStreamMsg{} },
+	"path_find":    func() interface{} { return &PathFindCreateResult{} },
 }
 
 type SubscribeCommand struct {
