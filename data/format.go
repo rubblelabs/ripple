@@ -159,6 +159,7 @@ var encodings = map[enc]string{
 	enc{ST_HASH256, 20}: "TicketID",
 	enc{ST_HASH256, 21}: "Digest",
 	enc{ST_HASH256, 22}: "Channel",
+	enc{ST_HASH256, 23}: "CheckID", // What is the "23" here???
 	// currency amount (common)
 	enc{ST_AMOUNT, 1}:  "Amount",
 	enc{ST_AMOUNT, 2}:  "Balance",
