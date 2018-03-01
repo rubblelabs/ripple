@@ -7,6 +7,7 @@ type LedgerEntryType uint16
 type TransactionType uint16
 
 const (
+	// LedgerEntryType values come from rippled's "LedgerFormats.h"
 	SIGNER_LIST   LedgerEntryType = 0x53 // 'S'
 	TICKET        LedgerEntryType = 0x54 // 'T'
 	ACCOUNT_ROOT  LedgerEntryType = 0x61 // 'a'
@@ -18,7 +19,9 @@ const (
 	FEE_SETTINGS  LedgerEntryType = 0x73 // 's'
 	ESCROW        LedgerEntryType = 0x75 // 'u'
 	PAY_CHANNEL   LedgerEntryType = 0x78 // 'x'
+	CHECK         LedgerEntryType = 0x63 // 'C'
 
+	// TransactionType values come from rippled's "TxFormats.h"
 	PAYMENT         TransactionType = 0
 	ESCROW_CREATE   TransactionType = 1
 	ESCROW_FINISH   TransactionType = 2
@@ -33,6 +36,9 @@ const (
 	PAYCHAN_CREATE  TransactionType = 13
 	PAYCHAN_FUND    TransactionType = 14
 	PAYCHAN_CLAIM   TransactionType = 15
+	CHECK_CREATE    TransactionType = 16
+	CHECK_CASH      TransactionType = 17
+	CHECK_CANCEL    TransactionType = 18
 	TRUST_SET       TransactionType = 20
 	AMENDMENT       TransactionType = 100
 	SET_FEE         TransactionType = 101
@@ -54,6 +60,7 @@ var LedgerEntryFactory = [...]func() LedgerEntry{
 	SIGNER_LIST:   func() LedgerEntry { return &SignerList{leBase: leBase{LedgerEntryType: SIGNER_LIST}} },
 	TICKET:        func() LedgerEntry { return &Ticket{leBase: leBase{LedgerEntryType: TICKET}} },
 	PAY_CHANNEL:   func() LedgerEntry { return &PayChannel{leBase: leBase{LedgerEntryType: PAY_CHANNEL}} },
+	CHECK:         func() LedgerEntry { return &Check{leBase: leBase{LedgerEntryType: CHECK}} },
 }
 
 var TxFactory = [...]func() Transaction{
@@ -72,6 +79,9 @@ var TxFactory = [...]func() Transaction{
 	PAYCHAN_CREATE:  func() Transaction { return &PaymentChannelCreate{TxBase: TxBase{TransactionType: PAYCHAN_CREATE}} },
 	PAYCHAN_FUND:    func() Transaction { return &PaymentChannelFund{TxBase: TxBase{TransactionType: PAYCHAN_FUND}} },
 	PAYCHAN_CLAIM:   func() Transaction { return &PaymentChannelClaim{TxBase: TxBase{TransactionType: PAYCHAN_CLAIM}} },
+	CHECK_CREATE:    func() Transaction { return &CheckCreate{TxBase: TxBase{TransactionType: CHECK_CREATE}} },
+	CHECK_CASH:      func() Transaction { return &CheckCash{TxBase: TxBase{TransactionType: CHECK_CASH}} },
+	CHECK_CANCEL:    func() Transaction { return &CheckCancel{TxBase: TxBase{TransactionType: CHECK_CANCEL}} },
 }
 
 var ledgerEntryNames = [...]string{
@@ -86,6 +96,7 @@ var ledgerEntryNames = [...]string{
 	SIGNER_LIST:   "SignerList",
 	TICKET:        "Ticket",
 	PAY_CHANNEL:   "PayChannel",
+	CHECK:         "Check",
 }
 
 var ledgerEntryTypes = map[string]LedgerEntryType{
@@ -100,6 +111,7 @@ var ledgerEntryTypes = map[string]LedgerEntryType{
 	"SignerList":    SIGNER_LIST,
 	"Ticket":        TICKET,
 	"PayChannel":    PAY_CHANNEL,
+	"Check":         CHECK,
 }
 
 var txNames = [...]string{
@@ -118,6 +130,9 @@ var txNames = [...]string{
 	PAYCHAN_CREATE:  "PaymentChannelCreate",
 	PAYCHAN_FUND:    "PaymentChannelFund",
 	PAYCHAN_CLAIM:   "PaymentChannelClaim",
+	CHECK_CREATE:    "CheckCreate",
+	CHECK_CASH:      "CheckCash",
+	CHECK_CANCEL:    "CheckCancel",
 }
 
 var txTypes = map[string]TransactionType{
@@ -136,6 +151,9 @@ var txTypes = map[string]TransactionType{
 	"PaymentChannelCreate": PAYCHAN_CREATE,
 	"PaymentChannelFund":   PAYCHAN_FUND,
 	"PaymentChannelClaim":  PAYCHAN_CLAIM,
+	"CheckCreate":          CHECK_CREATE,
+	"CheckCash":            CHECK_CASH,
+	"CheckCancel":          CHECK_CANCEL,
 }
 
 var HashableTypes []string

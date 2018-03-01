@@ -275,6 +275,7 @@ func (l *LedgerEntryType) UnmarshalText(b []byte) error {
 		*l = leType
 		return nil
 	}
+	// If here, add tx type to TxFactory and TxTypes in factory.go
 	return fmt.Errorf("Unknown LedgerEntryType: %s", string(b))
 }
 
@@ -287,6 +288,7 @@ func (t *TransactionType) UnmarshalText(b []byte) error {
 		*t = txType
 		return nil
 	}
+	// If here, add tx type to TxFactory and TxTypes in factory.go
 	return fmt.Errorf("Unknown TransactionType: %s", string(b))
 }
 
