@@ -86,6 +86,7 @@ const (
 	ST_VECTOR256 uint8 = 19
 )
 
+// See rippled's SField.cpp for the strings and corresponding encoding values.
 var encodings = map[enc]string{
 	// 16-bit unsigned integers (common)
 	enc{ST_UINT16, 1}: "LedgerEntryType",
@@ -159,6 +160,7 @@ var encodings = map[enc]string{
 	enc{ST_HASH256, 20}: "TicketID",
 	enc{ST_HASH256, 21}: "Digest",
 	enc{ST_HASH256, 22}: "Channel",
+	enc{ST_HASH256, 24}: "CheckID",
 	// currency amount (common)
 	enc{ST_AMOUNT, 1}:  "Amount",
 	enc{ST_AMOUNT, 2}:  "Balance",

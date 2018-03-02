@@ -130,6 +130,33 @@ type PaymentChannelClaim struct {
 	PublicKey *PublicKey      `json:",omitempty"`
 }
 
+// CheckCreate, CheckCash, CheckCancel enabled by amendment 157D2D480E006395B76F948E3E07A45A05FE10230D88A7993C71F97AE4B1F2D1
+
+// https://ripple.com/build/transactions/#checkcreate
+type CheckCreate struct {
+	TxBase
+	Destination    Account
+	SendMax        Amount
+	DestinationTag *uint32  `json:",omitempty"`
+	Expiration     *uint32  `json:",omitempty"`
+	InvoiceID      *Hash256 `json:",omitempty"`
+}
+
+// https://ripple.com/build/transactions/#checkcash
+// Must include one of Amount or DeliverMin
+type CheckCash struct {
+	TxBase
+	CheckID    Hash256
+	Amount     *Amount `json:",omitempty"`
+	DeliverMin *Amount `json:",omitempty"`
+}
+
+// https://ripple.com/build/transactions/#checkcancel
+type CheckCancel struct {
+	TxBase
+	CheckID Hash256
+}
+
 type TicketCreate struct {
 	Target     *Account `json:",omitempty"`
 	Expiration *uint32  `json:",omitempty"`

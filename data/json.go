@@ -3,6 +3,7 @@ package data
 // Evil things happen here. Rippled needs a V2 API...
 
 import (
+	"bytes"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -52,11 +53,11 @@ var (
 
 // This function is a horrow show, demonstrating the huge
 // inconsistencies in the presentation of a transaction
-// by the rippled API
+// by the rippled API.  Indeed.
 func (txm *TransactionWithMetaData) UnmarshalJSON(b []byte) error {
-
 	if txmSplitTypeRegex.Match(b) {
 		// Transaction has the form {"tx":{}, "meta":{}, "validated": true}
+		// i.e. returned from `tx` command.
 		var split struct {
 			Tx   json.RawMessage
 			Meta json.RawMessage
@@ -80,6 +81,12 @@ func (txm *TransactionWithMetaData) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, txm.Transaction); err != nil {
 		return err
 	}
+
+	// Transaction has the form {...fields..., "metaData":{...}}
+	// (no "validated" or ledger sequence or id)
+	// i.e. it comes from `ledger` command.
+	// Further, "metaData" for payments has "DeliveredAmount" instead of the expected "delivered_amount", so clean that up first.
+	b = bytes.Replace(b, []byte("\"DeliveredAmount\":"), []byte("\"delivered_amount\":"), 1)
 
 	// Parse the rest in one shot
 	extract := &struct {
@@ -268,6 +275,7 @@ func (l *LedgerEntryType) UnmarshalText(b []byte) error {
 		*l = leType
 		return nil
 	}
+	// If here, add tx type to TxFactory and TxTypes in factory.go
 	return fmt.Errorf("Unknown LedgerEntryType: %s", string(b))
 }
 
@@ -280,6 +288,7 @@ func (t *TransactionType) UnmarshalText(b []byte) error {
 		*t = txType
 		return nil
 	}
+	// If here, add tx type to TxFactory and TxTypes in factory.go
 	return fmt.Errorf("Unknown TransactionType: %s", string(b))
 }
 

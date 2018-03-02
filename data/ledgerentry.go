@@ -155,6 +155,15 @@ type PayChannel struct {
 	SourceTag      *uint32          `json:",omitempty"`
 }
 
+type Check struct {
+	leBase
+	Account     *Account `json:",omitempty"`
+	Destination *Account `json:",omitempty"`
+	Expiration  *uint32  `json:",omitempty"`
+	SendMax     *Amount  `json:",omitempty"`
+	Sequence    *uint32  `json:",omitempty"`
+}
+
 func (a *AccountRoot) Affects(account Account) bool {
 	return a.Account != nil && a.Account.Equals(account)
 }
@@ -179,6 +188,9 @@ func (s *SignerList) Affects(account Account) bool {
 }
 func (t *Ticket) Affects(account Account) bool { return t.Account != nil && t.Account.Equals(account) }
 func (p *PayChannel) Affects(account Account) bool {
+	return (p.Account != nil && p.Account.Equals(account)) || (p.Destination != nil && p.Destination.Equals(account))
+}
+func (p *Check) Affects(account Account) bool {
 	return (p.Account != nil && p.Account.Equals(account)) || (p.Destination != nil && p.Destination.Equals(account))
 }
 
