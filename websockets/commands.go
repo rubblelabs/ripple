@@ -104,7 +104,8 @@ type TxCommand struct {
 
 type TxResult struct {
 	data.TransactionWithMetaData
-	Validated bool `json:"validated"`
+	Date      data.RippleTime `json:"date"`
+	Validated bool            `json:"validated"`
 }
 
 // A shim to populate the Validated field before passing
@@ -113,6 +114,10 @@ func (txr *TxResult) UnmarshalJSON(b []byte) error {
 	var extract map[string]interface{}
 	if err := json.Unmarshal(b, &extract); err != nil {
 		return err
+	}
+	date, ok := extract["date"]
+	if ok {
+		txr.Date = *data.NewRippleTime(uint32(date.(float64)))
 	}
 	// "validated" can be absent, when tx result is provisional.
 	validated, ok := extract["validated"]
