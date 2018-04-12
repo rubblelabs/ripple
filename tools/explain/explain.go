@@ -118,7 +118,7 @@ func main() {
 		account, err := data.NewAccountFromAddress(matches[3])
 		checkErr(err)
 		fmt.Println("Getting transactions for: ", account.String())
-		for txm := range r.AccountTx(*account, *pageSize) {
+		for txm := range r.AccountTx(*account, *pageSize, -1, -1) {
 			explain(txm, terminal.ShowLedgerSequence)
 		}
 	case len(matches[4]) > 0:
