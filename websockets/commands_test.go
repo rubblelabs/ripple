@@ -83,6 +83,7 @@ func (s *MessagesSuite) TestTxResponse(c *C) {
 	c.Assert(msg.Type, Equals, "response")
 
 	// Result fields
+	c.Assert(msg.Result.Date.String(), Equals, "2014-May-30 13:11:50")
 	c.Assert(msg.Result.Validated, Equals, true)
 	c.Assert(msg.Result.MetaData.AffectedNodes, HasLen, 4)
 	c.Assert(msg.Result.MetaData.TransactionResult.String(), Equals, "tesSUCCESS")

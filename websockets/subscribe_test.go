@@ -106,8 +106,8 @@ func (s *MessagesSuite) TestServerSubscribeResponse(c *C) {
 
 	// Result fields
 	c.Assert(msg.Result.Status, Equals, "full")
-	c.Assert(msg.Result.LoadBase, Equals, 256)
-	c.Assert(msg.Result.LoadFactor, Equals, 256)
+	c.Assert(msg.Result.LoadBase, Equals, uint64(256))
+	c.Assert(msg.Result.LoadFactor, Equals, uint64(256))
 }
 
 func (s *MessagesSuite) TestServerStreamMsg(c *C) {
@@ -115,8 +115,8 @@ func (s *MessagesSuite) TestServerStreamMsg(c *C) {
 	readResponseFile(c, msg, "testdata/server_stream.json")
 
 	c.Assert(msg.Status, Equals, "syncing")
-	c.Assert(msg.LoadBase, Equals, 256)
-	c.Assert(msg.LoadFactor, Equals, 256)
+	c.Assert(msg.LoadBase, Equals, uint64(256))
+	c.Assert(msg.LoadFactor, Equals, uint64(256))
 }
 
 func (s *MessagesSuite) TestProposedTransactionStreamMsg(c *C) {
