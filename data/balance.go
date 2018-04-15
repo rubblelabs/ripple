@@ -75,7 +75,7 @@ func (txm *TransactionWithMetaData) Balances() (BalanceSlice, error) {
 			case RIPPLE_STATE:
 				// New trust line
 				state := node.CreatedNode.NewFields.(*RippleState)
-				balances.Add(&account, &zeroNonNative, state.Balance.Value, &state.Balance.Currency)
+				balances.Add(&state.HighLimit.Issuer, &zeroNonNative, state.Balance.Value, &state.Balance.Currency)
 			}
 		case node.DeletedNode != nil:
 			switch node.DeletedNode.LedgerEntryType {
