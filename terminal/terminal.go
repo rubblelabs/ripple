@@ -221,8 +221,8 @@ func newBundle(value interface{}, flag Flag) (*bundle, error) {
 	case data.Balance:
 		return &bundle{
 			color:  balanceStyle,
-			format: "Balance: %-34s  Currency: %s Balance: %20s Change: %20s",
-			values: []interface{}{v.Account, v.Currency, v.Balance, v.Change},
+			format: "CounterParty: %-34s  Currency: %s Balance: %20s Change: %20s",
+			values: []interface{}{v.CounterParty, v.Currency, v.Balance, v.Change},
 			flag:   flag,
 		}, nil
 	case data.Path:

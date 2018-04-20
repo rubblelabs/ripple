@@ -78,10 +78,13 @@ func explain(txm *data.TransactionWithMetaData, flag terminal.Flag) {
 		}
 	}
 	if !*balances {
-		balances, err := txm.Balances()
+		balanceMap, err := txm.Balances()
 		checkErr(err)
-		for _, balance := range balances {
-			terminal.Println(balance, flag|terminal.Indent)
+		for account, balances := range balanceMap {
+			terminal.Println(account, flag|terminal.Indent)
+			for _, balance := range *balances {
+				terminal.Println(balance, flag|terminal.DoubleIndent)
+			}
 		}
 	}
 }
