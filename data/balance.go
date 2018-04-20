@@ -28,14 +28,14 @@ type Transfer struct {
 }
 
 type Balance struct {
-	Account  Account
-	Balance  Value
-	Change   Value
-	Currency Currency
+	CounterParty Account
+	Balance      Value
+	Change       Value
+	Currency     Currency
 }
 
 func (b Balance) String() string {
-	return fmt.Sprintf("Account: %-34s  Currency: %s Balance: %20s Change: %20s", b.Account, b.Currency, b.Balance, b.Change)
+	return fmt.Sprintf("CounterParty: %-34s  Currency: %s Balance: %20s Change: %20s", b.CounterParty, b.Currency, b.Balance, b.Change)
 }
 
 type BalanceSlice []Balance
@@ -53,29 +53,38 @@ func (s BalanceSlice) Less(i, j int) bool {
 	}
 }
 
-func (s *BalanceSlice) Add(account *Account, balance, change *Value, currency *Currency) {
-	*s = append(*s, Balance{*account, *balance, *change, *currency})
+func (s *BalanceSlice) Add(counterparty *Account, balance, change *Value, currency *Currency) {
+	*s = append(*s, Balance{*counterparty, *balance, *change, *currency})
 }
 
-func (txm *TransactionWithMetaData) Balances() (BalanceSlice, error) {
+type BalanceMap map[Account]*BalanceSlice
+
+func (m *BalanceMap) Add(account *Account, counterparty *Account, balance, change *Value, currency *Currency) {
+	_, ok := (*m)[*account]
+	if !ok {
+		(*m)[*account] = &BalanceSlice{}
+	}
+	(*m)[*account].Add(counterparty, balance, change, currency)
+}
+
+func (txm *TransactionWithMetaData) Balances() (BalanceMap, error) {
 	if txm.GetTransactionType() != OFFER_CREATE && txm.GetTransactionType() != PAYMENT {
 		return nil, nil
 	}
-	var (
-		balances BalanceSlice
-		account  = txm.Transaction.GetBase().Account
-	)
+	balanceMap := BalanceMap{}
+	account := txm.Transaction.GetBase().Account
 	for _, node := range txm.MetaData.AffectedNodes {
 		switch {
 		case node.CreatedNode != nil:
 			switch node.CreatedNode.LedgerEntryType {
 			case ACCOUNT_ROOT:
 				created := node.CreatedNode.NewFields.(*AccountRoot)
-				balances.Add(created.Account, &zeroNative, created.Balance, &zeroCurrency)
+				balanceMap.Add(created.Account, &zeroAccount, &zeroNative, created.Balance, &zeroCurrency)
 			case RIPPLE_STATE:
 				// New trust line
 				state := node.CreatedNode.NewFields.(*RippleState)
-				balances.Add(&account, &zeroNonNative, state.Balance.Value, &state.Balance.Currency)
+				balanceMap.Add(&state.LowLimit.Issuer, &state.HighLimit.Issuer, state.Balance.Value, state.Balance.Value, &state.Balance.Currency)
+				balanceMap.Add(&state.HighLimit.Issuer, &state.LowLimit.Issuer, state.Balance.Value.Negate(), state.Balance.Value.Negate(), &state.Balance.Currency)
 			}
 		case node.DeletedNode != nil:
 			switch node.DeletedNode.LedgerEntryType {
@@ -112,7 +121,7 @@ func (txm *TransactionWithMetaData) Balances() (BalanceSlice, error) {
 					}
 				}
 				if change.num != 0 {
-					balances.Add(current.Account, current.Balance, change.Value, &zeroCurrency)
+					balanceMap.Add(current.Account, &zeroAccount, current.Balance, change.Value, &zeroCurrency)
 				}
 			case RIPPLE_STATE:
 				// Changed non-native balance
@@ -128,11 +137,13 @@ func (txm *TransactionWithMetaData) Balances() (BalanceSlice, error) {
 				if err != nil {
 					return nil, err
 				}
-				balances.Add(&current.HighLimit.Issuer, current.Balance.Value, change.Value, &current.Balance.Currency)
-				balances.Add(&current.LowLimit.Issuer, current.Balance.Value.Negate(), change.Value.Negate(), &current.Balance.Currency)
+				balanceMap.Add(&current.LowLimit.Issuer, &current.HighLimit.Issuer, current.Balance.Value, change.Value, &current.Balance.Currency)
+				balanceMap.Add(&current.HighLimit.Issuer, &current.LowLimit.Issuer, current.Balance.Value.Negate(), change.Value.Negate(), &current.Balance.Currency)
 			}
 		}
 	}
-	sort.Sort(balances)
-	return balances, nil
+	for _, balances := range balanceMap {
+		sort.Sort(balances)
+	}
+	return balanceMap, nil
 }
