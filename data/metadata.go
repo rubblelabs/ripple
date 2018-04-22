@@ -53,9 +53,10 @@ func (s TransactionSlice) Sort() { sort.Sort(s) }
 
 type TransactionWithMetaData struct {
 	Transaction
-	MetaData       MetaData `json:"meta"`
-	LedgerSequence uint32   `json:"ledger_index"`
-	Id             Hash256  `json:"-"`
+	MetaData       MetaData   `json:"meta"`
+	Date           RippleTime `json:"date"`
+	LedgerSequence uint32     `json:"ledger_index"`
+	Id             Hash256    `json:"-"`
 }
 
 func (t *TransactionWithMetaData) GetType() string    { return t.Transaction.GetType() }

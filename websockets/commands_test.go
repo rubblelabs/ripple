@@ -107,6 +107,7 @@ func (s *MessagesSuite) TestAccountTxResponse(c *C) {
 	c.Assert(msg.Type, Equals, "response")
 
 	c.Assert(len(msg.Result.Transactions), Equals, 2)
+	c.Assert(msg.Result.Transactions[1].Date.String(), Equals, "2014-Jun-19 14:14:40")
 	offer := msg.Result.Transactions[1].Transaction.(*data.OfferCreate)
 	c.Assert(offer.TakerPays.String(), Equals, "0.034800328/BTC/rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B")
 }

@@ -48,6 +48,7 @@ type txmNormal TransactionWithMetaData
 
 var (
 	txmSplitTypeRegex       = regexp.MustCompile(`"tx":`)
+	txmMetaDataRegex        = regexp.MustCompile(`"metaData":`)
 	txmTransactionTypeRegex = regexp.MustCompile(`"TransactionType"\s*:\s*"(\w+)"`)
 )
 
@@ -57,7 +58,7 @@ var (
 func (txm *TransactionWithMetaData) UnmarshalJSON(b []byte) error {
 	if txmSplitTypeRegex.Match(b) {
 		// Transaction has the form {"tx":{}, "meta":{}, "validated": true}
-		// i.e. returned from `tx` command.
+		// i.e. returned from `account_tx` command.
 		var split struct {
 			Tx   json.RawMessage
 			Meta json.RawMessage
@@ -82,18 +83,33 @@ func (txm *TransactionWithMetaData) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	// Transaction has the form {...fields..., "metaData":{...}}
-	// (no "validated" or ledger sequence or id)
-	// i.e. it comes from `ledger` command.
-	// Further, "metaData" for payments has "DeliveredAmount" instead of the expected "delivered_amount", so clean that up first.
-	b = bytes.Replace(b, []byte("\"DeliveredAmount\":"), []byte("\"delivered_amount\":"), 1)
+	if txmMetaDataRegex.Match(b) {
+		// Transaction has the form {...fields..., "metaData":{...}}
+		// (no "validated" or ledger sequence or id)
+		// i.e. it comes from `ledger` command.
+		// Further, "metaData" for payments has "DeliveredAmount" instead of the expected "delivered_amount", so clean that up first.
+		b = bytes.Replace(b, []byte("\"DeliveredAmount\":"), []byte("\"delivered_amount\":"), 1)
 
-	// Parse the rest in one shot
+		// Parse the rest in one shot
+		extract := &struct {
+			*txmNormal
+			MetaData *MetaData `json:"metaData"`
+		}{
+			txmNormal: (*txmNormal)(txm),
+			MetaData:  &txm.MetaData,
+		}
+		return json.Unmarshal(b, extract)
+	}
+
+	// Transaction has the form {...fields..., "metaData":{...}}
+	// i.e. it comes from `tx` command.
 	extract := &struct {
 		*txmNormal
+		Date     *RippleTime
 		MetaData *MetaData `json:"metaData"`
 	}{
 		txmNormal: (*txmNormal)(txm),
+		Date:      &txm.Date,
 		MetaData:  &txm.MetaData,
 	}
 	return json.Unmarshal(b, extract)
