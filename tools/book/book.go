@@ -38,7 +38,7 @@ func checkErr(err error) {
 }
 
 func main() {
-	if len(os.Args) != 3 {
+	if len(os.Args) < 3 {
 		showUsage()
 	}
 	flag.CommandLine.Parse(os.Args[3:])
