@@ -198,7 +198,7 @@ func (le *leBase) GetType() string                     { return ledgerEntryNames
 func (le *leBase) GetLedgerEntryType() LedgerEntryType { return le.LedgerEntryType }
 func (le *leBase) Prefix() HashPrefix                  { return HP_LEAF_NODE }
 func (le *leBase) NodeType() NodeType                  { return NT_ACCOUNT_NODE }
-func (le *leBase) Ledger() uint32                      { return 0 }
+func (le *leBase) Ledger() uint64                      { return 0 }
 func (le *leBase) GetHash() *Hash256                   { return &le.Hash }
 func (le *leBase) NodeId() *Hash256                    { return &le.Id }
 func (le *leBase) GetLedgerIndex() *Hash256            { return le.LedgerIndex }

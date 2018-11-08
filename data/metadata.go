@@ -55,14 +55,14 @@ type TransactionWithMetaData struct {
 	Transaction
 	MetaData       MetaData   `json:"meta"`
 	Date           RippleTime `json:"date"`
-	LedgerSequence uint32     `json:"ledger_index"`
+	LedgerSequence uint64     `json:"ledger_index"`
 	Id             Hash256    `json:"-"`
 }
 
 func (t *TransactionWithMetaData) GetType() string    { return t.Transaction.GetType() }
 func (t *TransactionWithMetaData) Prefix() HashPrefix { return HP_TRANSACTION_NODE }
 func (t *TransactionWithMetaData) NodeType() NodeType { return NT_TRANSACTION_NODE }
-func (t *TransactionWithMetaData) Ledger() uint32     { return t.LedgerSequence }
+func (t *TransactionWithMetaData) Ledger() uint64     { return t.LedgerSequence }
 func (t *TransactionWithMetaData) NodeId() *Hash256   { return &t.Id }
 
 func (t *TransactionWithMetaData) Affects(account Account) bool {

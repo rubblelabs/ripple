@@ -10,7 +10,7 @@ import (
 type LedgerStreamMsg struct {
 	FeeBase          uint64          `json:"fee_base"`
 	FeeRef           uint64          `json:"fee_ref"`
-	LedgerSequence   uint32          `json:"ledger_index"`
+	LedgerSequence   uint64          `json:"ledger_index"`
 	LedgerHash       data.Hash256    `json:"ledger_hash"`
 	LedgerTime       data.RippleTime `json:"ledger_time"`
 	ReserveBase      uint64          `json:"reserve_base"`
@@ -26,7 +26,7 @@ type TransactionStreamMsg struct {
 	EngineResultCode    int                          `json:"engine_result_code"`
 	EngineResultMessage string                       `json:"engine_result_message"`
 	LedgerHash          data.Hash256                 `json:"ledger_hash"`
-	LedgerSequence      uint32                       `json:"ledger_index"`
+	LedgerSequence      uint64                       `json:"ledger_index"`
 	Status              string
 	Validated           bool
 }

@@ -25,7 +25,7 @@ type Router interface {
 
 type Storer interface {
 	Hashable
-	Ledger() uint32
+	Ledger() uint64
 	NodeType() NodeType
 	NodeId() *Hash256
 }
