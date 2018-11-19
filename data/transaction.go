@@ -166,12 +166,14 @@ type TicketCancel struct {
 	TicketID Hash256
 }
 
+type SignerEntries []struct {
+	SignerEntry SignerEntry `json:",omitempty"`
+}
+
 type SignerListSet struct {
 	TxBase
-	SignerQuorum  uint32 `json:",omitempty"`
-	SignerEntries []struct {
-		SignerEntry SignerEntry `json:",omitempty"`
-	} `json:",omitempty"`
+	SignerQuorum  uint32        `json:",omitempty"`
+	SignerEntries SignerEntries `json:",omitempty"`
 }
 
 func (t *TxBase) GetBase() *TxBase                    { return t }
