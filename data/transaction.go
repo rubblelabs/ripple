@@ -168,8 +168,10 @@ type TicketCancel struct {
 
 type SignerListSet struct {
 	TxBase
-	SignerQuorum  uint32        `json:",omitempty"`
-	SignerEntries []SignerEntry `json:",omitempty"`
+	SignerQuorum  uint32 `json:",omitempty"`
+	SignerEntries []struct {
+		SignerEntry SignerEntry `json:",omitempty"`
+	} `json:",omitempty"`
 }
 
 func (t *TxBase) GetBase() *TxBase                    { return t }
