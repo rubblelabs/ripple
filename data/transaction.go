@@ -166,10 +166,6 @@ type TicketCancel struct {
 	TicketID Hash256
 }
 
-type SignerEntries []struct {
-	SignerEntry SignerEntry `json:",omitempty"`
-}
-
 type SignerListSet struct {
 	TxBase
 	SignerQuorum  uint32        `json:",omitempty"`
