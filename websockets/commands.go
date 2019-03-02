@@ -285,7 +285,7 @@ type FeeResult struct {
 	CurrentQueueSize  uint32 `json:"current_queue_size,string"`
 	Drops             struct {
 		BaseFee       data.Value `json:"base_fee"`
-		MedianFee     data.Value `json:"base_fee"`
+		MedianFee     data.Value `json:"median_fee"`
 		MinimumFee    data.Value `json:"minimum_fee"`
 		OpenLedgerFee data.Value `json:"open_ledger_fee"`
 	} `json:"drops"`
