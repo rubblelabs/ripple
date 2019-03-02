@@ -33,9 +33,17 @@ func newPathElem(s string) (PathElem, error) {
 	parts := strings.Split(s, "/")
 	switch {
 	case len(parts) == 1:
-		pe.Account, err = NewAccountFromAddress(parts[0])
-		if err != nil {
-			return pe, err
+		if parts[0] == "XRP" {
+			pe.Currency = &Currency{}
+			*pe.Currency, err = NewCurrency(parts[0])
+			if err != nil {
+				return pe, err
+			}
+		} else {
+			pe.Account, err = NewAccountFromAddress(parts[0])
+			if err != nil {
+				return pe, err
+			}
 		}
 
 	case len(parts) == 2:
