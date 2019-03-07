@@ -1,5 +1,7 @@
 package data
 
+import "math"
+
 type TransactionResult int16
 
 const (
@@ -9,7 +11,8 @@ const (
 	// Implications:
 	// - Applied
 	// - Forwarded
-	tesSUCCESS TransactionResult = 0
+	tesSUCCESS      TransactionResult = 0
+	tesUNKNOWN_TYPE TransactionResult = math.MaxInt16
 )
 const (
 	// 100 .. 159 C Claim fee only (ripple transaction with no good paths, pay to non-existent account, no path)
@@ -145,7 +148,7 @@ const (
 	tefEXCEPTION
 	tefGEN_IN_USE
 	tefINTERNAL
-	tefNO_AUTH_REQUIRED // Can't set auth if auth is not required.
+	tefNO_AUTH_REQUIRED  // Can't set auth if auth is not required.
 	tefPAST_SEQ
 	tefWRONG_PRIOR
 	tefMASTER_DISABLED
@@ -167,16 +170,16 @@ const (
 	// - Hold
 	// - Makes hole in sequence which jams transactions.
 	terRETRY       TransactionResult = iota - 99
-	terFUNDS_SPENT                   // This is a free transaction, therefore don't burden network.
-	terINSUF_FEE_B                   // Can't pay fee TransactionError     = -99 therefore don't burden network.
-	terNO_ACCOUNT                    // Can't pay fee, therefore don't burden network.
-	terNO_AUTH                       // Not authorized to hold IOUs.
-	terNO_LINE                       // Internal flag.
-	terOWNERS                        // Can't succeed with non-zero owner count.
-	terPRE_SEQ                       // Can't pay fee, no point in forwarding, therefore don't burden network.
-	terLAST                          // Process after all other transactions
-	terNO_RIPPLE                     // Rippling not allowed
-	terQUEUED                        // Transaction is being held in TxQ until fee drops
+	terFUNDS_SPENT  // This is a free transaction, therefore don't burden network.
+	terINSUF_FEE_B  // Can't pay fee TransactionError     = -99 therefore don't burden network.
+	terNO_ACCOUNT   // Can't pay fee, therefore don't burden network.
+	terNO_AUTH      // Not authorized to hold IOUs.
+	terNO_LINE      // Internal flag.
+	terOWNERS       // Can't succeed with non-zero owner count.
+	terPRE_SEQ      // Can't pay fee, no point in forwarding, therefore don't burden network.
+	terLAST         // Process after all other transactions
+	terNO_RIPPLE    // Rippling not allowed
+	terQUEUED       // Transaction is being held in TxQ until fee drops
 )
 
 var resultNames = map[TransactionResult]struct {
@@ -290,6 +293,7 @@ var resultNames = map[TransactionResult]struct {
 	terPRE_SEQ:                {"terPRE_SEQ", "Missing/inapplicable prior transaction."},
 	terOWNERS:                 {"terOWNERS", "Non-zero owner count."},
 	terQUEUED:                 {"terQUEUED", "Held until escalated fee drops."},
+	tesUNKNOWN_TYPE:           {"terUNKNOW_TYPE", "Tx type is unknow."},
 }
 
 var reverseResults map[string]TransactionResult

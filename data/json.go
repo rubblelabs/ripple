@@ -278,8 +278,10 @@ func (r *TransactionResult) UnmarshalText(b []byte) error {
 	if result, ok := reverseResults[string(b)]; ok {
 		*r = result
 		return nil
+	} else {
+		*r = tesUNKNOWN_TYPE
+		return nil
 	}
-	return fmt.Errorf("Unknown TransactionResult: %s", string(b))
 }
 
 func (l LedgerEntryType) MarshalText() ([]byte, error) {
