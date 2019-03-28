@@ -57,6 +57,7 @@ const (
 	tecOVERSIZE
 	tecCRYPTOCONDITION_ERROR
 	tecINVARIANT_FAILED
+	tecKILLED
 )
 
 const (
@@ -217,6 +218,7 @@ var resultNames = map[TransactionResult]struct {
 	tecCRYPTOCONDITION_ERROR:  {"tecCRYPTOCONDITION_ERROR", "Malformed, invalid, or mismatched conditional or fulfillment."},
 	tecINVARIANT_FAILED:       {"tecINVARIANT_FAILED", "One or more invariants for the transaction were not satisfied."},
 	tecOVERSIZE:               {"tecOVERSIZE", "Object exceeded serialization limits"},
+	tecKILLED:                 {"tecKILLED", "The OfferCreate transaction specified the tfFillOrKill flag and could not be filled, so it was killed"},
 	tefFAILURE:                {"tefFAILURE", "Failed to apply."},
 	tefALREADY:                {"tefALREADY", "The exact transaction was already in this ledger."},
 	tefBAD_ADD_AUTH:           {"tefBAD_ADD_AUTH", "Not authorized to add account."},
