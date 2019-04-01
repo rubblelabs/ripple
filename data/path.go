@@ -26,16 +26,24 @@ type PathElem struct {
 	Issuer   *Account
 }
 
-func newPathElem(s string) (PathElem, error) {
+func NewPathElem(s string) (PathElem, error) {
 	var err error
 	pe := PathElem{}
 
 	parts := strings.Split(s, "/")
 	switch {
 	case len(parts) == 1:
-		pe.Account, err = NewAccountFromAddress(parts[0])
-		if err != nil {
-			return pe, err
+		if parts[0] == "XRP" {
+			pe.Currency = &Currency{}
+			*pe.Currency, err = NewCurrency(parts[0])
+			if err != nil {
+				return pe, err
+			}
+		} else {
+			pe.Account, err = NewAccountFromAddress(parts[0])
+			if err != nil {
+				return pe, err
+			}
 		}
 
 	case len(parts) == 2:
@@ -65,7 +73,7 @@ type Path []PathElem
 func NewPath(s string) (Path, error) {
 	p := Path{}
 	for _, part := range strings.Split(s, "=>") {
-		pe, err := newPathElem(strings.TrimSpace(part))
+		pe, err := NewPathElem(strings.TrimSpace(part))
 		if err != nil {
 			return nil, err
 		}
