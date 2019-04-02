@@ -424,14 +424,14 @@ func (r *Remote) AccountOffers(account data.Account, ledgerIndex interface{}) (*
 	}
 }
 
-func (r *Remote) BookOffers(taker data.Account, ledgerIndex interface{}, pays, gets data.Asset) (*BookOffersResult, error) {
+func (r *Remote) BookOffers(taker data.Account, ledgerIndex interface{}, pays, gets data.Asset, limit uint32) (*BookOffersResult, error) {
 	cmd := &BookOffersCommand{
 		Command:     newCommand("book_offers"),
 		LedgerIndex: ledgerIndex,
 		Taker:       taker,
 		TakerPays:   pays,
 		TakerGets:   gets,
-		Limit:       5000, // Marker not implemented....
+		Limit:       limit, // Marker not implemented....
 	}
 	r.outgoing <- cmd
 	<-cmd.Ready
