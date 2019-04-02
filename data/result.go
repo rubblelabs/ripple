@@ -57,6 +57,9 @@ const (
 	tecOVERSIZE
 	tecCRYPTOCONDITION_ERROR
 	tecINVARIANT_FAILED
+	tecEXPIRED
+	tecDUPLICATE
+	tecKILLED
 )
 
 const (
@@ -216,6 +219,9 @@ var resultNames = map[TransactionResult]struct {
 	tecINTERNAL:               {"tecINTERNAL", "An internal error has occurred during processing."},
 	tecCRYPTOCONDITION_ERROR:  {"tecCRYPTOCONDITION_ERROR", "Malformed, invalid, or mismatched conditional or fulfillment."},
 	tecINVARIANT_FAILED:       {"tecINVARIANT_FAILED", "One or more invariants for the transaction were not satisfied."},
+	tecEXPIRED:                {"tecEXPIRED", "Expiration time is passed."},
+	tecDUPLICATE:              {"tecDUPLICATE", "Ledger object already exists."},
+	tecKILLED:                 {"tecKILLED", "FillOrKill offer killed."},
 	tecOVERSIZE:               {"tecOVERSIZE", "Object exceeded serialization limits"},
 	tefFAILURE:                {"tefFAILURE", "Failed to apply."},
 	tefALREADY:                {"tefALREADY", "The exact transaction was already in this ledger."},
