@@ -164,6 +164,15 @@ type Check struct {
 	Sequence    *uint32  `json:",omitempty"`
 }
 
+type UnknowLedger struct {
+	leBase
+	Account     *Account `json:",omitempty"`
+}
+
+func (a *UnknowLedger) Affects(account Account) bool {
+	return a.Account != nil && a.Account.Equals(account)
+}
+
 func (a *AccountRoot) Affects(account Account) bool {
 	return a.Account != nil && a.Account.Equals(account)
 }
