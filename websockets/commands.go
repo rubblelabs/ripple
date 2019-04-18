@@ -130,6 +130,14 @@ type SubmitCommand struct {
 	Result *SubmitResult `json:"result,omitempty"`
 }
 
+type SubmitSignCommand struct {
+	*Command
+	Tx      data.Transaction `json:"tx_json"`
+	Seed    string           `json:"seed"`
+	KeyType string           `json:"key_type"`
+	Result  *SubmitResult    `json:"result,omitempty"`
+}
+
 type SubmitResult struct {
 	EngineResult        data.TransactionResult `json:"engine_result"`
 	EngineResultCode    int                    `json:"engine_result_code"`

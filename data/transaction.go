@@ -5,7 +5,7 @@ type TxBase struct {
 	Flags              *TransactionFlag `json:",omitempty"`
 	SourceTag          *uint32          `json:",omitempty"`
 	Account            Account
-	Sequence           uint32
+	Sequence           uint32 `json:",omitempty"`
 	Fee                Value
 	AccountTxnID       *Hash256        `json:",omitempty"`
 	SigningPubKey      *PublicKey      `json:",omitempty"`
@@ -13,7 +13,7 @@ type TxBase struct {
 	Memos              Memos           `json:",omitempty"`
 	PreviousTxnID      *Hash256        `json:",omitempty"`
 	LastLedgerSequence *uint32         `json:",omitempty"`
-	Hash               Hash256         `json:"hash"`
+	Hash               Hash256         `json:"hash,omitempty"`
 }
 
 type Payment struct {
