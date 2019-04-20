@@ -3,7 +3,8 @@ package crypto
 import (
 	"fmt"
 
-	"github.com/agl/ed25519"
+	"golang.org/x/crypto/ed25519"
+
 	"github.com/btcsuite/btcd/btcec"
 )
 
@@ -30,16 +31,14 @@ func Verify(publicKey, hash, msg, signature []byte) (bool, error) {
 }
 
 func signEd25519(privateKey, msg []byte) ([]byte, error) {
-	var p [ed25519.PrivateKeySize]byte
-	copy(p[:], privateKey)
-	return ed25519.Sign(&p, msg)[:], nil
+	p := make(ed25519.PrivateKey, ed25519.PrivateKeySize)
+	copy(p, privateKey[:])
+	return ed25519.Sign(p, msg)[:], nil
 }
 
 func verifyEd25519(pubKey, signature, msg []byte) (bool, error) {
-	var (
-		p [ed25519.PublicKeySize]byte
-		s [ed25519.SignatureSize]byte
-	)
+	p := make(ed25519.PublicKey, ed25519.PublicKeySize)
+	s := make([]byte, ed25519.SignatureSize)
 	switch {
 	case len(pubKey) != ed25519.PublicKeySize+1:
 		return false, fmt.Errorf("Wrong public key length: %d", len(pubKey))
@@ -50,7 +49,7 @@ func verifyEd25519(pubKey, signature, msg []byte) (bool, error) {
 	default:
 		copy(p[:], pubKey[1:])
 		copy(s[:], signature)
-		return ed25519.Verify(&p, msg, &s), nil
+		return ed25519.Verify(p, msg, s), nil
 	}
 }
 
