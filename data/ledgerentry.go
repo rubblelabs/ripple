@@ -203,7 +203,7 @@ func (p *Check) Affects(account Account) bool {
 }
 
 func (d *DepositPreAuth) Affects(account Account) bool {
-	return (d.Account != nil && d.Account.Equals(account)) || (d.Authorizeu != nil && d.Authorize.Equals(account))
+	return (d.Account != nil && d.Account.Equals(account)) || (d.Authorize != nil && d.Authorize.Equals(account))
 }
 
 func (le *leBase) GetType() string                     { return ledgerEntryNames[le.LedgerEntryType] }
