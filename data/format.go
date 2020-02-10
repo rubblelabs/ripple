@@ -204,6 +204,8 @@ var encodings = map[enc]string{
 	enc{ST_ACCOUNT, 2}: "Owner",
 	enc{ST_ACCOUNT, 3}: "Destination",
 	enc{ST_ACCOUNT, 4}: "Issuer",
+	enc{ST_ACCOUNT, 5}: "Authorize",
+	enc{ST_ACCOUNT, 6}: "Unauthorize",
 	enc{ST_ACCOUNT, 7}: "Target",
 	enc{ST_ACCOUNT, 8}: "RegularKey",
 	// inner object
