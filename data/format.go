@@ -92,6 +92,8 @@ var encodings = map[enc]string{
 	enc{ST_UINT16, 1}: "LedgerEntryType",
 	enc{ST_UINT16, 2}: "TransactionType",
 	enc{ST_UINT16, 3}: "SignerWeight",
+	// 16-bit unsigned integers (uncommon)
+	enc{ST_UINT16, 16}: "Version",
 	// 32-bit unsigned integers (common)
 	enc{ST_UINT32, 2}:  "Flags",
 	enc{ST_UINT32, 3}:  "SourceTag",
@@ -132,14 +134,16 @@ var encodings = map[enc]string{
 	enc{ST_UINT32, 38}: "SignerListID",
 	enc{ST_UINT32, 39}: "SettleDelay",
 	// 64-bit unsigned integers (common)
-	enc{ST_UINT64, 1}: "IndexNext",
-	enc{ST_UINT64, 2}: "IndexPrevious",
-	enc{ST_UINT64, 3}: "BookNode",
-	enc{ST_UINT64, 4}: "OwnerNode",
-	enc{ST_UINT64, 5}: "BaseFee",
-	enc{ST_UINT64, 6}: "ExchangeRate",
-	enc{ST_UINT64, 7}: "LowNode",
-	enc{ST_UINT64, 8}: "HighNode",
+	enc{ST_UINT64, 1}:  "IndexNext",
+	enc{ST_UINT64, 2}:  "IndexPrevious",
+	enc{ST_UINT64, 3}:  "BookNode",
+	enc{ST_UINT64, 4}:  "OwnerNode",
+	enc{ST_UINT64, 5}:  "BaseFee",
+	enc{ST_UINT64, 6}:  "ExchangeRate",
+	enc{ST_UINT64, 7}:  "LowNode",
+	enc{ST_UINT64, 8}:  "HighNode",
+	enc{ST_UINT64, 9}:  "DestinationNode",
+	enc{ST_UINT64, 10}: "Cookie",
 	// 128-bit (common)
 	enc{ST_HASH128, 1}: "EmailHash",
 	// 256-bit (common)
