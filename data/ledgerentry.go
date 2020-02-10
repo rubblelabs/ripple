@@ -103,16 +103,17 @@ type FeeSettings struct {
 
 type Escrow struct {
 	leBase
-	Flags          *LedgerEntryFlag `json:",omitempty"`
-	Account        Account          `json:",omitempty"`
-	Destination    Account          `json:",omitempty"`
-	Amount         Amount           `json:",omitempty"`
-	Condition      *VariableLength  `json:",omitempty"`
-	CancelAfter    *uint32          `json:",omitempty"`
-	FinishAfter    *uint32          `json:",omitempty"`
-	SourceTag      *uint32          `json:",omitempty"`
-	DestinationTag *uint32          `json:",omitempty"`
-	OwnerNode      *NodeIndex       `json:",omitempty"`
+	Flags           *LedgerEntryFlag `json:",omitempty"`
+	Account         Account          `json:",omitempty"`
+	Destination     Account          `json:",omitempty"`
+	Amount          Amount           `json:",omitempty"`
+	Condition       *VariableLength  `json:",omitempty"`
+	CancelAfter     *uint32          `json:",omitempty"`
+	FinishAfter     *uint32          `json:",omitempty"`
+	SourceTag       *uint32          `json:",omitempty"`
+	DestinationTag  *uint32          `json:",omitempty"`
+	OwnerNode       *NodeIndex       `json:",omitempty"`
+	DestinationNode *NodeIndex       `json:",omitempty"`
 }
 
 type SignerEntry struct {
