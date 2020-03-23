@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"crypto/rand"
 
-	"github.com/agl/ed25519"
+	"golang.org/x/crypto/ed25519"
 )
 
 type ed25519key struct {
-	priv [ed25519.PrivateKeySize]byte
+	priv ed25519.PrivateKey
 }
 
 func checkSequenceIsNil(seq *uint32) {
@@ -24,12 +24,12 @@ func (e *ed25519key) Id(seq *uint32) []byte {
 
 func (e *ed25519key) Public(seq *uint32) []byte {
 	checkSequenceIsNil(seq)
-	return append([]byte{0xED}, e.priv[32:]...)
+	return append([]byte{0xED}, e.priv.Public().([]byte)...)
 }
 
 func (e *ed25519key) Private(seq *uint32) []byte {
 	checkSequenceIsNil(seq)
-	return e.priv[:]
+	return e.priv.Seed()
 }
 
 func NewEd25519Key(seed []byte) (*ed25519key, error) {
@@ -41,5 +41,5 @@ func NewEd25519Key(seed []byte) (*ed25519key, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &ed25519key{*priv}, nil
+	return &ed25519key{priv}, nil
 }
