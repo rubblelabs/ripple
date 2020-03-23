@@ -3,7 +3,6 @@ module github.com/rubblelabs/ripple
 go 1.13
 
 require (
-	github.com/agl/ed25519 v0.0.0-00010101000000-000000000000
 	github.com/btcsuite/btcd v0.20.1-beta
 	github.com/fatih/color v1.9.0
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
@@ -17,4 +16,4 @@ require (
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22 // indirect
 )
 
-replace github.com/agl/ed25519 => github.com/inn4science/ed25519 v1.0.0
+// replace github.com/agl/ed25519 => github.com/inn4science/ed25519 v1.0.0
