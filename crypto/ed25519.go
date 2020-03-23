@@ -24,7 +24,7 @@ func (e *ed25519key) Id(seq *uint32) []byte {
 
 func (e *ed25519key) Public(seq *uint32) []byte {
 	checkSequenceIsNil(seq)
-	return append([]byte{0xED}, e.priv.Public().([]byte)...)
+	return append([]byte{0xED}, []byte(e.priv.Public().(ed25519.PublicKey))...)
 }
 
 func (e *ed25519key) Private(seq *uint32) []byte {
