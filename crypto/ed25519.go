@@ -29,7 +29,7 @@ func (e *ed25519key) Public(seq *uint32) []byte {
 
 func (e *ed25519key) Private(seq *uint32) []byte {
 	checkSequenceIsNil(seq)
-	return e.priv.Seed()
+	return []byte(e.priv)
 }
 
 func NewEd25519Key(seed []byte) (*ed25519key, error) {

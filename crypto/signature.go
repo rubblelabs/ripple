@@ -32,7 +32,7 @@ func Verify(publicKey, hash, msg, signature []byte) (bool, error) {
 func signEd25519(privateKey, msg []byte) ([]byte, error) {
 	var p [ed25519.PrivateKeySize]byte
 	copy(p[:], privateKey)
-	k := ed25519.NewKeyFromSeed(privateKey)
+	k := ed25519.PrivateKey(privateKey)
 	return ed25519.Sign(k, msg)[:], nil
 }
 
