@@ -1,9 +1,9 @@
 package crypto
 
 import (
+	"crypto/ed25519"
 	"fmt"
 
-	"github.com/agl/ed25519"
 	"github.com/btcsuite/btcd/btcec"
 )
 
@@ -30,15 +30,14 @@ func Verify(publicKey, hash, msg, signature []byte) (bool, error) {
 }
 
 func signEd25519(privateKey, msg []byte) ([]byte, error) {
-	var p [ed25519.PrivateKeySize]byte
+	var p ed25519.PrivateKey
 	copy(p[:], privateKey)
-	return ed25519.Sign(&p, msg)[:], nil
+	return ed25519.Sign(p, msg)[:], nil
 }
 
 func verifyEd25519(pubKey, signature, msg []byte) (bool, error) {
 	var (
-		p [ed25519.PublicKeySize]byte
-		s [ed25519.SignatureSize]byte
+		p ed25519.PublicKey
 	)
 	switch {
 	case len(pubKey) != ed25519.PublicKeySize+1:
@@ -49,8 +48,7 @@ func verifyEd25519(pubKey, signature, msg []byte) (bool, error) {
 		return false, fmt.Errorf("Wrong Signature length: %d", len(signature))
 	default:
 		copy(p[:], pubKey[1:])
-		copy(s[:], signature)
-		return ed25519.Verify(&p, msg, &s), nil
+		return ed25519.Verify(p, msg, signature), nil
 	}
 }
 

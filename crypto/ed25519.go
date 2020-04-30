@@ -2,13 +2,12 @@ package crypto
 
 import (
 	"bytes"
+	"crypto/ed25519"
 	"crypto/rand"
-
-	"github.com/agl/ed25519"
 )
 
 type ed25519key struct {
-	priv [ed25519.PrivateKeySize]byte
+	priv ed25519.PrivateKey
 }
 
 func checkSequenceIsNil(seq *uint32) {
@@ -41,5 +40,5 @@ func NewEd25519Key(seed []byte) (*ed25519key, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &ed25519key{*priv}, nil
+	return &ed25519key{priv: priv}, nil
 }
