@@ -41,6 +41,7 @@ const (
 	CHECK_CASH      TransactionType = 17
 	CHECK_CANCEL    TransactionType = 18
 	TRUST_SET       TransactionType = 20
+	ACCOUNT_DELETE  TransactionType = 21
 	AMENDMENT       TransactionType = 100
 	SET_FEE         TransactionType = 101
 )
@@ -68,6 +69,7 @@ var LedgerEntryFactory = [...]func() LedgerEntry{
 var TxFactory = [...]func() Transaction{
 	PAYMENT:         func() Transaction { return &Payment{TxBase: TxBase{TransactionType: PAYMENT}} },
 	ACCOUNT_SET:     func() Transaction { return &AccountSet{TxBase: TxBase{TransactionType: ACCOUNT_SET}} },
+	ACCOUNT_DELETE:  func() Transaction { return &AccountDelete{TxBase: TxBase{TransactionType: ACCOUNT_DELETE}} },
 	SET_REGULAR_KEY: func() Transaction { return &SetRegularKey{TxBase: TxBase{TransactionType: SET_REGULAR_KEY}} },
 	OFFER_CREATE:    func() Transaction { return &OfferCreate{TxBase: TxBase{TransactionType: OFFER_CREATE}} },
 	OFFER_CANCEL:    func() Transaction { return &OfferCancel{TxBase: TxBase{TransactionType: OFFER_CANCEL}} },
@@ -121,6 +123,7 @@ var ledgerEntryTypes = map[string]LedgerEntryType{
 var txNames = [...]string{
 	PAYMENT:         "Payment",
 	ACCOUNT_SET:     "AccountSet",
+	ACCOUNT_DELETE:  "AccountDelete",
 	SET_REGULAR_KEY: "SetRegularKey",
 	OFFER_CREATE:    "OfferCreate",
 	OFFER_CANCEL:    "OfferCancel",
@@ -142,6 +145,7 @@ var txNames = [...]string{
 var txTypes = map[string]TransactionType{
 	"Payment":              PAYMENT,
 	"AccountSet":           ACCOUNT_SET,
+	"AccountDelete":        ACCOUNT_DELETE,
 	"SetRegularKey":        SET_REGULAR_KEY,
 	"OfferCreate":          OFFER_CREATE,
 	"OfferCancel":          OFFER_CANCEL,

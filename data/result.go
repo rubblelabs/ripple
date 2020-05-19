@@ -60,6 +60,8 @@ const (
 	tecEXPIRED
 	tecDUPLICATE
 	tecKILLED
+	tecHAS_OBLIGATIONS
+	tecTOO_SOON
 )
 
 const (
@@ -160,6 +162,7 @@ const (
 	tefNOT_MULTI_SIGNING
 	tefBAD_AUTH_MASTER
 	tefINVARIANT_FAILED
+	tefTOO_BIG
 )
 const (
 	// -99 .. -1: R Retry (sequence too high, no funds for txn fee, originating account non-existent)
@@ -225,6 +228,8 @@ var resultNames = map[TransactionResult]struct {
 	tecEXPIRED:               {"tecEXPIRED", "Expiration time is passed."},
 	tecDUPLICATE:             {"tecDUPLICATE", "Ledger object already exists."},
 	tecKILLED:                {"tecKILLED", "FillOrKill offer killed."},
+	tecHAS_OBLIGATIONS:       {"tecHAS_OBLIGATIONS", "The account cannot be deleted since it has obligations."},
+	tecTOO_SOON:              {"tecTOO_SOON", "It is too early to attempt the requested operation. Please wait."},
 
 	tefFAILURE:          {"tefFAILURE", "Failed to apply."},
 	tefALREADY:          {"tefALREADY", "The exact transaction was already in this ledger."},
@@ -246,6 +251,7 @@ var resultNames = map[TransactionResult]struct {
 	tefMAX_LEDGER:       {"tefMAX_LEDGER", "Ledger sequence too high."},
 	tefBAD_AUTH_MASTER:  {"tefBAD_AUTH_MASTER", "Auth for unclaimed account needs correct master key."},
 	tefINVARIANT_FAILED: {"tefINVARIANT_FAILED", "Fee claim violated invariants for the transaction."},
+	tefTOO_BIG:          {"tefTOO_BIG", "Transaction affects too many items."},
 
 	telLOCAL_ERROR:           {"telLOCAL_ERROR", "Local failure."},
 	telBAD_DOMAIN:            {"telBAD_DOMAIN", "Domain too long."},

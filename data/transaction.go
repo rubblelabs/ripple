@@ -40,6 +40,12 @@ type AccountSet struct {
 	ClearFlag     *uint32         `json:",omitempty"`
 }
 
+type AccountDelete struct {
+	TxBase
+	Destination    Account
+	DestinationTag *uint32 `json:",omitempty"`
+}
+
 type SetRegularKey struct {
 	TxBase
 	RegularKey *RegularKey `json:",omitempty"`
