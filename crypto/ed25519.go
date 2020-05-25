@@ -2,8 +2,9 @@ package crypto
 
 import (
 	"bytes"
-	"crypto/ed25519"
 	"crypto/rand"
+
+	"golang.org/x/crypto/ed25519"
 )
 
 type ed25519key struct {
@@ -41,4 +42,5 @@ func NewEd25519Key(seed []byte) (*ed25519key, error) {
 		return nil, err
 	}
 	return &ed25519key{priv: priv}, nil
+
 }

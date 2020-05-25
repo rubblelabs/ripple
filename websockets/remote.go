@@ -169,8 +169,9 @@ func (r *Remote) Tx(hash data.Hash256) (*TxResult, error) {
 	return cmd.Result, nil
 }
 
-func (r *Remote) accountTx(account data.Account, c chan *data.TransactionWithMetaData, pageSize int, minLedger, maxLedger int64) {
+func (r *Remote) accountTx(account data.Account, c chan *data.TransactionWithMetaData, pageSize int, minLedger, maxLedger, maxCount int64) {
 	defer close(c)
+	var count int64
 	cmd := newAccountTxCommand(account, pageSize, nil, minLedger, maxLedger)
 	for ; ; cmd = newAccountTxCommand(account, pageSize, cmd.Result.Marker, minLedger, maxLedger) {
 		r.outgoing <- cmd
@@ -181,8 +182,12 @@ func (r *Remote) accountTx(account data.Account, c chan *data.TransactionWithMet
 		}
 		for _, tx := range cmd.Result.Transactions {
 			c <- tx
+			count++
 		}
 		if cmd.Result.Marker == nil {
+			return
+		}
+		if maxCount > 0 && count >= maxCount {
 			return
 		}
 	}
@@ -196,9 +201,9 @@ func (r *Remote) accountTx(account data.Account, c chan *data.TransactionWithMet
 //
 // Use minLedger -1 for the earliest ledger available.
 // Use maxLedger -1 for the most recent validated ledger.
-func (r *Remote) AccountTx(account data.Account, pageSize int, minLedger, maxLedger int64) chan *data.TransactionWithMetaData {
+func (r *Remote) AccountTx(account data.Account, pageSize int, minLedger, maxLedger, maxCount int64) chan *data.TransactionWithMetaData {
 	c := make(chan *data.TransactionWithMetaData)
-	go r.accountTx(account, c, pageSize, minLedger, maxLedger)
+	go r.accountTx(account, c, pageSize, minLedger, maxLedger, maxCount)
 	return c
 }
 
@@ -211,6 +216,20 @@ func (r *Remote) Submit(tx data.Transaction) (*SubmitResult, error) {
 	cmd := &SubmitCommand{
 		Command: newCommand("submit"),
 		TxBlob:  fmt.Sprintf("%X", raw),
+	}
+	r.outgoing <- cmd
+	<-cmd.Ready
+	if cmd.CommandError != nil {
+		return nil, cmd.CommandError
+	}
+	return cmd.Result, nil
+}
+
+// SubmitRaw Synchronously submit a raw transaction
+func (r *Remote) SubmitRaw(txRaw string) (*SubmitResult, error) {
+	cmd := &SubmitCommand{
+		Command: newCommand("submit"),
+		TxBlob:  txRaw,
 	}
 	r.outgoing <- cmd
 	<-cmd.Ready
@@ -318,6 +337,19 @@ func (r *Remote) LedgerHeader(ledger interface{}) (*LedgerHeaderResult, error) {
 	cmd := &LedgerHeaderCommand{
 		Command: newCommand("ledger_header"),
 		Ledger:  ledger,
+	}
+	r.outgoing <- cmd
+	<-cmd.Ready
+	if cmd.CommandError != nil {
+		return nil, cmd.CommandError
+	}
+	return cmd.Result, nil
+}
+
+// LedgerClose 获取最新的Ledger
+func (r *Remote) LedgerClose() (*LedgerHeaderResult, error) {
+	cmd := &LedgerHeaderCommand{
+		Command: newCommand("ledger_closed"),
 	}
 	r.outgoing <- cmd
 	<-cmd.Ready
