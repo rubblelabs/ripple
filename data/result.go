@@ -9,7 +9,8 @@ const (
 	// Implications:
 	// - Applied
 	// - Forwarded
-	tesSUCCESS TransactionResult = 0
+	tesSUCCESS      TransactionResult = 0
+	tesUNKNOWN_TYPE TransactionResult = 1
 )
 const (
 	// 100 .. 159 C Claim fee only (ripple transaction with no good paths, pay to non-existent account, no path)
@@ -299,17 +300,18 @@ var resultNames = map[TransactionResult]struct {
 	temINVALID_ACCOUNT_ID:     {"temINVALID_ACCOUNT_ID", "Malformed: A field contains an invalid account ID."},
 	temCANNOT_PREAUTH_SELF:    {"temCANNOT_PREAUTH_SELF", "Malformed: An account may not preauthorize itself."},
 
-	terRETRY:       {"terRETRY", "Retry transaction."},
-	terFUNDS_SPENT: {"terFUNDS_SPENT", "Can't set password, password set funds already spent."},
-	terINSUF_FEE_B: {"terINSUF_FEE_B", "Account balance can't pay fee."},
-	terLAST:        {"terLAST", "Process last."},
-	terNO_RIPPLE:   {"terNO_RIPPLE", "Path does not permit rippling."},
-	terNO_ACCOUNT:  {"terNO_ACCOUNT", "The source account does not exist."},
-	terNO_AUTH:     {"terNO_AUTH", "Not authorized to hold IOUs."},
-	terNO_LINE:     {"terNO_LINE", "No such line."},
-	terPRE_SEQ:     {"terPRE_SEQ", "Missing/inapplicable prior transaction."},
-	terOWNERS:      {"terOWNERS", "Non-zero owner count."},
-	terQUEUED:      {"terQUEUED", "Held until escalated fee drops."},
+	terRETRY:        {"terRETRY", "Retry transaction."},
+	terFUNDS_SPENT:  {"terFUNDS_SPENT", "Can't set password, password set funds already spent."},
+	terINSUF_FEE_B:  {"terINSUF_FEE_B", "Account balance can't pay fee."},
+	terLAST:         {"terLAST", "Process last."},
+	terNO_RIPPLE:    {"terNO_RIPPLE", "Path does not permit rippling."},
+	terNO_ACCOUNT:   {"terNO_ACCOUNT", "The source account does not exist."},
+	terNO_AUTH:      {"terNO_AUTH", "Not authorized to hold IOUs."},
+	terNO_LINE:      {"terNO_LINE", "No such line."},
+	terPRE_SEQ:      {"terPRE_SEQ", "Missing/inapplicable prior transaction."},
+	terOWNERS:       {"terOWNERS", "Non-zero owner count."},
+	terQUEUED:       {"terQUEUED", "Held until escalated fee drops."},
+	tesUNKNOWN_TYPE: {"tesUNKNOWN_TYPE", "unknown type"},
 }
 
 var reverseResults map[string]TransactionResult

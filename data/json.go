@@ -277,7 +277,9 @@ func (r *TransactionResult) UnmarshalText(b []byte) error {
 		*r = result
 		return nil
 	}
-	return fmt.Errorf("Unknown TransactionResult: %s", string(b))
+	// return fmt.Errorf("Unknown TransactionResult: %s", string(b))
+	*r = tesUNKNOWN_TYPE
+	return nil
 }
 
 func (l LedgerEntryType) MarshalText() ([]byte, error) {
@@ -290,7 +292,10 @@ func (l *LedgerEntryType) UnmarshalText(b []byte) error {
 		return nil
 	}
 	// If here, add tx type to TxFactory and TxTypes in factory.go
-	return fmt.Errorf("Unknown LedgerEntryType: %s", string(b))
+	// return fmt.Errorf("Unknown LedgerEntryType: %s", string(b))
+
+	*l = UNKNOW_LEDGER_TYPE
+	return nil
 }
 
 func (t TransactionType) MarshalText() ([]byte, error) {
@@ -303,7 +308,10 @@ func (t *TransactionType) UnmarshalText(b []byte) error {
 		return nil
 	}
 	// If here, add tx type to TxFactory and TxTypes in factory.go
-	return fmt.Errorf("Unknown TransactionType: %s", string(b))
+	// return fmt.Errorf("Unknown TransactionType: %s", string(b))
+
+	*t = UNKNOW_TX_TYPE
+	return nil
 }
 
 func (t RippleTime) MarshalJSON() ([]byte, error) {
