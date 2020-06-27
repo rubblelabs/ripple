@@ -160,7 +160,7 @@ func ReadLedgerEntry(r Reader, nodeId Hash256) (LedgerEntry, error) {
 	if err != nil {
 		return nil, err
 	}
-	factory, ok := LedgerEntryFactory[leType]()
+	factory, ok := LedgerEntryFactory[leType]
 	if !ok {
 		return nil, fmt.Errorf("unknown ledger entry: %d", leType)
 	}
