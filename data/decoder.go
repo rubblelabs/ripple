@@ -160,11 +160,7 @@ func ReadLedgerEntry(r Reader, nodeId Hash256) (LedgerEntry, error) {
 	if err != nil {
 		return nil, err
 	}
-	factory, ok := LedgerEntryFactory[leType]
-	if !ok {
-		return nil, fmt.Errorf("unknown ledger entry: %d", leType)
-	}
-	le := factory()
+	le := LedgerEntryFactory[leType]()
 	v := reflect.ValueOf(le)
 	// LedgerEntries have 32 bytes of index suffixed
 	// but don't have a variable bytes indicator
