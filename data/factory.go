@@ -19,7 +19,7 @@ const (
 	FEE_SETTINGS     LedgerEntryType = 0x73 // 's'
 	ESCROW           LedgerEntryType = 0x75 // 'u'
 	PAY_CHANNEL      LedgerEntryType = 0x78 // 'x'
-	CHECK            LedgerEntryType = 0x63 // 'C'
+	CHECK            LedgerEntryType = 0x43 // 'C'
 	DEPOSIT_PRE_AUTH LedgerEntryType = 0x70 // 'p'
 
 	// TransactionType values come from rippled's "TxFormats.h"

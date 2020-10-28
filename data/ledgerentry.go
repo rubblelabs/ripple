@@ -158,11 +158,16 @@ type PayChannel struct {
 
 type Check struct {
 	leBase
-	Account     *Account `json:",omitempty"`
-	Destination *Account `json:",omitempty"`
-	Expiration  *uint32  `json:",omitempty"`
-	SendMax     *Amount  `json:",omitempty"`
-	Sequence    *uint32  `json:",omitempty"`
+	Account         *Account   `json:",omitempty"`
+	Destination     *Account   `json:",omitempty"`
+	OwnerNode       *NodeIndex `json:",omitempty"`
+	SendMax         *Amount    `json:",omitempty"`
+	Sequence        *uint32    `json:",omitempty"`
+	DestinationNode *NodeIndex `json:",omitempty"`
+	DestinationTag  *uint32    `json:",omitempty"`
+	Expiration      *uint32    `json:",omitempty"`
+	SourceTag       *uint32    `json:",omitempty"`
+	InvoiceID       *Hash256   `json:",omitempty"`
 }
 
 type DepositPreAuth struct {
