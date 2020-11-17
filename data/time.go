@@ -6,7 +6,7 @@ import (
 
 const (
 	rippleTimeEpoch  int64  = 946684800
-	rippleTimeFormat string = "2006-Jan-02 15:04:05"
+	rippleTimeFormat string = "2006-Jan-02 15:04:05 UTC"
 )
 
 // Represents a time as the number of seconds since the Ripple epoch: January 1st, 2000 (00:00 UTC)
