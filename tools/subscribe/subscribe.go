@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/rubblelabs/ripple/data"
-	"github.com/rubblelabs/ripple/terminal"
-	"github.com/rubblelabs/ripple/websockets"
+	"github.com/ysv/ripple/data"
+	"github.com/ysv/ripple/terminal"
+	"github.com/ysv/ripple/websockets"
 )
 
 func checkErr(err error, quit bool) {

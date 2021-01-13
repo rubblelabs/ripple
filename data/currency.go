@@ -30,18 +30,17 @@ func NewCurrency(s string) (Currency, error) {
 		return zeroCurrency, nil
 	}
 	var currency Currency
-	switch len(s) {
-	case 3:
+	if len(s) <= 3 {
 		copy(currency[12:], []byte(s))
 		return currency, nil
-	case 40:
+	} else if len(s) == 40 {
 		c, err := hex.DecodeString(s)
 		if err != nil {
 			return currency, fmt.Errorf("Bad Currency: %s", s)
 		}
 		copy(currency[:], c)
 		return currency, nil
-	default:
+	} else {
 		return currency, fmt.Errorf("Bad Currency: %s", s)
 	}
 }

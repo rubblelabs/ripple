@@ -46,6 +46,7 @@ const (
 	AMENDMENT       TransactionType = 100
 	SET_FEE         TransactionType = 101
 	UNL_MODIFY      TransactionType = 102
+	DEPOSIT_PREAUTH TransactionType = 200
 )
 
 var LedgerFactory = [...]func() Hashable{
@@ -91,6 +92,8 @@ var TxFactory = [...]func() Transaction{
 	CHECK_CREATE:    func() Transaction { return &CheckCreate{TxBase: TxBase{TransactionType: CHECK_CREATE}} },
 	CHECK_CASH:      func() Transaction { return &CheckCash{TxBase: TxBase{TransactionType: CHECK_CASH}} },
 	CHECK_CANCEL:    func() Transaction { return &CheckCancel{TxBase: TxBase{TransactionType: CHECK_CANCEL}} },
+	// The next types are not fully supported. They just added to avoid "Unknown TransactionType" error.
+	DEPOSIT_PREAUTH: func() Transaction { return &DepositPreauth{TxBase: TxBase{TransactionType: DEPOSIT_PREAUTH}} },
 }
 
 var ledgerEntryNames = [...]string{
@@ -128,27 +131,28 @@ var ledgerEntryTypes = map[string]LedgerEntryType{
 }
 
 var txNames = [...]string{
-	PAYMENT:         "Payment",
-	ACCOUNT_SET:     "AccountSet",
-	ACCOUNT_DELETE:  "AccountDelete",
-	SET_REGULAR_KEY: "SetRegularKey",
-	OFFER_CREATE:    "OfferCreate",
-	OFFER_CANCEL:    "OfferCancel",
-	TRUST_SET:       "TrustSet",
-	AMENDMENT:       "EnableAmendment",
-	SET_FEE:         "SetFee",
-	UNL_MODIFY:      "UNLModify",
-	TICKET_CREATE:   "TicketCreate",
-	ESCROW_CREATE:   "EscrowCreate",
-	ESCROW_FINISH:   "EscrowFinish",
-	ESCROW_CANCEL:   "EscrowCancel",
-	SIGNER_LIST_SET: "SignerListSet",
-	PAYCHAN_CREATE:  "PaymentChannelCreate",
-	PAYCHAN_FUND:    "PaymentChannelFund",
-	PAYCHAN_CLAIM:   "PaymentChannelClaim",
-	CHECK_CREATE:    "CheckCreate",
-	CHECK_CASH:      "CheckCash",
-	CHECK_CANCEL:    "CheckCancel",
+	PAYMENT:          "Payment",
+	ACCOUNT_SET:      "AccountSet",
+	ACCOUNT_DELETE:   "AccountDelete",
+	SET_REGULAR_KEY:  "SetRegularKey",
+	OFFER_CREATE:     "OfferCreate",
+	OFFER_CANCEL:     "OfferCancel",
+	TRUST_SET:        "TrustSet",
+	AMENDMENT:        "EnableAmendment",
+	SET_FEE:          "SetFee",
+	UNL_MODIFY:       "UNLModify",
+	TICKET_CREATE:    "TicketCreate",
+	ESCROW_CREATE:    "EscrowCreate",
+	ESCROW_FINISH:    "EscrowFinish",
+	ESCROW_CANCEL:    "EscrowCancel",
+	SIGNER_LIST_SET:  "SignerListSet",
+	PAYCHAN_CREATE:   "PaymentChannelCreate",
+	PAYCHAN_FUND:     "PaymentChannelFund",
+	PAYCHAN_CLAIM:    "PaymentChannelClaim",
+	CHECK_CREATE:     "CheckCreate",
+	CHECK_CASH:       "CheckCash",
+	CHECK_CANCEL:     "CheckCancel",
+	DEPOSIT_PRE_AUTH: "DepositPreauth",
 }
 
 var txTypes = map[string]TransactionType{
@@ -173,6 +177,7 @@ var txTypes = map[string]TransactionType{
 	"CheckCreate":          CHECK_CREATE,
 	"CheckCash":            CHECK_CASH,
 	"CheckCancel":          CHECK_CANCEL,
+	"DepositPreauth":       DEPOSIT_PREAUTH,
 }
 
 var HashableTypes []string
