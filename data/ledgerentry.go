@@ -142,18 +142,19 @@ type Ticket struct {
 
 type PayChannel struct {
 	leBase
-	Flags          *LedgerEntryFlag `json:",omitempty"`
-	Account        *Account         `json:",omitempty"`
-	Destination    *Account         `json:",omitempty"`
-	Amount         *Amount          `json:",omitempty"`
-	Balance        *Amount          `json:",omitempty"`
-	PublicKey      *PublicKey       `json:",omitempty"`
-	SettleDelay    *uint32          `json:",omitempty"`
-	OwnerNode      *NodeIndex       `json:",omitempty"`
-	Expiration     *uint32          `json:",omitempty"`
-	CancelAfter    *uint32          `json:",omitempty"`
-	DestinationTag *uint32          `json:",omitempty"`
-	SourceTag      *uint32          `json:",omitempty"`
+	Flags           *LedgerEntryFlag `json:",omitempty"`
+	Account         *Account         `json:",omitempty"`
+	Destination     *Account         `json:",omitempty"`
+	Amount          *Amount          `json:",omitempty"`
+	Balance         *Amount          `json:",omitempty"`
+	PublicKey       *PublicKey       `json:",omitempty"`
+	SettleDelay     *uint32          `json:",omitempty"`
+	OwnerNode       *NodeIndex       `json:",omitempty"`
+	DestinationNode *NodeIndex       `json:",omitempty"`
+	Expiration      *uint32          `json:",omitempty"`
+	CancelAfter     *uint32          `json:",omitempty"`
+	DestinationTag  *uint32          `json:",omitempty"`
+	SourceTag       *uint32          `json:",omitempty"`
 }
 
 type Check struct {
