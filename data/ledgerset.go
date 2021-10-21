@@ -2,7 +2,7 @@ package data
 
 import (
 	"fmt"
-	"github.com/willf/bitset"
+	"github.com/bits-and-blooms/bitset"
 	"sort"
 	"time"
 )
