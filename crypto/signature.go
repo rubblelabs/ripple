@@ -1,10 +1,10 @@
 package crypto
 
 import (
-	"crypto/ed25519"
 	"fmt"
 
 	"github.com/btcsuite/btcd/btcec"
+	"golang.org/x/crypto/ed25519"
 )
 
 func Sign(privateKey, hash, msg []byte) ([]byte, error) {
