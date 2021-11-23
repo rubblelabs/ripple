@@ -17,6 +17,8 @@ func NewRippleHash(s string) (Hash, error) {
 		return newHashFromString(ACCOUNT_ZERO)
 	case "1":
 		return newHashFromString(ACCOUNT_ONE)
+	case "":
+		return newHashFromString(NaN)
 	default:
 		return newHashFromString(s)
 	}

@@ -8,19 +8,20 @@ type TransactionType uint16
 
 const (
 	// LedgerEntryType values come from rippled's "LedgerFormats.h"
-	SIGNER_LIST        LedgerEntryType = 0x53 // 'S'
-	TICKET             LedgerEntryType = 0x54 // 'T'
-	ACCOUNT_ROOT       LedgerEntryType = 0x61 // 'a'
-	DIRECTORY          LedgerEntryType = 0x64 // 'd'
-	AMENDMENTS         LedgerEntryType = 0x66 // 'f'
-	LEDGER_HASHES      LedgerEntryType = 0x68 // 'h'
-	OFFER              LedgerEntryType = 0x6f // 'o'
-	RIPPLE_STATE       LedgerEntryType = 0x72 // 'r'
-	FEE_SETTINGS       LedgerEntryType = 0x73 // 's'
-	ESCROW             LedgerEntryType = 0x75 // 'u'
-	PAY_CHANNEL        LedgerEntryType = 0x78 // 'x'
-	CHECK              LedgerEntryType = 0x63 // 'C'
-	DEPOSIT_PRE_AUTH   LedgerEntryType = 0x70 // 'p'
+	SIGNER_LIST        LedgerEntryType = 0x53   // 'S'
+	TICKET             LedgerEntryType = 0x54   // 'T'
+	ACCOUNT_ROOT       LedgerEntryType = 0x61   // 'a'
+	DIRECTORY          LedgerEntryType = 0x64   // 'd'
+	AMENDMENTS         LedgerEntryType = 0x66   // 'f'
+	LEDGER_HASHES      LedgerEntryType = 0x68   // 'h'
+	OFFER              LedgerEntryType = 0x6f   // 'o'
+	RIPPLE_STATE       LedgerEntryType = 0x72   // 'r'
+	FEE_SETTINGS       LedgerEntryType = 0x73   // 's'
+	ESCROW             LedgerEntryType = 0x75   // 'u'
+	PAY_CHANNEL        LedgerEntryType = 0x78   // 'x'
+	CHECK              LedgerEntryType = 0x63   // 'C'
+	DEPOSIT_PRE_AUTH   LedgerEntryType = 0x70   // 'p'
+	NEGATIVE_UNL       LedgerEntryType = 0x2d31 // -1
 	UNKNOW_LEDGER_TYPE LedgerEntryType = 0xff
 
 	// TransactionType values come from rippled's "TxFormats.h"
@@ -45,6 +46,7 @@ const (
 	ACCOUNT_DELETE  TransactionType = 21
 	AMENDMENT       TransactionType = 100
 	SET_FEE         TransactionType = 101
+	UNL_MODIFY      TransactionType = 102
 	UNKNOW_TX_TYPE  TransactionType = 999
 )
 
@@ -66,6 +68,7 @@ var LedgerEntryFactory = [...]func() LedgerEntry{
 	PAY_CHANNEL:        func() LedgerEntry { return &PayChannel{leBase: leBase{LedgerEntryType: PAY_CHANNEL}} },
 	CHECK:              func() LedgerEntry { return &Check{leBase: leBase{LedgerEntryType: CHECK}} },
 	DEPOSIT_PRE_AUTH:   func() LedgerEntry { return &DepositPreAuth{leBase: leBase{LedgerEntryType: DEPOSIT_PRE_AUTH}} },
+	NEGATIVE_UNL:       func() LedgerEntry { return &DepositPreAuth{leBase: leBase{LedgerEntryType: NEGATIVE_UNL}} },
 	UNKNOW_LEDGER_TYPE: func() LedgerEntry { return &UnknowLedger{leBase: leBase{LedgerEntryType: UNKNOW_LEDGER_TYPE}} },
 }
 
@@ -89,6 +92,7 @@ var TxFactory = [...]func() Transaction{
 	CHECK_CREATE:    func() Transaction { return &CheckCreate{TxBase: TxBase{TransactionType: CHECK_CREATE}} },
 	CHECK_CASH:      func() Transaction { return &CheckCash{TxBase: TxBase{TransactionType: CHECK_CASH}} },
 	CHECK_CANCEL:    func() Transaction { return &CheckCancel{TxBase: TxBase{TransactionType: CHECK_CANCEL}} },
+	UNL_MODIFY:      func() Transaction { return &CheckCancel{TxBase: TxBase{TransactionType: UNL_MODIFY}} },
 	UNKNOW_TX_TYPE:  func() Transaction { return &UnknowTx{TxBase: TxBase{TransactionType: UNKNOW_TX_TYPE}} },
 }
 
@@ -106,6 +110,7 @@ var ledgerEntryNames = [...]string{
 	PAY_CHANNEL:        "PayChannel",
 	CHECK:              "Check",
 	DEPOSIT_PRE_AUTH:   "DepositPreAuth",
+	NEGATIVE_UNL:       "NegativeUNL",
 	UNKNOW_LEDGER_TYPE: "UnknowLedgerType",
 }
 
@@ -123,6 +128,7 @@ var ledgerEntryTypes = map[string]LedgerEntryType{
 	"PayChannel":     PAY_CHANNEL,
 	"Check":          CHECK,
 	"DepositPreAuth": DEPOSIT_PRE_AUTH,
+	"NegativeUNL":    NEGATIVE_UNL,
 }
 
 var txNames = [...]string{
@@ -145,6 +151,7 @@ var txNames = [...]string{
 	CHECK_CREATE:    "CheckCreate",
 	CHECK_CASH:      "CheckCash",
 	CHECK_CANCEL:    "CheckCancel",
+	UNL_MODIFY:      "UNLModify",
 	UNKNOW_TX_TYPE:  "UnknowTxType",
 }
 
@@ -168,6 +175,7 @@ var txTypes = map[string]TransactionType{
 	"CheckCreate":          CHECK_CREATE,
 	"CheckCash":            CHECK_CASH,
 	"CheckCancel":          CHECK_CANCEL,
+	"UNLModify":            UNL_MODIFY,
 }
 
 var HashableTypes []string
