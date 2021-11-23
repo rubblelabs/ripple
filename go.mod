@@ -3,7 +3,7 @@ module github.com/rubblelabs/ripple
 go 1.12
 
 require (
-    github.com/bits-and-blooms/bitset v1.2.1
+	github.com/bits-and-blooms/bitset v1.2.1
 	github.com/btcsuite/btcd v0.20.1-beta
 	github.com/fatih/color v1.9.0
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
