@@ -136,6 +136,8 @@ var encodings = map[enc]string{
 	enc{ST_UINT32, 37}: "FinishAfter",
 	enc{ST_UINT32, 38}: "SignerListID",
 	enc{ST_UINT32, 39}: "SettleDelay",
+	enc{ST_UINT32, 40}: "TicketCount",
+	enc{ST_UINT32, 41}: "TicketSequence",
 	// 64-bit unsigned integers (common)
 	enc{ST_UINT64, 1}:  "IndexNext",
 	enc{ST_UINT64, 2}:  "IndexPrevious",
@@ -147,6 +149,7 @@ var encodings = map[enc]string{
 	enc{ST_UINT64, 8}:  "HighNode",
 	enc{ST_UINT64, 9}:  "DestinationNode",
 	enc{ST_UINT64, 10}: "Cookie",
+	enc{ST_UINT64, 11}: "ServerVersion",
 	// 128-bit (common)
 	enc{ST_HASH128, 1}: "EmailHash",
 	// 256-bit (common)
@@ -168,6 +171,7 @@ var encodings = map[enc]string{
 	enc{ST_HASH256, 21}: "Digest",
 	enc{ST_HASH256, 22}: "Channel",
 	enc{ST_HASH256, 24}: "CheckID",
+	enc{ST_HASH256, 25}: "ValidatedHash",
 	// currency amount (common)
 	enc{ST_AMOUNT, 1}:  "Amount",
 	enc{ST_AMOUNT, 2}:  "Balance",
@@ -229,6 +233,7 @@ var encodings = map[enc]string{
 	// inner object (uncommon)
 	enc{ST_OBJECT, 16}: "Signer",
 	enc{ST_OBJECT, 18}: "Majority",
+	enc{ST_OBJECT, 19}: "DisabledValidator",
 	// array of objects
 	enc{ST_ARRAY, 1}: "EndOfArray",
 	enc{ST_ARRAY, 2}: "SigningAccounts",
