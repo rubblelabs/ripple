@@ -21,6 +21,7 @@ const (
 	PAY_CHANNEL      LedgerEntryType = 0x78 // 'x'
 	CHECK            LedgerEntryType = 0x43 // 'C'
 	DEPOSIT_PRE_AUTH LedgerEntryType = 0x70 // 'p'
+	NEGATIVE_UNL     LedgerEntryType = 0x4e //'N'
 
 	// TransactionType values come from rippled's "TxFormats.h"
 	PAYMENT         TransactionType = 0
@@ -44,6 +45,7 @@ const (
 	ACCOUNT_DELETE  TransactionType = 21
 	AMENDMENT       TransactionType = 100
 	SET_FEE         TransactionType = 101
+	UNL_MODIFY      TransactionType = 102
 )
 
 var LedgerFactory = [...]func() Hashable{
@@ -64,6 +66,7 @@ var LedgerEntryFactory = [...]func() LedgerEntry{
 	PAY_CHANNEL:      func() LedgerEntry { return &PayChannel{leBase: leBase{LedgerEntryType: PAY_CHANNEL}} },
 	CHECK:            func() LedgerEntry { return &Check{leBase: leBase{LedgerEntryType: CHECK}} },
 	DEPOSIT_PRE_AUTH: func() LedgerEntry { return &DepositPreAuth{leBase: leBase{LedgerEntryType: DEPOSIT_PRE_AUTH}} },
+	NEGATIVE_UNL:     func() LedgerEntry { return &NegativeUNL{leBase: leBase{LedgerEntryType: NEGATIVE_UNL}} },
 }
 
 var TxFactory = [...]func() Transaction{
@@ -76,6 +79,7 @@ var TxFactory = [...]func() Transaction{
 	TRUST_SET:       func() Transaction { return &TrustSet{TxBase: TxBase{TransactionType: TRUST_SET}} },
 	AMENDMENT:       func() Transaction { return &Amendment{TxBase: TxBase{TransactionType: AMENDMENT}} },
 	SET_FEE:         func() Transaction { return &SetFee{TxBase: TxBase{TransactionType: SET_FEE}} },
+	UNL_MODIFY:      func() Transaction { return &UNLModify{TxBase: TxBase{TransactionType: UNL_MODIFY}} },
 	ESCROW_CREATE:   func() Transaction { return &EscrowCreate{TxBase: TxBase{TransactionType: ESCROW_CREATE}} },
 	ESCROW_FINISH:   func() Transaction { return &EscrowFinish{TxBase: TxBase{TransactionType: ESCROW_FINISH}} },
 	ESCROW_CANCEL:   func() Transaction { return &EscrowCancel{TxBase: TxBase{TransactionType: ESCROW_CANCEL}} },
@@ -102,6 +106,7 @@ var ledgerEntryNames = [...]string{
 	PAY_CHANNEL:      "PayChannel",
 	CHECK:            "Check",
 	DEPOSIT_PRE_AUTH: "DepositPreAuth",
+	NEGATIVE_UNL:     "NegativeUNL",
 }
 
 var ledgerEntryTypes = map[string]LedgerEntryType{
@@ -118,6 +123,7 @@ var ledgerEntryTypes = map[string]LedgerEntryType{
 	"PayChannel":     PAY_CHANNEL,
 	"Check":          CHECK,
 	"DepositPreAuth": DEPOSIT_PRE_AUTH,
+	"NegativeUNL":    NEGATIVE_UNL,
 }
 
 var txNames = [...]string{
@@ -130,6 +136,7 @@ var txNames = [...]string{
 	TRUST_SET:       "TrustSet",
 	AMENDMENT:       "EnableAmendment",
 	SET_FEE:         "SetFee",
+	UNL_MODIFY:      "UNLModify",
 	ESCROW_CREATE:   "EscrowCreate",
 	ESCROW_FINISH:   "EscrowFinish",
 	ESCROW_CANCEL:   "EscrowCancel",
@@ -152,6 +159,7 @@ var txTypes = map[string]TransactionType{
 	"TrustSet":             TRUST_SET,
 	"EnableAmendment":      AMENDMENT,
 	"SetFee":               SET_FEE,
+	"UNLModify":            UNL_MODIFY,
 	"EscrowCreate":         ESCROW_CREATE,
 	"EscrowFinish":         ESCROW_FINISH,
 	"EscrowCancel":         ESCROW_CANCEL,

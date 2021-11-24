@@ -178,6 +178,12 @@ type SignerListSet struct {
 	SignerEntries []SignerEntry `json:",omitempty"`
 }
 
+type UNLModify struct {
+	TxBase
+	UNLModifyDisabling uint8           `json:",omitempty"`
+	UNLModifyValidator *VariableLength `json:",omitempty"`
+}
+
 func (t *TxBase) GetBase() *TxBase                    { return t }
 func (t *TxBase) GetType() string                     { return txNames[t.TransactionType] }
 func (t *TxBase) GetTransactionType() TransactionType { return t.TransactionType }

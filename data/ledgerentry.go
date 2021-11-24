@@ -180,6 +180,18 @@ type DepositPreAuth struct {
 	OwnerNode *NodeIndex       `json:",omitempty"`
 }
 
+type DisabledValidator struct {
+	FirstLedgerSequence *uint32    `json:",omitempty"`
+	PublicKey           *PublicKey `json:",omitempty"`
+}
+
+type NegativeUNL struct {
+	leBase
+	DisabledValidators  []DisabledValidator `json:",omitempty"`
+	ValidatorToDisable  *VariableLength     `json:",omitempty"`
+	ValidatorToReEnable *VariableLength     `json:",omitempty"`
+}
+
 func (a *AccountRoot) Affects(account Account) bool {
 	return a.Account != nil && a.Account.Equals(account)
 }
@@ -191,6 +203,7 @@ func (d *Directory) Affects(account Account) bool    { return false }
 func (l *LedgerHashes) Affects(account Account) bool { return false }
 func (a *Amendments) Affects(account Account) bool   { return false }
 func (f *FeeSettings) Affects(account Account) bool  { return false }
+func (*NegativeUNL) Affects(account Account) bool    { return false }
 func (s *Escrow) Affects(account Account) bool {
 	return s.Account.Equals(account) || s.Destination.Equals(account)
 }

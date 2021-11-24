@@ -49,6 +49,9 @@ const (
 	NS_TICKET          LedgerNamespace = 'T'
 	NS_SIGNER_LIST     LedgerNamespace = 'S'
 	NS_XRPU_CHANNEL    LedgerNamespace = 'x'
+	NS_CHECK           LedgerNamespace = 'C'
+	NS_DEPOSIT_PREAUTH LedgerNamespace = 'p'
+	NS_NEGATIVE_UNL    LedgerNamespace = 'N'
 )
 
 var nodeTypes = [...]string{
@@ -199,6 +202,9 @@ var encodings = map[enc]string{
 	enc{ST_VL, 16}: "Fulfillment",
 	enc{ST_VL, 17}: "Condition",
 	enc{ST_VL, 18}: "MasterSignature",
+	enc{ST_VL, 19}: "UNLModifyValidator",
+	enc{ST_VL, 20}: "ValidatorToDisable",
+	enc{ST_VL, 21}: "ValidatorToReEnable",
 	// account
 	enc{ST_ACCOUNT, 1}: "Account",
 	enc{ST_ACCOUNT, 2}: "Owner",
@@ -235,12 +241,14 @@ var encodings = map[enc]string{
 	enc{ST_ARRAY, 9}: "Memos",
 	// array of objects (uncommon)
 	enc{ST_ARRAY, 16}: "Majorities",
+	enc{ST_ARRAY, 17}: "DisabledValidators",
 	// 8-bit unsigned integers (common)
 	enc{ST_UINT8, 1}: "CloseResolution",
 	enc{ST_UINT8, 2}: "Method",
 	enc{ST_UINT8, 3}: "TransactionResult",
 	// 8-bit unsigned integers (uncommon)
 	enc{ST_UINT8, 16}: "TickSize",
+	enc{ST_UINT8, 17}: "UNLModifyDisabling",
 	// 160-bit (common)
 	enc{ST_HASH160, 1}: "TakerPaysCurrency",
 	enc{ST_HASH160, 2}: "TakerPaysIssuer",
