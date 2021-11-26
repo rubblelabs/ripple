@@ -33,7 +33,7 @@ const (
 	OFFER_CREATE    TransactionType = 7
 	OFFER_CANCEL    TransactionType = 8
 	TICKET_CREATE   TransactionType = 10
-	TICKET_CANCEL   TransactionType = 11
+	// TICKET_CANCEL   TransactionType = 11
 	SIGNER_LIST_SET TransactionType = 12
 	PAYCHAN_CREATE  TransactionType = 13
 	PAYCHAN_FUND    TransactionType = 14
@@ -137,6 +137,7 @@ var txNames = [...]string{
 	AMENDMENT:       "EnableAmendment",
 	SET_FEE:         "SetFee",
 	UNL_MODIFY:      "UNLModify",
+	TICKET_CREATE:   "TicketCreate",
 	ESCROW_CREATE:   "EscrowCreate",
 	ESCROW_FINISH:   "EscrowFinish",
 	ESCROW_CANCEL:   "EscrowCancel",
@@ -160,6 +161,7 @@ var txTypes = map[string]TransactionType{
 	"EnableAmendment":      AMENDMENT,
 	"SetFee":               SET_FEE,
 	"UNLModify":            UNL_MODIFY,
+	"TicketCreate":         TICKET_CREATE,
 	"EscrowCreate":         ESCROW_CREATE,
 	"EscrowFinish":         ESCROW_FINISH,
 	"EscrowCancel":         ESCROW_CANCEL,

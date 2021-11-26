@@ -145,12 +145,10 @@ type SignerList struct {
 
 type Ticket struct {
 	leBase
-	Flags      *LedgerEntryFlag `json:",omitempty"`
-	Account    *Account         `json:",omitempty"`
-	Sequence   *uint32          `json:",omitempty"`
-	OwnerNode  *NodeIndex       `json:",omitempty"`
-	Target     *Account         `json:",omitempty"`
-	Expiration *uint32          `json:",omitempty"`
+	Flags          *LedgerEntryFlag `json:",omitempty"`
+	Account        *Account         `json:",omitempty"`
+	TicketSequence *uint32          `json:",omitempty"`
+	OwnerNode      *NodeIndex       `json:",omitempty"`
 }
 
 type PayChannel struct {

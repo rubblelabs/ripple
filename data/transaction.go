@@ -164,12 +164,7 @@ type CheckCancel struct {
 }
 
 type TicketCreate struct {
-	Target     *Account `json:",omitempty"`
-	Expiration *uint32  `json:",omitempty"`
-}
-
-type TicketCancel struct {
-	TicketID Hash256
+	TicketCount *uint32 `json:",omitempty"`
 }
 
 type SignerListSet struct {
