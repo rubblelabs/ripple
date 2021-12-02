@@ -2,9 +2,10 @@ package data
 
 import (
 	"fmt"
-	"github.com/willf/bitset"
 	"sort"
 	"time"
+
+	"github.com/bits-and-blooms/bitset"
 )
 
 type LedgerSlice []uint32
