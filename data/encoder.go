@@ -19,7 +19,7 @@ func NodeId(h Hashable) (Hash256, error) {
 	return nodeid, err
 }
 
-func SigningHash(s Signer) (Hash256, []byte, error) {
+func SigningHash(s Signable) (Hash256, []byte, error) {
 	return raw(s, s.SigningPrefix(), true)
 }
 

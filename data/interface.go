@@ -10,7 +10,7 @@ type Hashable interface {
 	GetHash() *Hash256
 }
 
-type Signer interface {
+type Signable interface {
 	Hashable
 	InitialiseForSigning()
 	SigningPrefix() HashPrefix
@@ -39,7 +39,7 @@ type LedgerEntry interface {
 }
 
 type Transaction interface {
-	Signer
+	Signable
 	GetTransactionType() TransactionType
 	GetBase() *TxBase
 	PathSet() PathSet

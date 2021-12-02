@@ -2,7 +2,7 @@ package data
 
 import "github.com/rubblelabs/ripple/crypto"
 
-func Sign(s Signer, key crypto.Key, sequence *uint32) error {
+func Sign(s Signable, key crypto.Key, sequence *uint32) error {
 	s.InitialiseForSigning()
 	copy(s.GetPublicKey().Bytes(), key.Public(sequence))
 	hash, msg, err := SigningHash(s)
@@ -22,7 +22,7 @@ func Sign(s Signer, key crypto.Key, sequence *uint32) error {
 	return nil
 }
 
-func CheckSignature(s Signer) (bool, error) {
+func CheckSignature(s Signable) (bool, error) {
 	hash, msg, err := SigningHash(s)
 	if err != nil {
 		return false, err
