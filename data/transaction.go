@@ -10,10 +10,17 @@ type TxBase struct {
 	AccountTxnID       *Hash256        `json:",omitempty"`
 	SigningPubKey      *PublicKey      `json:",omitempty"`
 	TxnSignature       *VariableLength `json:",omitempty"`
+	Signers            []Signer        `json:",omitempty"`
 	Memos              Memos           `json:",omitempty"`
 	PreviousTxnID      *Hash256        `json:",omitempty"`
 	LastLedgerSequence *uint32         `json:",omitempty"`
 	Hash               Hash256         `json:"hash"`
+}
+
+type Signer struct {
+	Account       Account
+	TxnSignature  *VariableLength
+	SigningPubKey *PublicKey
 }
 
 type Payment struct {
