@@ -55,7 +55,7 @@ func MemoSymbol(tx data.Transaction) string {
 	return BoolSymbol(len(tx.GetBase().Memos) > 0)
 }
 
-func SignSymbol(s data.Sigable) string {
+func SignSymbol(s data.Signable) string {
 	valid, err := data.CheckSignature(s)
 	return BoolSymbol(!valid || err != nil)
 }
