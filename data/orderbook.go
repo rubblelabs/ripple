@@ -12,7 +12,7 @@ type Asset struct {
 }
 
 func NewAsset(s string) (*Asset, error) {
-	if s == "XRP" {
+	if s == "HWA" {
 		return &Asset{
 			Currency: s,
 		}, nil
@@ -28,7 +28,7 @@ func NewAsset(s string) (*Asset, error) {
 }
 
 func (a *Asset) IsNative() bool {
-	return a.Currency == "XRP"
+	return a.Currency == "HWA"
 }
 
 func (a *Asset) Matches(amount *Amount) bool {

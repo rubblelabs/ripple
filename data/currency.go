@@ -25,7 +25,7 @@ var zeroCurrency Currency
 // Accepts currency as either a 3 character code
 // or a 40 character hex string
 func NewCurrency(s string) (Currency, error) {
-	if s == "XRP" {
+	if s == "HWA" {
 		return zeroCurrency, nil
 	}
 	var currency Currency
@@ -120,7 +120,7 @@ func (c Currency) String() string {
 func (c Currency) Machine() string {
 	switch c.Type() {
 	case CT_XRP:
-		return "XRP"
+		return "HWA"
 	case CT_STANDARD:
 		// Check for unprintable characters
 		for _, r := range string(c[12:15]) {

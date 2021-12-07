@@ -7,7 +7,7 @@
             "paths_computed" : [
                [
                   {
-                     "currency" : "XRP",
+                     "currency" : "HWA",
                      "type_hex" : "0000000000000010",
                      "type" : 16
                   },
@@ -43,7 +43,7 @@
                      "type" : 1
                   },
                   {
-                     "currency" : "XRP",
+                     "currency" : "HWA",
                      "type_hex" : "0000000000000010",
                      "type" : 16
                   },
@@ -61,7 +61,7 @@
                      "type" : 1
                   },
                   {
-                     "currency" : "XRP",
+                     "currency" : "HWA",
                      "type_hex" : "0000000000000010",
                      "type" : 16
                   },
@@ -87,7 +87,7 @@
          "USD",
          "XPT",
          "XAU",
-         "XRP"
+         "HWA"
       ],
       "destination_account" : "r9Dr5xwkeLegBeXq6ujinjSBLQzQ1zQGjH"
    }

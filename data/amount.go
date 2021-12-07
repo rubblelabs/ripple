@@ -40,7 +40,7 @@ func NewAmount(v interface{}) (*Amount, error) {
 		switch {
 		case len(parts) == 1:
 			native = true
-		case len(parts) > 1 && parts[1] == "XRP":
+		case len(parts) > 1 && parts[1] == "HWA":
 			native = true
 			if !strings.Contains(parts[0], ".") {
 				parts[0] = parts[0] + "."
@@ -230,7 +230,7 @@ func (a Amount) Asset() *Asset {
 	switch {
 	case a.IsNative():
 		return &Asset{
-			Currency: "XRP",
+			Currency: "HWA",
 		}
 	default:
 		return &Asset{
