@@ -5,8 +5,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"net"
-	"net/url"
 	"reflect"
 	"sort"
 	"time"
@@ -39,16 +37,8 @@ type Remote struct {
 // NewRemote returns a new remote session connected to the specified
 // server endpoint URI. To close the connection, use Close().
 func NewRemote(endpoint string) (*Remote, error) {
-	glog.Infoln(endpoint)
-	u, err := url.Parse(endpoint)
-	if err != nil {
-		return nil, err
-	}
-	c, err := net.DialTimeout("tcp", u.Host, dialTimeout)
-	if err != nil {
-		return nil, err
-	}
-	ws, _, err := websocket.NewClient(c, u, nil, 1024, 1024)
+	dd := websocket.DefaultDialer
+	ws, _, err := dd.Dial(endpoint, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -9,6 +9,7 @@ type LedgerEntryFlag uint32
 
 // Transaction Flags
 const (
+	NoneFlags TransactionFlag = 0x00000000
 	//Universal flags
 	TxCanonicalSignature TransactionFlag = 0x80000000
 

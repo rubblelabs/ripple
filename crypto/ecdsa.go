@@ -3,6 +3,7 @@ package crypto
 import (
 	"crypto/rand"
 	"encoding/binary"
+	"encoding/hex"
 	"math/big"
 
 	"github.com/btcsuite/btcd/btcec"
@@ -28,6 +29,20 @@ func newKey(seed []byte) *btcec.PrivateKey {
 			return privKey
 		}
 	}
+}
+
+func NewECDSAKeyFromString(p string) (*ecdsaKey, error) {
+	pk, err := hex.DecodeString(p)
+	if err != nil {
+		return nil, err
+	}
+	pvk, _ := btcec.PrivKeyFromBytes(btcec.S256(), pk)
+	r := &ecdsaKey{pvk}
+	return r, nil
+}
+func NewECDSAKeyFromPk(p *btcec.PrivateKey) *ecdsaKey {
+	r := &ecdsaKey{p}
+	return r
 }
 
 // If seed is nil, generate a random one
