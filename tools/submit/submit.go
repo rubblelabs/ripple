@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	host = flag.String("host", "wss://s-east.ripple.com:443", "websockets host")
+	host = flag.String("host", "wss://s2.ripple.com:443", "websockets host")
 )
 
 func checkErr(err error) {

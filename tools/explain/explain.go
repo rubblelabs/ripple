@@ -40,7 +40,7 @@ var argumentRegex = regexp.MustCompile(`(^[0-9a-fA-F]{64}$)|(^\d+$)|(^[r][a-km-z
 
 var (
 	flags        = flag.CommandLine
-	host         = flags.String("host", "wss://s-east.ripple.com:443", "websockets host")
+	host         = flags.String("host", "wss://s2.ripple.com:443", "websockets host")
 	trades       = flag.Bool("t", false, "hide trades")
 	balances     = flag.Bool("b", false, "hide balances")
 	paths        = flag.Bool("p", false, "hide paths")

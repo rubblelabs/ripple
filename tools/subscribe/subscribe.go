@@ -20,7 +20,7 @@ func checkErr(err error, quit bool) {
 }
 
 var (
-	host     = flag.String("host", "wss://s-east.ripple.com:443", "websockets host to connect to")
+	host     = flag.String("host", "wss://s2.ripple.com:443", "websockets host to connect to")
 	proposed = flag.Bool("proposed", false, "include proposed transacions")
 )
 
