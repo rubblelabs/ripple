@@ -184,6 +184,17 @@ func (p *PublicKey) Bytes() []byte {
 }
 
 // Expects address in base58 form
+func NewAccountFromByte(s string) (*Account, error) {
+	hash, err := crypto.NewRippleHashCheck(s, crypto.RIPPLE_ACCOUNT_ID)
+	if err != nil {
+		return nil, err
+	}
+	var account Account
+	copy(account[:], hash.Payload())
+	return &account, nil
+}
+
+// Expects address in base58 form
 func NewAccountFromAddress(s string) (*Account, error) {
 	hash, err := crypto.NewRippleHashCheck(s, crypto.RIPPLE_ACCOUNT_ID)
 	if err != nil {

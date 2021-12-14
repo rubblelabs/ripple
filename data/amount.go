@@ -54,7 +54,7 @@ func NewAmount(v interface{}) (*Amount, error) {
 				return nil, err
 			}
 		}
-		if len(parts) > 2 {
+		if len(parts) > 2 && parts[1] != "HWA" {
 			if issuer, err := crypto.NewRippleHash(parts[2]); err != nil {
 				return nil, err
 			} else {

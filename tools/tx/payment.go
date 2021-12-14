@@ -13,3 +13,15 @@ func NewPayment(account data.Account, to data.Account, amount data.Amount) *data
 	tr.Fee = *f
 	return tr
 }
+
+func NewOfferCreate(account data.Account, takerGets data.Amount, takerPays data.Amount) *data.OfferCreate {
+	tr := (data.TxFactory[data.OFFER_CREATE]()).(*data.OfferCreate)
+	tf := data.NoneFlags
+	tr.Flags = &tf
+	tr.TakerGets = takerGets
+	tr.Account = account
+	tr.TakerPays = takerPays
+	f, _ := data.NewNativeValue(12)
+	tr.Fee = *f
+	return tr
+}
