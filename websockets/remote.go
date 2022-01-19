@@ -320,7 +320,7 @@ func (r *Remote) LedgerHeader(ledger interface{}) (*LedgerHeaderResult, error) {
 // Synchronously requests paths
 func (r *Remote) RipplePathFind(src, dest data.Account, amount data.Amount, srcCurr *[]data.Currency) (*RipplePathFindResult, error) {
 	cmd := &RipplePathFindCommand{
-		Command:       newCommand("ripple_path_find"),
+		Command:       newCommand("hchain_path_find"),
 		SrcAccount:    src,
 		SrcCurrencies: srcCurr,
 		DestAccount:   dest,

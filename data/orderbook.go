@@ -148,8 +148,8 @@ type AccountLine struct {
 	Currency     Currency       `json:"currency"`
 	Limit        NonNativeValue `json:"limit"`
 	LimitPeer    NonNativeValue `json:"limit_peer"`
-	NoRipple     bool           `json:"no_ripple"`
-	NoRipplePeer bool           `json:"no_ripple_peer"`
+	NoRipple     bool           `json:"no_hchain"`
+	NoRipplePeer bool           `json:"no_hchain_peer"`
 	QualityIn    uint32         `json:"quality_in"`
 	QualityOut   uint32         `json:"quality_out"`
 }
