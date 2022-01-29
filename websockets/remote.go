@@ -70,7 +70,7 @@ func (r *Remote) Close() {
 
 	// Drain the Incoming channel and block until it is closed,
 	// indicating that this Remote is fully cleaned up.
-	for _ = range r.Incoming {
+	for range r.Incoming {
 	}
 }
 
@@ -272,7 +272,7 @@ func (r *Remote) streamLedgerData(ledger interface{}, c chan data.LedgerEntrySli
 		for i, state := range cmd.Result.State {
 			b, err := hex.DecodeString(state.Data + state.Index)
 			if err != nil {
-				glog.Errorln(cmd.Error())
+				glog.Errorln(err.Error())
 				return
 			}
 			les[i], err = data.ReadLedgerEntry(bytes.NewReader(b), data.Hash256{})
