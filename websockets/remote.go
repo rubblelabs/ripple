@@ -91,7 +91,7 @@ func (r *Remote) run() {
 
 		// Drain the inbound channel and block until it is closed,
 		// indicating that the readPump has returned.
-		for _ = range inbound {
+		for range inbound {
 		}
 	}()
 
@@ -292,7 +292,7 @@ func (r *Remote) streamLedgerData(ledger interface{}, c chan data.LedgerEntrySli
 
 // Asynchronously retrieve all data for a ledger using the binary form
 func (r *Remote) StreamLedgerData(ledger interface{}) chan data.LedgerEntrySlice {
-	c := make(chan data.LedgerEntrySlice)
+	c := make(chan data.LedgerEntrySlice, 100)
 	go r.streamLedgerData(ledger, c)
 	return c
 }
