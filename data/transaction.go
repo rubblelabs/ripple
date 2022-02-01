@@ -171,6 +171,7 @@ type CheckCancel struct {
 }
 
 type TicketCreate struct {
+	TxBase
 	TicketCount *uint32 `json:",omitempty"`
 }
 

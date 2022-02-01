@@ -80,6 +80,7 @@ var TxFactory = [...]func() Transaction{
 	AMENDMENT:       func() Transaction { return &Amendment{TxBase: TxBase{TransactionType: AMENDMENT}} },
 	SET_FEE:         func() Transaction { return &SetFee{TxBase: TxBase{TransactionType: SET_FEE}} },
 	UNL_MODIFY:      func() Transaction { return &UNLModify{TxBase: TxBase{TransactionType: UNL_MODIFY}} },
+	TICKET_CREATE:   func() Transaction { return &TicketCreate{TxBase: TxBase{TransactionType: TICKET_CREATE}} },
 	ESCROW_CREATE:   func() Transaction { return &EscrowCreate{TxBase: TxBase{TransactionType: ESCROW_CREATE}} },
 	ESCROW_FINISH:   func() Transaction { return &EscrowFinish{TxBase: TxBase{TransactionType: ESCROW_FINISH}} },
 	ESCROW_CANCEL:   func() Transaction { return &EscrowCancel{TxBase: TxBase{TransactionType: ESCROW_CANCEL}} },
