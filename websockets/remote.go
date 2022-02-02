@@ -305,13 +305,12 @@ func (r *Remote) streamLedgerData(ledger interface{}, start, end string, c chan 
 
 // Asynchronously retrieve all data for a ledger using the binary form
 func (r *Remote) StreamLedgerData(ledger interface{}) chan data.LedgerEntrySlice {
-	c := make(chan data.LedgerEntrySlice)
+	c := make(chan data.LedgerEntrySlice, 100)
 	wg := &sync.WaitGroup{}
 	for i := 0; i < 16; i++ {
 		wg.Add(1)
 		start := fmt.Sprintf("%X%s", i, strings.Repeat("0", 63))
 		end := fmt.Sprintf("%X%s", i, strings.Repeat("F", 63))
-		fmt.Println(start, end)
 		go r.streamLedgerData(ledger, start, end, c, wg)
 	}
 	go func() {
