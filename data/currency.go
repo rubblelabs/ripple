@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
 )
 
 type Currency [20]byte
@@ -129,6 +130,8 @@ func (c Currency) Machine() string {
 			}
 		}
 		return string(c[12:15])
+	case CT_UNKNOWN:
+		return strings.TrimSpace(string(c[:]))
 	default:
 		return string(b2h(c[:]))
 	}
