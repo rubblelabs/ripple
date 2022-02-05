@@ -24,10 +24,10 @@ type AccountRoot struct {
 	WalletLocator *Hash256         `json:",omitempty"`
 	WalletSize    *uint32          `json:",omitempty"`
 	MessageKey    *VariableLength  `json:",omitempty"`
-	TickSize      *uint8           `json:",omitempty"`
 	TransferRate  *uint32          `json:",omitempty"`
 	Domain        *VariableLength  `json:",omitempty"`
-	Signers       *VariableLength  `json:",omitempty"`
+	TickSize      *uint8           `json:",omitempty"`
+	TicketCount   *uint32          `json:",omitempty"`
 }
 
 type RippleState struct {
