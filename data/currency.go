@@ -8,6 +8,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 type Currency [20]byte
@@ -131,7 +132,12 @@ func (c Currency) Machine() string {
 		}
 		return string(c[12:15])
 	case CT_UNKNOWN:
-		return strings.TrimSpace(string(c[:]))
+		return strings.Map(func(r rune) rune {
+			if r > unicode.MaxASCII {
+				return -1
+			}
+			return r
+		}, string(c[:]))
 	default:
 		return string(b2h(c[:]))
 	}
