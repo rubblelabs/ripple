@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math"
-	"strconv"
 	"strings"
 	"unicode"
 )
@@ -126,17 +125,17 @@ func (c Currency) Machine() string {
 	case CT_STANDARD:
 		// Check for unprintable characters
 		for _, r := range string(c[12:15]) {
-			if !strconv.IsPrint(r) {
+			if !unicode.IsPrint(r) {
 				return string(b2h(c[:]))
 			}
 		}
 		return string(c[12:15])
 	case CT_UNKNOWN:
 		return strings.Map(func(r rune) rune {
-			if r > unicode.MaxASCII {
-				return -1
+			if unicode.IsPrint(r) {
+				return r
 			}
-			return r
+			return -1
 		}, string(c[:]))
 	default:
 		return string(b2h(c[:]))
