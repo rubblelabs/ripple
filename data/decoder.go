@@ -293,6 +293,12 @@ func readObject(r Reader, v *reflect.Value) error {
 				err := readObject(r, &inner)
 				v.Set(m.Elem())
 				return err
+			case "DisabledValidator":
+				var disabledValidator DisabledValidator
+				dv := reflect.ValueOf(&disabledValidator)
+				err := readObject(r, &dv)
+				v.Set(dv.Elem())
+				return err
 			default:
 				return fmt.Errorf("Unexpected object: %s for field: %s", v.Type(), name)
 			}
