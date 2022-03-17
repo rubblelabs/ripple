@@ -191,6 +191,19 @@ type DepositPreAuth struct {
 	OwnerNode *NodeIndex       `json:",omitempty"`
 }
 
+type NonFungibleToken struct {
+	TokenID *VariableLength `json:",omitempty"`
+	URI     *VariableLength `json:",omitempty"`
+}
+
+type NFTokenPage struct {
+	leBase
+	PreviousPageMin   *Hash256           `json:",omitempty"`
+	NextPageMin       *Hash256           `json:",omitempty"`
+	PreviousTxnID     *Hash256           `json:",omitempty"`
+	NonFungibleTokens []NonFungibleToken `json:",omitempty"`
+}
+
 func (a *AccountRoot) Affects(account Account) bool {
 	return a.Account != nil && a.Account.Equals(account)
 }
@@ -224,6 +237,10 @@ func (p *Check) Affects(account Account) bool {
 
 func (d *DepositPreAuth) Affects(account Account) bool {
 	return (d.Account != nil && d.Account.Equals(account)) || (d.Authorize != nil && d.Authorize.Equals(account))
+}
+
+func (p *NFTokenPage) Affects(account Account) bool {
+	return false
 }
 
 func (le *leBase) GetType() string                     { return ledgerEntryNames[le.LedgerEntryType] }

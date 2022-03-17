@@ -21,7 +21,13 @@ const (
 	PAY_CHANNEL      LedgerEntryType = 0x78 // 'x'
 	CHECK            LedgerEntryType = 0x43 // 'C'
 	DEPOSIT_PRE_AUTH LedgerEntryType = 0x70 // 'p'
-	NEGATIVE_UNL     LedgerEntryType = 0x4e //'N'
+	NEGATIVE_UNL     LedgerEntryType = 0x4e // 'N'
+	NFTOKEN_PAGE     LedgerEntryType = 0x50 // 'P'
+
+	// TODO: NFTOKEN_OFFER this needs to be tested because in source code it is defined as 0x37 but in doc as 0x0074
+	// source: https://github.com/ripple/rippled/pull/4101/files#diff-5b0d620062dd00fb5801519e62e857f3456075b1d9d02062b6a06bb0f64fffa5R162
+	// doc: https://xrpl.org/nftokenoffer.html#nftokenoffer-fields
+	NFTOKEN_OFFER LedgerEntryType = 0x37 // '7'
 
 	// TransactionType values come from rippled's "TxFormats.h"
 	PAYMENT         TransactionType = 0
@@ -34,19 +40,24 @@ const (
 	OFFER_CANCEL    TransactionType = 8
 	TICKET_CREATE   TransactionType = 10
 	// TICKET_CANCEL   TransactionType = 11
-	SIGNER_LIST_SET TransactionType = 12
-	PAYCHAN_CREATE  TransactionType = 13
-	PAYCHAN_FUND    TransactionType = 14
-	PAYCHAN_CLAIM   TransactionType = 15
-	CHECK_CREATE    TransactionType = 16
-	CHECK_CASH      TransactionType = 17
-	CHECK_CANCEL    TransactionType = 18
-	TRUST_SET       TransactionType = 20
-	ACCOUNT_DELETE  TransactionType = 21
-	AMENDMENT       TransactionType = 100
-	SET_FEE         TransactionType = 101
-	UNL_MODIFY      TransactionType = 102
-	DEPOSIT_PREAUTH TransactionType = 200
+	SIGNER_LIST_SET      TransactionType = 12
+	PAYCHAN_CREATE       TransactionType = 13
+	PAYCHAN_FUND         TransactionType = 14
+	PAYCHAN_CLAIM        TransactionType = 15
+	CHECK_CREATE         TransactionType = 16
+	CHECK_CASH           TransactionType = 17
+	CHECK_CANCEL         TransactionType = 18
+	TRUST_SET            TransactionType = 20
+	ACCOUNT_DELETE       TransactionType = 21
+	NFTOKEN_MINT         TransactionType = 25
+	NFTOKEN_BURN         TransactionType = 26
+	NFTOKEN_CREATE_OFFER TransactionType = 27
+	NFTOKEN_CANCEL_OFFER TransactionType = 28
+	NFTOKEN_ACCEPT_OFFER TransactionType = 29
+	AMENDMENT            TransactionType = 100
+	SET_FEE              TransactionType = 101
+	UNL_MODIFY           TransactionType = 102
+	DEPOSIT_PREAUTH      TransactionType = 200
 )
 
 var LedgerFactory = [...]func() Hashable{
@@ -68,6 +79,7 @@ var LedgerEntryFactory = [...]func() LedgerEntry{
 	CHECK:            func() LedgerEntry { return &Check{leBase: leBase{LedgerEntryType: CHECK}} },
 	DEPOSIT_PRE_AUTH: func() LedgerEntry { return &DepositPreAuth{leBase: leBase{LedgerEntryType: DEPOSIT_PRE_AUTH}} },
 	NEGATIVE_UNL:     func() LedgerEntry { return &NegativeUNL{leBase: leBase{LedgerEntryType: NEGATIVE_UNL}} },
+	NFTOKEN_PAGE:     func() LedgerEntry { return &NFTokenPage{leBase: leBase{LedgerEntryType: NFTOKEN_PAGE}} },
 }
 
 var TxFactory = [...]func() Transaction{
@@ -92,6 +104,7 @@ var TxFactory = [...]func() Transaction{
 	CHECK_CREATE:    func() Transaction { return &CheckCreate{TxBase: TxBase{TransactionType: CHECK_CREATE}} },
 	CHECK_CASH:      func() Transaction { return &CheckCash{TxBase: TxBase{TransactionType: CHECK_CASH}} },
 	CHECK_CANCEL:    func() Transaction { return &CheckCancel{TxBase: TxBase{TransactionType: CHECK_CANCEL}} },
+	NFTOKEN_MINT:    func() Transaction { return &NFTokenMint{TxBase: TxBase{TransactionType: NFTOKEN_MINT}} },
 	// The next types are not fully supported. They just added to avoid "Unknown TransactionType" error.
 	DEPOSIT_PREAUTH: func() Transaction { return &DepositPreauth{TxBase: TxBase{TransactionType: DEPOSIT_PREAUTH}} },
 }
@@ -111,6 +124,7 @@ var ledgerEntryNames = [...]string{
 	CHECK:            "Check",
 	DEPOSIT_PRE_AUTH: "DepositPreAuth",
 	NEGATIVE_UNL:     "NegativeUNL",
+	NFTOKEN_PAGE:     "NFTokenPage",
 }
 
 var ledgerEntryTypes = map[string]LedgerEntryType{
@@ -128,6 +142,7 @@ var ledgerEntryTypes = map[string]LedgerEntryType{
 	"Check":          CHECK,
 	"DepositPreAuth": DEPOSIT_PRE_AUTH,
 	"NegativeUNL":    NEGATIVE_UNL,
+	"NFTokenPage":    NFTOKEN_PAGE,
 }
 
 var txNames = [...]string{
@@ -153,6 +168,7 @@ var txNames = [...]string{
 	CHECK_CASH:       "CheckCash",
 	CHECK_CANCEL:     "CheckCancel",
 	DEPOSIT_PRE_AUTH: "DepositPreauth",
+	NFTOKEN_MINT:     "NFTokenMint",
 }
 
 var txTypes = map[string]TransactionType{
@@ -178,6 +194,7 @@ var txTypes = map[string]TransactionType{
 	"CheckCash":            CHECK_CASH,
 	"CheckCancel":          CHECK_CANCEL,
 	"DepositPreauth":       DEPOSIT_PREAUTH,
+	"NFTokenMint":          NFTOKEN_MINT,
 }
 
 var HashableTypes []string

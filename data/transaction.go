@@ -186,6 +186,14 @@ type SignerListSet struct {
 	SignerEntries []SignerEntry `json:",omitempty"`
 }
 
+type NFTokenMint struct {
+	TxBase
+	TokenTaxon  uint32
+	Issuer      *Account        `json:",omitempty"`
+	TransferFee *uint16         `json:",omitempty"`
+	URI         *VariableLength `json:",omitempty"`
+}
+
 type UNLModify struct {
 	TxBase
 	UNLModifyDisabling uint8           `json:",omitempty"`
