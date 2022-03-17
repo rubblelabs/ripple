@@ -194,6 +194,32 @@ type NFTokenMint struct {
 	URI         *VariableLength `json:",omitempty"`
 }
 
+type NFTokenBurn struct {
+	TxBase
+	TokenID Hash256 `json:",omitempty"`
+}
+
+type NFTokenCreateOffer struct {
+	TxBase
+	Owner       *Account `json:",omitempty"`
+	TokenID     Hash256  `json:",omitempty"`
+	Amount      Amount   `json:",omitempty"`
+	Expiration  *uint32  `json:",omitempty"`
+	Destination *Account `json:",omitempty"`
+}
+
+type NFTokenAcceptOffer struct {
+	TxBase
+	SellOffer *Hash256 `json:",omitempty"`
+	BuyOffer  *Hash256 `json:",omitempty"`
+	BrokerFee *Amount  `json:",omitempty"`
+}
+
+type NFTokenCancelOffer struct {
+	TxBase
+	TokenOffers Vector256 `json:",omitempty"`
+}
+
 type UNLModify struct {
 	TxBase
 	UNLModifyDisabling uint8           `json:",omitempty"`

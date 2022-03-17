@@ -2,7 +2,6 @@ package data
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"path/filepath"
 
@@ -26,7 +25,7 @@ func compare(c *C, filename string, expected, obtained []byte) {
 }
 
 func (s *JSONSuite) TestTransactionsJSON(c *C) {
-	files, err := filepath.Glob("testdata/transaction_nft_*.json")
+	files, err := filepath.Glob("testdata/transaction_nft_acc*.json")
 	c.Assert(err, IsNil)
 	for _, f := range files {
 		b, err := ioutil.ReadFile(f)
@@ -34,8 +33,6 @@ func (s *JSONSuite) TestTransactionsJSON(c *C) {
 		var txm TransactionWithMetaData
 		c.Assert(json.Unmarshal(b, &txm), IsNil)
 		out, err := json.MarshalIndent(txm, "", "  ")
-		fmt.Println(string(out))
-		fmt.Println(string(b))
 		c.Assert(err, IsNil)
 		compare(c, f, b, out)
 	}

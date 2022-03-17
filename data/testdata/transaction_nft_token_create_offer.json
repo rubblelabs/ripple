@@ -1,0 +1,75 @@
+{
+  "Account": "ramh8EQPBHyyfTmQSqkqYYgZgnhGmJV69u",
+  "Amount": "1100000",
+  "Fee": "12",
+  "Flags": 0,
+  "LastLedgerSequence": 364043,
+  "Owner": "r4q82SDwKtoSFmfPtZfDwbyKkzkUbXB2mN",
+  "Sequence": 277756,
+  "SigningPubKey": "02AD22844B7CBFBA8BFFA0340EAAE728149A725AA1A715A2EE6B3E71188F0387B7",
+  "TokenID": "000800003F2E1634C35C647F154C55015A50BFF37FBCB0400000099B00000000",
+  "TransactionType": "NFTokenCreateOffer",
+  "TxnSignature": "304402205791B89EF8FBAFF8CF9CE69B4AC97EF3C627DDF9AB38D040480F81F0B6CA71EA0220240DD4CD6FF78F0BCC6C312AF91BF1C2D9585D2208503F7BEA53A11B2068D292",
+  "meta": {
+    "AffectedNodes": [
+      {
+        "ModifiedNode": {
+          "FinalFields": {
+            "Flags": 1,
+            "RootIndex": "765A1628C75E257F0C998A04CE4354F3567F5F68D400CCA176D465A307D9DDDE",
+            "TokenID": "000800003F2E1634C35C647F154C55015A50BFF37FBCB0400000099B00000000"
+          },
+          "LedgerEntryType": "DirectoryNode",
+          "LedgerIndex": "765A1628C75E257F0C998A04CE4354F3567F5F68D400CCA176D465A307D9DDDE"
+        }
+      },
+      {
+        "ModifiedNode": {
+          "FinalFields": {
+            "Account": "ramh8EQPBHyyfTmQSqkqYYgZgnhGmJV69u",
+            "Balance": "10000999916",
+            "Flags": 0,
+            "MintedTokens": 2,
+            "OwnerCount": 2,
+            "Sequence": 277757
+          },
+          "LedgerEntryType": "AccountRoot",
+          "LedgerIndex": "BC1971F354ADA614A4E2956866AF3082BB4C5EA11C7A36FAD5C255BC44F2151D",
+          "PreviousFields": {
+            "Balance": "10000999928",
+            "OwnerCount": 1,
+            "Sequence": 277756
+          },
+          "PreviousTxnID": "1687A5F24D37B9D0F319A80EDF8CCEA31599B23DC31FF3D2207A19ACD91D1328",
+          "PreviousTxnLgrSeq": 363869
+        }
+      },
+      {
+        "CreatedNode": {
+          "LedgerEntryType": "NFTokenOffer",
+          "LedgerIndex": "BFFBDEE239AE2889943268EEB006572D2D7BCCB881F92E5B77890E6FE80B9B8A",
+          "NewFields": {
+            "Amount": "1100000",
+            "Owner": "ramh8EQPBHyyfTmQSqkqYYgZgnhGmJV69u",
+            "TokenID": "000800003F2E1634C35C647F154C55015A50BFF37FBCB0400000099B00000000"
+          }
+        }
+      },
+      {
+        "CreatedNode": {
+          "LedgerEntryType": "DirectoryNode",
+          "LedgerIndex": "DF98FCBA9B093F80411F8C04E233D62F2CFCBF88925B8E1D4AE4659C48C1033A",
+          "NewFields": {
+            "Owner": "ramh8EQPBHyyfTmQSqkqYYgZgnhGmJV69u",
+            "RootIndex": "DF98FCBA9B093F80411F8C04E233D62F2CFCBF88925B8E1D4AE4659C48C1033A"
+          }
+        }
+      }
+    ],
+    "TransactionIndex": 0,
+    "TransactionResult": "tesSUCCESS"
+  },
+  "hash": "9406C0FD679628147E1C9102DC30A2F6E845BDF595590D8362AE1B4EFE99507C",
+  "ledger_index": 364024,
+  "inLedger": 364024
+}
