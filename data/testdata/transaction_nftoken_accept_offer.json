@@ -15,9 +15,7 @@
           "FinalFields": {
             "Amount": "1000000",
             "Flags": 1,
-            "OfferNode": "0",
             "Owner": "ramh8EQPBHyyfTmQSqkqYYgZgnhGmJV69u",
-            "OwnerNode": "0",
             "PreviousTxnID": "EF3C5AAC4A28D21875C77A9DDDAE97AD54B8CC55E07979E31FF879FBD9792DEC",
             "PreviousTxnLgrSeq": 278220,
             "TokenID": "000800003F2E1634C35C647F154C55015A50BFF37FBCB0400000099B00000000"
@@ -29,7 +27,6 @@
       {
         "DeletedNode": {
           "FinalFields": {
-            "Flags": 0,
             "NonFungibleTokens": [
               {
                 "NonFungibleToken": {

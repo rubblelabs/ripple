@@ -216,9 +216,9 @@ type NFTokenOffer struct {
 	Amount      Amount   `json:",omitempty"`
 	Expiration  *uint32  `json:",omitempty"`
 	Destination *Account `json:",omitempty"`
-	OwnerNode   *uint64  `json:",omitempty"`
-	OfferNode   *uint64  `json:",omitempty"`
-	Flags       uint32   `json:",omitempty"`
+	//OwnerNode   *VariableLength `json:",omitempty"`
+	//OfferNode   *VariableLength `json:",omitempty"`
+	Flags uint32 `json:",omitempty"`
 }
 
 func (a *AccountRoot) Affects(account Account) bool {

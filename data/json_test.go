@@ -25,7 +25,7 @@ func compare(c *C, filename string, expected, obtained []byte) {
 }
 
 func (s *JSONSuite) TestTransactionsJSON(c *C) {
-	files, err := filepath.Glob("testdata/transaction_nft_acc*.json")
+	files, err := filepath.Glob("testdata/transaction_*.json")
 	c.Assert(err, IsNil)
 	for _, f := range files {
 		b, err := ioutil.ReadFile(f)
