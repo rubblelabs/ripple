@@ -81,7 +81,7 @@ func (c Currency) Type() CurrencyType {
 		return CT_XRP
 	case c[0] == 0x00:
 		for i, b := range c {
-			if i < 12 && i > 14 && b != 0 {
+			if (i < 12 || i > 15) && b != 0 {
 				return CT_UNKNOWN
 			}
 		}
