@@ -18,6 +18,7 @@ type AccountRoot struct {
 	Sequence      *uint32          `json:",omitempty"`
 	Balance       *Value           `json:",omitempty"`
 	OwnerCount    *uint32          `json:",omitempty"`
+	MintedTokens  *uint32          `json:",omitempty"`
 	AccountTxnID  *Hash256         `json:",omitempty"`
 	RegularKey    *RegularKey      `json:",omitempty"`
 	EmailHash     *Hash128         `json:",omitempty"`
@@ -70,6 +71,7 @@ type Directory struct {
 	ExchangeRate      *ExchangeRate    `json:",omitempty"`
 	IndexNext         *NodeIndex       `json:",omitempty"`
 	IndexPrevious     *NodeIndex       `json:",omitempty"`
+	TokenID           *Hash256         `json:",omitempty"`
 }
 
 type LedgerHashes struct {
@@ -191,6 +193,34 @@ type DepositPreAuth struct {
 	OwnerNode *NodeIndex       `json:",omitempty"`
 }
 
+type NonFungibleToken struct {
+	TokenID Hash256        `json:",omitempty"`
+	URI     VariableLength `json:",omitempty"`
+}
+
+// NonFungibleTokens is defined as map. Doesn't work properly unless defined like this.
+type NonFungibleTokens []map[string]NonFungibleToken
+
+type NFTokenPage struct {
+	leBase
+	Flags             LedgerEntryFlag   `json:",omitempty"`
+	PreviousPageMin   *Hash256          `json:",omitempty"`
+	NextPageMin       *Hash256          `json:",omitempty"`
+	NonFungibleTokens NonFungibleTokens `json:",omitempty"`
+}
+
+type NFTokenOffer struct {
+	leBase
+	Owner       Account  `json:",omitempty"`
+	TokenID     Hash256  `json:",omitempty"`
+	Amount      Amount   `json:",omitempty"`
+	Expiration  *uint32  `json:",omitempty"`
+	Destination *Account `json:",omitempty"`
+	//OwnerNode   *VariableLength `json:",omitempty"`
+	//OfferNode   *VariableLength `json:",omitempty"`
+	Flags uint32 `json:",omitempty"`
+}
+
 func (a *AccountRoot) Affects(account Account) bool {
 	return a.Account != nil && a.Account.Equals(account)
 }
@@ -225,6 +255,9 @@ func (p *Check) Affects(account Account) bool {
 func (d *DepositPreAuth) Affects(account Account) bool {
 	return (d.Account != nil && d.Account.Equals(account)) || (d.Authorize != nil && d.Authorize.Equals(account))
 }
+
+func (p *NFTokenPage) Affects(account Account) bool  { return false }
+func (p *NFTokenOffer) Affects(account Account) bool { return false }
 
 func (le *leBase) GetType() string                     { return ledgerEntryNames[le.LedgerEntryType] }
 func (le *leBase) GetLedgerEntryType() LedgerEntryType { return le.LedgerEntryType }

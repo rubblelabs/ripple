@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math"
-	"strings"
 	"unicode"
 )
 
@@ -129,13 +128,13 @@ func (c Currency) Machine() string {
 			}
 		}
 		return string(c[12:15])
-	case CT_UNKNOWN:
-		return strings.Map(func(r rune) rune {
-			if unicode.IsPrint(r) {
-				return r
-			}
-			return -1
-		}, string(c[:]))
+	//case CT_UNKNOWN:
+	//	return strings.Map(func(r rune) rune {
+	//		if unicode.IsPrint(r) {
+	//			return r
+	//		}
+	//		return -1
+	//	}, string(c[:]))
 	default:
 		return string(b2h(c[:]))
 	}

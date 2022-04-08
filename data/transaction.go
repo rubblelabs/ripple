@@ -186,6 +186,40 @@ type SignerListSet struct {
 	SignerEntries []SignerEntry `json:",omitempty"`
 }
 
+type NFTokenMint struct {
+	TxBase
+	TokenTaxon  uint32
+	Issuer      *Account        `json:",omitempty"`
+	TransferFee *uint16         `json:",omitempty"`
+	URI         *VariableLength `json:",omitempty"`
+}
+
+type NFTokenBurn struct {
+	TxBase
+	TokenID Hash256 `json:",omitempty"`
+}
+
+type NFTokenCreateOffer struct {
+	TxBase
+	Owner       *Account `json:",omitempty"`
+	TokenID     Hash256  `json:",omitempty"`
+	Amount      Amount   `json:",omitempty"`
+	Expiration  *uint32  `json:",omitempty"`
+	Destination *Account `json:",omitempty"`
+}
+
+type NFTokenAcceptOffer struct {
+	TxBase
+	SellOffer *Hash256 `json:",omitempty"`
+	BuyOffer  *Hash256 `json:",omitempty"`
+	BrokerFee *Amount  `json:",omitempty"`
+}
+
+type NFTokenCancelOffer struct {
+	TxBase
+	TokenOffers Vector256 `json:",omitempty"`
+}
+
 type UNLModify struct {
 	TxBase
 	UNLModifyDisabling uint8           `json:",omitempty"`
