@@ -49,9 +49,27 @@ func ReadPrefix(r Reader, nodeId Hash256) (Storer, error) {
 }
 
 func ReadLedger(r Reader, nodeId Hash256) (*Ledger, error) {
-	ledger := new(Ledger)
-	if err := read(r, &ledger.LedgerHeader); err != nil {
-		return nil, err
+	ledger := &Ledger{
+		LedgerHeader: LedgerHeader{
+			ParentCloseTime: NewRippleTime(0),
+			CloseTime:       NewRippleTime(0),
+		},
+	}
+	values := []interface{}{
+		&ledger.LedgerSequence,
+		&ledger.TotalXRP,
+		&ledger.PreviousLedger,
+		&ledger.TransactionHash,
+		&ledger.StateHash,
+		ledger.ParentCloseTime,
+		ledger.CloseTime,
+		&ledger.CloseResolution,
+		&ledger.CloseFlags,
+	}
+	for _, v := range values {
+		if err := read(r, v); err != nil {
+			return nil, err
+		}
 	}
 	ledger.Hash = nodeId
 	return ledger, nil
