@@ -17,8 +17,7 @@ Examples:
 lines rBxy23n7ZFbUpS699rFVj1V9ZVhAq6EGwC
 	Show all trust lines for account rBxy23n7ZFbUpS699rFVj1V9ZVhAq6EGwC
 
-Options:
-`
+Options:`
 
 var (
 	host = flag.String("host", "wss://s1.ripple.com:443", "websockets host")

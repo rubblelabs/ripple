@@ -13,7 +13,7 @@ var _ = Suite(&CodecSuite{})
 
 func dump(test internal.TestData, v interface{}) CommentInterface {
 	out, _ := json.Marshal(v)
-	return Commentf("Test: %s\nJSON:%s\n", test.Description, string(out))
+	return Commentf("Test: %s\n Object: %v\n JSON: %s\n", test.Description, v, string(out))
 }
 
 func (s *CodecSuite) TestParseTransactions(c *C) {

@@ -164,7 +164,7 @@ func getFields(v *reflect.Value, depth int) fieldSlice {
 		if f.Kind() == reflect.Ptr {
 			f = f.Elem()
 		}
-		if !f.IsValid() || !f.CanInterface() || (f.Kind() == reflect.Slice && f.Len() == 0) {
+		if !f.IsValid() || (f.Kind() == reflect.Slice && f.Len() == 0) {
 			continue
 		}
 		switch encoding.typ {

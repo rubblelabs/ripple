@@ -1,15 +1,15 @@
 package data
 
 type LedgerHeader struct {
-	LedgerSequence  uint32     `json:"ledger_index,string"`
-	TotalXRP        uint64     `json:"total_coins,string"`
-	PreviousLedger  Hash256    `json:"parent_hash"`
-	TransactionHash Hash256    `json:"transaction_hash"`
-	StateHash       Hash256    `json:"account_hash"`
-	ParentCloseTime RippleTime `json:"parent_close_time"`
-	CloseTime       RippleTime `json:"close_time"`
-	CloseResolution uint8      `json:"close_time_resolution"`
-	CloseFlags      uint8      `json:"close_flags"`
+	LedgerSequence  uint32      `json:"ledger_index,string"`
+	TotalXRP        uint64      `json:"total_coins,string"`
+	PreviousLedger  Hash256     `json:"parent_hash"`
+	TransactionHash Hash256     `json:"transaction_hash"`
+	StateHash       Hash256     `json:"account_hash"`
+	ParentCloseTime *RippleTime `json:"parent_close_time,omitempty"`
+	CloseTime       *RippleTime `json:"close_time"`
+	CloseResolution uint8       `json:"close_time_resolution"`
+	CloseFlags      uint8       `json:"close_flags,omitempty"`
 }
 
 type Ledger struct {

@@ -37,7 +37,7 @@ func (s *MessagesSuite) TestLedgerResponse(c *C) {
 	// Result fields
 	c.Assert(msg.Result.Ledger.LedgerSequence, Equals, uint32(6917762))
 	c.Assert(msg.Result.Ledger.Accepted, Equals, true)
-	c.Assert(msg.Result.Ledger.CloseTime.String(), Equals, "2014-May-30 13:11:50")
+	c.Assert(msg.Result.Ledger.CloseTime.String(), Equals, "2014-May-30 13:11:50 UTC")
 	c.Assert(msg.Result.Ledger.Closed, Equals, true)
 	c.Assert(msg.Result.Ledger.Hash.String(), Equals, "0C5C5B39EA40D40ACA6EB47E50B2B85FD516D1A2BA67BA3E050349D3EF3632A4")
 	c.Assert(msg.Result.Ledger.PreviousLedger.String(), Equals, "F8F0363803C30E659AA24D6A62A6512BA24BEA5AC52A29731ABA1E2D80796E8B")
@@ -64,7 +64,7 @@ func (s *MessagesSuite) TestLedgerHeaderResponse(c *C) {
 	c.Assert(msg.Result.LedgerSequence, Equals, uint32(32570))
 	c.Assert(msg.Result.Ledger.LedgerSequence, Equals, uint32(32570))
 	c.Assert(msg.Result.Ledger.Accepted, Equals, true)
-	c.Assert(msg.Result.Ledger.CloseTime.String(), Equals, "2013-Jan-01 03:21:10")
+	c.Assert(msg.Result.Ledger.CloseTime.String(), Equals, "2013-Jan-01 03:21:10 UTC")
 	c.Assert(msg.Result.Ledger.Closed, Equals, true)
 	c.Assert(msg.Result.Ledger.Hash.String(), Equals, "4109C6F2045FC7EFF4CDE8F9905D19C28820D86304080FF886B299F0206E42B5")
 	c.Assert(msg.Result.Ledger.PreviousLedger.String(), Equals, "60A01EBF11537D8394EA1235253293508BDA7131D5F8710EFE9413AA129653A2")
@@ -83,7 +83,7 @@ func (s *MessagesSuite) TestTxResponse(c *C) {
 	c.Assert(msg.Type, Equals, "response")
 
 	// Result fields
-	c.Assert(msg.Result.Date.String(), Equals, "2014-May-30 13:11:50")
+	c.Assert(msg.Result.Date.String(), Equals, "2014-May-30 13:11:50 UTC")
 	c.Assert(msg.Result.Validated, Equals, true)
 	c.Assert(msg.Result.MetaData.AffectedNodes, HasLen, 4)
 	c.Assert(msg.Result.MetaData.TransactionResult.String(), Equals, "tesSUCCESS")
@@ -107,7 +107,7 @@ func (s *MessagesSuite) TestAccountTxResponse(c *C) {
 	c.Assert(msg.Type, Equals, "response")
 
 	c.Assert(len(msg.Result.Transactions), Equals, 2)
-	c.Assert(msg.Result.Transactions[1].Date.String(), Equals, "2014-Jun-19 14:14:40")
+	c.Assert(msg.Result.Transactions[1].Date.String(), Equals, "2014-Jun-19 14:14:40 UTC")
 	offer := msg.Result.Transactions[1].Transaction.(*data.OfferCreate)
 	c.Assert(offer.TakerPays.String(), Equals, "0.034800328/BTC/rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B")
 }
