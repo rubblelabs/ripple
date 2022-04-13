@@ -3,11 +3,14 @@
   "Fee": "12",
   "Flags": 0,
   "LastLedgerSequence": 279243,
-  "SellOffer": "2E56D35F040D355408931A35066A8284322D546F7E5867C11D020095EE673AE7",
+  "NFTokenSellOffer": "2E56D35F040D355408931A35066A8284322D546F7E5867C11D020095EE673AE7",
   "Sequence": 279160,
   "SigningPubKey": "03EC6A1FB23B738640D12C4664A902B277311C6426A097883D32BD3E2EE9030E04",
   "TransactionType": "NFTokenAcceptOffer",
   "TxnSignature": "3045022100D51D7BFB0F0DD298C70B8C4B9E3315B3A46106D01902B53572B0328EB8500744022077049C5D4C41FFD9F04451E5E7F0F39874B7C025F3B2C35C36E9B6B78E4F449C",
+  "hash": "E717AC94B38D2349E502B8E9ECF02DA98178412C3C754990B6F495D2BA500BCB",
+  "inLedger": 279225,
+  "ledger_index": 279225,
   "meta": {
     "AffectedNodes": [
       {
@@ -15,10 +18,10 @@
           "FinalFields": {
             "Amount": "1000000",
             "Flags": 1,
+            "NFTokenID": "000800003F2E1634C35C647F154C55015A50BFF37FBCB0400000099B00000000",
             "Owner": "ramh8EQPBHyyfTmQSqkqYYgZgnhGmJV69u",
             "PreviousTxnID": "EF3C5AAC4A28D21875C77A9DDDAE97AD54B8CC55E07979E31FF879FBD9792DEC",
-            "PreviousTxnLgrSeq": 278220,
-            "TokenID": "000800003F2E1634C35C647F154C55015A50BFF37FBCB0400000099B00000000"
+            "PreviousTxnLgrSeq": 278220
           },
           "LedgerEntryType": "NFTokenOffer",
           "LedgerIndex": "2E56D35F040D355408931A35066A8284322D546F7E5867C11D020095EE673AE7"
@@ -27,10 +30,10 @@
       {
         "DeletedNode": {
           "FinalFields": {
-            "NonFungibleTokens": [
+            "NFTokens": [
               {
-                "NonFungibleToken": {
-                  "TokenID": "000800003F2E1634C35C647F154C55015A50BFF37FBCB0400000099B00000000",
+                "NFToken": {
+                  "NFTokenID": "000800003F2E1634C35C647F154C55015A50BFF37FBCB0400000099B00000000",
                   "URI": "697066733A2F2F62616679626569676479727A74357366703775646D37687537367568377932366E6634646675796C71616266336F636C67747179353566627A6469"
                 }
               }
@@ -47,8 +50,7 @@
           "FinalFields": {
             "Account": "ramh8EQPBHyyfTmQSqkqYYgZgnhGmJV69u",
             "Balance": "10000999976",
-            "Flags": 0,
-            "MintedTokens": 1,
+            "MintedNFTokens": 1,
             "OwnerCount": 0,
             "Sequence": 277752
           },
@@ -67,7 +69,6 @@
           "FinalFields": {
             "Account": "r4q82SDwKtoSFmfPtZfDwbyKkzkUbXB2mN",
             "Balance": "9998999964",
-            "Flags": 0,
             "OwnerCount": 2,
             "Sequence": 279161
           },
@@ -86,8 +87,8 @@
         "DeletedNode": {
           "FinalFields": {
             "Flags": 2,
-            "RootIndex": "C7F8832C887CC1389E9AEB6479F3A460458201BF816C2A7DC6B1891BFAA3BDEC",
-            "TokenID": "000800003F2E1634C35C647F154C55015A50BFF37FBCB0400000099B00000000"
+            "NFTokenID": "000800003F2E1634C35C647F154C55015A50BFF37FBCB0400000099B00000000",
+            "RootIndex": "C7F8832C887CC1389E9AEB6479F3A460458201BF816C2A7DC6B1891BFAA3BDEC"
           },
           "LedgerEntryType": "DirectoryNode",
           "LedgerIndex": "C7F8832C887CC1389E9AEB6479F3A460458201BF816C2A7DC6B1891BFAA3BDEC"
@@ -96,7 +97,6 @@
       {
         "DeletedNode": {
           "FinalFields": {
-            "Flags": 0,
             "Owner": "ramh8EQPBHyyfTmQSqkqYYgZgnhGmJV69u",
             "RootIndex": "DF98FCBA9B093F80411F8C04E233D62F2CFCBF88925B8E1D4AE4659C48C1033A"
           },
@@ -109,10 +109,10 @@
           "LedgerEntryType": "NFTokenPage",
           "LedgerIndex": "EF94A726EBBC2C5F06324613EC0244AF179F4F5AFFFFFFFFFFFFFFFFFFFFFFFF",
           "NewFields": {
-            "NonFungibleTokens": [
+            "NFTokens": [
               {
-                "NonFungibleToken": {
-                  "TokenID": "000800003F2E1634C35C647F154C55015A50BFF37FBCB0400000099B00000000",
+                "NFToken": {
+                  "NFTokenID": "000800003F2E1634C35C647F154C55015A50BFF37FBCB0400000099B00000000",
                   "URI": "697066733A2F2F62616679626569676479727A74357366703775646D37687537367568377932366E6634646675796C71616266336F636C67747179353566627A6469"
                 }
               }
@@ -123,8 +123,5 @@
     ],
     "TransactionIndex": 0,
     "TransactionResult": "tesSUCCESS"
-  },
-  "hash": "E717AC94B38D2349E502B8E9ECF02DA98178412C3C754990B6F495D2BA500BCB",
-  "ledger_index": 279225,
-  "inLedger": 279225
+  }
 }

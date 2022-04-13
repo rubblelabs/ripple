@@ -13,22 +13,22 @@ type leBase struct {
 
 type AccountRoot struct {
 	leBase
-	Flags         *LedgerEntryFlag `json:",omitempty"`
-	Account       *Account         `json:",omitempty"`
-	Sequence      *uint32          `json:",omitempty"`
-	Balance       *Value           `json:",omitempty"`
-	OwnerCount    *uint32          `json:",omitempty"`
-	MintedTokens  *uint32          `json:",omitempty"`
-	AccountTxnID  *Hash256         `json:",omitempty"`
-	RegularKey    *RegularKey      `json:",omitempty"`
-	EmailHash     *Hash128         `json:",omitempty"`
-	WalletLocator *Hash256         `json:",omitempty"`
-	WalletSize    *uint32          `json:",omitempty"`
-	MessageKey    *VariableLength  `json:",omitempty"`
-	TransferRate  *uint32          `json:",omitempty"`
-	Domain        *VariableLength  `json:",omitempty"`
-	TickSize      *uint8           `json:",omitempty"`
-	TicketCount   *uint32          `json:",omitempty"`
+	Flags          *LedgerEntryFlag `json:",omitempty"`
+	Account        *Account         `json:",omitempty"`
+	Sequence       *uint32          `json:",omitempty"`
+	Balance        *Value           `json:",omitempty"`
+	OwnerCount     *uint32          `json:",omitempty"`
+	MintedNFTokens *uint32          `json:",omitempty"`
+	AccountTxnID   *Hash256         `json:",omitempty"`
+	RegularKey     *RegularKey      `json:",omitempty"`
+	EmailHash      *Hash128         `json:",omitempty"`
+	WalletLocator  *Hash256         `json:",omitempty"`
+	WalletSize     *uint32          `json:",omitempty"`
+	MessageKey     *VariableLength  `json:",omitempty"`
+	TransferRate   *uint32          `json:",omitempty"`
+	Domain         *VariableLength  `json:",omitempty"`
+	TickSize       *uint8           `json:",omitempty"`
+	TicketCount    *uint32          `json:",omitempty"`
 }
 
 type RippleState struct {
@@ -71,7 +71,7 @@ type Directory struct {
 	ExchangeRate      *ExchangeRate    `json:",omitempty"`
 	IndexNext         *NodeIndex       `json:",omitempty"`
 	IndexPrevious     *NodeIndex       `json:",omitempty"`
-	TokenID           *Hash256         `json:",omitempty"`
+	NFTokenID         *Hash256         `json:",omitempty"`
 }
 
 type LedgerHashes struct {
@@ -193,31 +193,31 @@ type DepositPreAuth struct {
 	OwnerNode *NodeIndex       `json:",omitempty"`
 }
 
-type NonFungibleToken struct {
-	TokenID Hash256        `json:",omitempty"`
-	URI     VariableLength `json:",omitempty"`
+type NFToken struct {
+	NFTokenID Hash256        `json:",omitempty"`
+	URI       VariableLength `json:",omitempty"`
 }
 
-// NonFungibleTokens is defined as map. Doesn't work properly unless defined like this.
-type NonFungibleTokens []map[string]NonFungibleToken
+// NFTokens is defined as map. Doesn't work properly unless defined like this.
+type NFTokens []map[string]NFToken
 
 type NFTokenPage struct {
 	leBase
-	Flags             LedgerEntryFlag   `json:",omitempty"`
-	PreviousPageMin   *Hash256          `json:",omitempty"`
-	NextPageMin       *Hash256          `json:",omitempty"`
-	NonFungibleTokens NonFungibleTokens `json:",omitempty"`
+	Flags           LedgerEntryFlag `json:",omitempty"`
+	PreviousPageMin *Hash256        `json:",omitempty"`
+	NextPageMin     *Hash256        `json:",omitempty"`
+	NFTokens        NFTokens        `json:",omitempty"`
 }
 
 type NFTokenOffer struct {
 	leBase
 	Owner       Account  `json:",omitempty"`
-	TokenID     Hash256  `json:",omitempty"`
+	NFTokenID   Hash256  `json:",omitempty"`
 	Amount      Amount   `json:",omitempty"`
 	Expiration  *uint32  `json:",omitempty"`
 	Destination *Account `json:",omitempty"`
-	//OwnerNode   *VariableLength `json:",omitempty"`
-	//OfferNode   *VariableLength `json:",omitempty"`
+	//OwnerNode        *VariableLength `json:",omitempty"`
+	//NFTokenOfferNode *VariableLength `json:",omitempty"`
 	Flags uint32 `json:",omitempty"`
 }
 

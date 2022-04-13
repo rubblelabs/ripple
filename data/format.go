@@ -245,7 +245,7 @@ var encodings = map[enc]string{
 	enc{ST_ARRAY, 7}:  "Sufficient",
 	enc{ST_ARRAY, 8}:  "AffectedNodes",
 	enc{ST_ARRAY, 9}:  "Memos",
-	enc{ST_ARRAY, 10}: "NonFungibleTokens",
+	enc{ST_ARRAY, 10}: "NFTokens",
 	// array of objects (uncommon)
 	enc{ST_ARRAY, 16}: "Majorities",
 	enc{ST_ARRAY, 17}: "DisabledValidators",

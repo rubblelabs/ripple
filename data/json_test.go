@@ -33,6 +33,7 @@ func (s *JSONSuite) TestTransactionsJSON(c *C) {
 		var txm TransactionWithMetaData
 		c.Assert(json.Unmarshal(b, &txm), IsNil)
 		out, err := json.MarshalIndent(txm, "", "  ")
+		//c.Assert(ioutil.WriteFile("out.json", out, 0664), IsNil)
 		c.Assert(err, IsNil)
 		compare(c, f, b, out)
 	}

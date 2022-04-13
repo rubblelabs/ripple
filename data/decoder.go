@@ -287,8 +287,8 @@ func readObject(r Reader, v *reflect.Value) error {
 				v.Set(m.Elem())
 				return err
 			case "NonFungibleToken":
-				var nonFungibleToken NonFungibleToken
-				n := reflect.ValueOf(&nonFungibleToken)
+				var nfToken NFToken
+				n := reflect.ValueOf(&nfToken)
 				err := readObject(r, &n)
 				v.Set(n.Elem())
 				return err
