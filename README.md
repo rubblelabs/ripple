@@ -3,8 +3,8 @@ ripple
 
 Go packages to interact with the Ripple protocol.
 
-[![GoDoc](https://godoc.org/github.com/rubblelabs/ripple?status.png)](https://godoc.org/github.com/rubblelabs/ripple)
-[![Build Status](https://drone.io/github.com/rubblelabs/ripple/status.png)](https://drone.io/github.com/rubblelabs/ripple/latest)
+[![Go Reference](https://pkg.go.dev/badge/github.com/rubblelabs/ripple.svg)](https://pkg.go.dev/github.com/rubblelabs/ripple)
+[![Build Status](https://github.com/rubblelabs/ripple/actions/workflows/go.yml/badge.svg)](https://github.com/rubblelabs/ripple/actions/workflows/go.yml)
 
 The data, crypto, and websockets packages are very functional and quite well tested. Most websockets commands are implemented but not all.
 
@@ -22,11 +22,3 @@ The hope is one day that these packages might lay the foundations for an alterna
 Please bear in mind that this has been an exercise that has taken a lot of time, so if you want to help and are not a developer, bounties and thanks are more than welcome. Please see the [AUTHORS](https://github.com/rubblelabs/ripple/blob/master/AUTHORS) file. If you'd like to chat about the code, have a look here:
 
 [![Gitter chat](https://badges.gitter.im/rubblelabs/ripple.png)](https://gitter.im/rubblelabs/ripple)
-
-## Test Coverage
-
-[crypto package](https://drone.io/github.com/rubblelabs/ripple/files/crypto.html)
-
-[data package](https://drone.io/github.com/rubblelabs/ripple/files/data.html)
-
-[websockets package](https://drone.io/github.com/rubblelabs/ripple/files/websockets.html)
