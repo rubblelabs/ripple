@@ -34,7 +34,7 @@ const (
 	tecINSUF_RESERVE_LINE
 	tecINSUF_RESERVE_OFFER
 	tecNO_DST
-	tecNO_DST_INSUF_XRP
+	tecNO_DST_INSUF_HWA
 	tecNO_LINE_INSUF_RESERVE
 	tecNO_LINE_REDUNDANT
 	tecPATH_DRY
@@ -104,11 +104,11 @@ const (
 	temBAD_OFFER
 	temBAD_PATH
 	temBAD_PATH_LOOP
-	temBAD_SEND_XRP_LIMIT
-	temBAD_SEND_XRP_MAX
-	temBAD_SEND_XRP_NO_DIRECT
-	temBAD_SEND_XRP_PARTIAL
-	temBAD_SEND_XRP_PATHS
+	temBAD_SEND_HWA_LIMIT
+	temBAD_SEND_HWA_MAX
+	temBAD_SEND_HWA_NO_DIRECT
+	temBAD_SEND_HWA_PARTIAL
+	temBAD_SEND_HWA_PATHS
 	temBAD_SEQUENCE
 	temBAD_SIGNATURE
 	temBAD_SRC_ACCOUNT
@@ -118,7 +118,7 @@ const (
 	temINVALID
 	temINVALID_FLAG
 	temREDUNDANT
-	temRIPPLE_EMPTY
+	temHCHAIN_EMPTY
 	temDISABLED
 	temBAD_SIGNER
 	temBAD_QUORUM
@@ -183,7 +183,7 @@ const (
 	terOWNERS                        // Can't succeed with non-zero owner count.
 	terPRE_SEQ                       // Can't pay fee, no point in forwarding, therefore don't burden network.
 	terLAST                          // Process after all other transactions
-	terNO_RIPPLE                     // Rippling not allowed
+	terNO_HCHAIN                     // Rippling not allowed
 	terQUEUED                        // Transaction is being held in TxQ until fee drops
 )
 
@@ -197,8 +197,8 @@ var resultNames = map[TransactionResult]struct {
 	tecFAILED_PROCESSING:     {"tecFAILED_PROCESSING", "Failed to correctly process transaction."},
 	tecINSUF_RESERVE_LINE:    {"tecINSUF_RESERVE_LINE", "Insufficient reserve to add trust line."},
 	tecINSUF_RESERVE_OFFER:   {"tecINSUF_RESERVE_OFFER", "Insufficient reserve to create offer."},
-	tecNO_DST:                {"tecNO_DST", "Destination does not exist. Send XRP to create it."},
-	tecNO_DST_INSUF_XRP:      {"tecNO_DST_INSUF_XRP", "Destination does not exist. Too little XRP sent to create it."},
+	tecNO_DST:                {"tecNO_DST", "Destination does not exist. Send HWA to create it."},
+	tecNO_DST_INSUF_HWA:      {"tecNO_DST_INSUF_HWA", "Destination does not exist. Too little HWA sent to create it."},
 	tecNO_LINE_INSUF_RESERVE: {"tecNO_LINE_INSUF_RESERVE", "No such line. Too little reserve to create it."},
 	tecNO_LINE_REDUNDANT:     {"tecNO_LINE_REDUNDANT", "Can't set non-existant line to default."},
 	tecPATH_DRY:              {"tecPATH_DRY", "Path could not send partial amount."},
@@ -206,9 +206,9 @@ var resultNames = map[TransactionResult]struct {
 	tecNO_ALTERNATIVE_KEY:    {"tecNO_ALTERNATIVE_KEY", "The operation would remove the ability to sign transactions with the account."},
 	tecNO_REGULAR_KEY:        {"tecNO_REGULAR_KEY", "Regular key is not set."},
 	tecUNFUNDED:              {"tecUNFUNDED", "One of _ADD, _OFFER, or _SEND. Deprecated."},
-	tecUNFUNDED_ADD:          {"tecUNFUNDED_ADD", "Insufficient XRP balance for WalletAdd."},
+	tecUNFUNDED_ADD:          {"tecUNFUNDED_ADD", "Insufficient HWA balance for WalletAdd."},
 	tecUNFUNDED_OFFER:        {"tecUNFUNDED_OFFER", "Insufficient balance to fund created offer."},
-	tecUNFUNDED_PAYMENT:      {"tecUNFUNDED_PAYMENT", "Insufficient XRP balance to send."},
+	tecUNFUNDED_PAYMENT:      {"tecUNFUNDED_PAYMENT", "Insufficient HWA balance to send."},
 	tecOWNERS:                {"tecOWNERS", "Non-zero owner count."},
 	tecNO_ISSUER:             {"tecNO_ISSUER", "Issuer account does not exist."},
 	tecNO_AUTH:               {"tecNO_AUTH", "Not authorized to hold asset."},
@@ -270,7 +270,7 @@ var resultNames = map[TransactionResult]struct {
 	temMALFORMED:              {"temMALFORMED", "Malformed transaction."},
 	temBAD_AMOUNT:             {"temBAD_AMOUNT", "Can only send positive amounts."},
 	temBAD_CURRENCY:           {"temBAD_CURRENCY", "Malformed: Bad currency."},
-	temBAD_FEE:                {"temBAD_FEE", "Invalid fee, negative or not XRP."},
+	temBAD_FEE:                {"temBAD_FEE", "Invalid fee, negative or not HWA."},
 	temBAD_EXPIRATION:         {"temBAD_EXPIRATION", "Malformed: Bad expiration."},
 	temBAD_ISSUER:             {"temBAD_ISSUER", "Malformed: Bad issuer."},
 	temBAD_LIMIT:              {"temBAD_LIMIT", "Limits must be non-negative."},
@@ -281,17 +281,17 @@ var resultNames = map[TransactionResult]struct {
 	temBAD_SRC_ACCOUNT:        {"temBAD_SRC_ACCOUNT", "Malformed: Bad source account."},
 	temBAD_TRANSFER_RATE:      {"temBAD_TRANSFER_RATE", "Malformed: Transfer rate must be >= 1.0"},
 	temBAD_SEQUENCE:           {"temBAD_SEQUENCE", "Malformed: Sequence is not in the past."},
-	temBAD_SEND_XRP_LIMIT:     {"temBAD_SEND_XRP_LIMIT", "Malformed: Limit quality is not allowed for XRP to XRP."},
-	temBAD_SEND_XRP_MAX:       {"temBAD_SEND_XRP_MAX", "Malformed: Send max is not allowed for XRP to XRP."},
-	temBAD_SEND_XRP_NO_DIRECT: {"temBAD_SEND_XRP_NO_DIRECT", "Malformed: No Ripple direct is not allowed for XRP to XRP."},
-	temBAD_SEND_XRP_PARTIAL:   {"temBAD_SEND_XRP_PARTIAL", "Malformed: Partial payment is not allowed for XRP to XRP."},
-	temBAD_SEND_XRP_PATHS:     {"temBAD_SEND_XRP_PATHS", "Malformed: Paths are not allowed for XRP to XRP."},
+	temBAD_SEND_HWA_LIMIT:     {"temBAD_SEND_HWA_LIMIT", "Malformed: Limit quality is not allowed for HWA to HWA."},
+	temBAD_SEND_HWA_MAX:       {"temBAD_SEND_HWA_MAX", "Malformed: Send max is not allowed for HWA to HWA."},
+	temBAD_SEND_HWA_NO_DIRECT: {"temBAD_SEND_HWA_NO_DIRECT", "Malformed: No Ripple direct is not allowed for HWA to HWA."},
+	temBAD_SEND_HWA_PARTIAL:   {"temBAD_SEND_HWA_PARTIAL", "Malformed: Partial payment is not allowed for HWA to HWA."},
+	temBAD_SEND_HWA_PATHS:     {"temBAD_SEND_HWA_PATHS", "Malformed: Paths are not allowed for HWA to HWA."},
 	temDST_IS_SRC:             {"temDST_IS_SRC", "Destination may not be source."},
 	temDST_NEEDED:             {"temDST_NEEDED", "Destination not specified."},
 	temINVALID:                {"temINVALID", "The transaction is ill-formed."},
 	temINVALID_FLAG:           {"temINVALID_FLAG", "The transaction has an invalid flag."},
 	temREDUNDANT:              {"temREDUNDANT", "Sends same currency to self."},
-	temRIPPLE_EMPTY:           {"temRIPPLE_EMPTY", "PathSet with no paths."},
+	temHCHAIN_EMPTY:           {"temHCHAIN_EMPTY", "PathSet with no paths."},
 	temUNCERTAIN:              {"temUNCERTAIN", "In process of determining result. Never returned."},
 	temUNKNOWN:                {"temUNKNOWN", "The transactions requires logic not implemented yet."},
 	temDISABLED:               {"temDISABLED", "The transaction requires logic that is currently disabled."},
@@ -303,7 +303,7 @@ var resultNames = map[TransactionResult]struct {
 	terFUNDS_SPENT: {"terFUNDS_SPENT", "Can't set password, password set funds already spent."},
 	terINSUF_FEE_B: {"terINSUF_FEE_B", "Account balance can't pay fee."},
 	terLAST:        {"terLAST", "Process last."},
-	terNO_RIPPLE:   {"terNO_RIPPLE", "Path does not permit rippling."},
+	terNO_HCHAIN:   {"terNO_HCHAIN", "Path does not permit rippling."},
 	terNO_ACCOUNT:  {"terNO_ACCOUNT", "The source account does not exist."},
 	terNO_AUTH:     {"terNO_AUTH", "Not authorized to hold IOUs."},
 	terNO_LINE:     {"terNO_LINE", "No such line."},

@@ -9,7 +9,7 @@ func NewPayment(account data.Account, to data.Account, amount data.Amount) *data
 	tr.Amount = amount
 	tr.Destination = to
 	tr.Account = account
-	f, _ := data.NewNativeValue(12)
+	f, _ := data.NewNativeValue(120)
 	tr.Fee = *f
 	return tr
 }
@@ -21,7 +21,7 @@ func NewOfferCreate(account data.Account, takerGets data.Amount, takerPays data.
 	tr.TakerGets = takerGets
 	tr.Account = account
 	tr.TakerPays = takerPays
-	f, _ := data.NewNativeValue(12)
+	f, _ := data.NewNativeValue(120)
 	tr.Fee = *f
 	return tr
 }
