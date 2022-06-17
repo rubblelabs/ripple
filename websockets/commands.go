@@ -226,9 +226,9 @@ type ServerInfoResult struct {
 	Info struct {
 		LoadFactor      uint32 `json:"load_factor"`
 		ValidatedLedger struct {
-			BaseFeeHwa    float64 `json:"base_fee_xrp"`
+			BaseFeeHwa    float64 `json:"base_fee_hwa"`
 			Seq           uint32  `json:"seq"`
-			ReserveIncXrp float64 `json:"reserve_inc_xrp"`
+			ReserveIncXrp float64 `json:"reserve_inc_hwa"`
 		} `json:"validated_ledger"`
 	} `json:"info"`
 	Status string `json:"status"`
