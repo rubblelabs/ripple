@@ -18,5 +18,5 @@ func TestParse(t *testing.T) {
 	if err := actions.Prepare(); err != nil {
 		t.Fatalf("prepare: %v", err)
 	}
-	t.Log(actions)
+	// t.Log(actions)
 }

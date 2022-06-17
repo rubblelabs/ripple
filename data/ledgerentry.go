@@ -13,21 +13,24 @@ type leBase struct {
 
 type AccountRoot struct {
 	leBase
-	Flags         *LedgerEntryFlag `json:",omitempty"`
-	Account       *Account         `json:",omitempty"`
-	Sequence      *uint32          `json:",omitempty"`
-	Balance       *Value           `json:",omitempty"`
-	OwnerCount    *uint32          `json:",omitempty"`
-	AccountTxnID  *Hash256         `json:",omitempty"`
-	RegularKey    *RegularKey      `json:",omitempty"`
-	EmailHash     *Hash128         `json:",omitempty"`
-	WalletLocator *Hash256         `json:",omitempty"`
-	WalletSize    *uint32          `json:",omitempty"`
-	MessageKey    *VariableLength  `json:",omitempty"`
-	TickSize      *uint8           `json:",omitempty"`
-	TransferRate  *uint32          `json:",omitempty"`
-	Domain        *VariableLength  `json:",omitempty"`
-	Signers       *VariableLength  `json:",omitempty"`
+	Flags          *LedgerEntryFlag `json:",omitempty"`
+	Account        *Account         `json:",omitempty"`
+	Sequence       *uint32          `json:",omitempty"`
+	Balance        *Value           `json:",omitempty"`
+	OwnerCount     *uint32          `json:",omitempty"`
+	AccountTxnID   *Hash256         `json:",omitempty"`
+	RegularKey     *RegularKey      `json:",omitempty"`
+	EmailHash      *Hash128         `json:",omitempty"`
+	WalletLocator  *Hash256         `json:",omitempty"`
+	WalletSize     *uint32          `json:",omitempty"`
+	MessageKey     *VariableLength  `json:",omitempty"`
+	NFTokenMinter  *Account         `json:",omitempty"`
+	BurnedNFTokens *uint32          `json:",omitempty"`
+	MintedNFTokens *uint32          `json:",omitempty"`
+	TransferRate   *uint32          `json:",omitempty"`
+	Domain         *VariableLength  `json:",omitempty"`
+	TickSize       *uint8           `json:",omitempty"`
+	TicketCount    *uint32          `json:",omitempty"`
 }
 
 type RippleState struct {
@@ -101,6 +104,44 @@ type FeeSettings struct {
 	ReserveIncrement  *uint32          `json:",omitempty"`
 }
 
+type DisabledValidator struct {
+	FirstLedgerSequence *uint32    `json:",omitempty"`
+	PublicKey           *PublicKey `json:",omitempty"`
+}
+
+type NegativeUNL struct {
+	leBase
+	Flags               *LedgerEntryFlag    `json:",omitempty"`
+	DisabledValidators  []DisabledValidator `json:",omitempty"`
+	ValidatorToDisable  *VariableLength     `json:",omitempty"`
+	ValidatorToReEnable *VariableLength     `json:",omitempty"`
+}
+type NFTokenOffer struct {
+	leBase
+	Destination      *Account         `json:",omitempty"`
+	Flags            *TransactionFlag `json:",omitempty"`
+	NFTokenID        *Hash256         `json:",omitempty"`
+	Owner            *Account         `json:",omitempty"`
+	Expiration       *uint32          `json:",omitempty"`
+	Amount           *Amount          `json:",omitempty"`
+	NFTokenOfferNode *Uint64Hex       `json:",omitempty"`
+	OwnerNode        *Uint64Hex       `json:",omitempty"`
+}
+
+type NFTokenPage struct {
+	leBase
+	NFTokens NFTokens `json:",omitempty"`
+}
+
+type NFToken struct {
+	NFTokenID *Hash256        `json:",omitempty"`
+	URI       *VariableLength `json:",omitempty"`
+}
+
+type NFTokens []struct {
+	NFToken NFToken
+}
+
 type Escrow struct {
 	leBase
 	Flags           *LedgerEntryFlag `json:",omitempty"`
@@ -132,12 +173,10 @@ type SignerList struct {
 
 type Ticket struct {
 	leBase
-	Flags      *LedgerEntryFlag `json:",omitempty"`
-	Account    *Account         `json:",omitempty"`
-	Sequence   *uint32          `json:",omitempty"`
-	OwnerNode  *NodeIndex       `json:",omitempty"`
-	Target     *Account         `json:",omitempty"`
-	Expiration *uint32          `json:",omitempty"`
+	Flags          *LedgerEntryFlag `json:",omitempty"`
+	Account        *Account         `json:",omitempty"`
+	TicketSequence *uint32          `json:",omitempty"`
+	OwnerNode      *NodeIndex       `json:",omitempty"`
 }
 
 type PayChannel struct {
@@ -191,8 +230,15 @@ func (d *Directory) Affects(account Account) bool    { return false }
 func (l *LedgerHashes) Affects(account Account) bool { return false }
 func (a *Amendments) Affects(account Account) bool   { return false }
 func (f *FeeSettings) Affects(account Account) bool  { return false }
+func (n *NegativeUNL) Affects(account Account) bool  { return false }
 func (s *Escrow) Affects(account Account) bool {
 	return s.Account.Equals(account) || s.Destination.Equals(account)
+}
+func (n *NFTokenPage) Affects(account Account) bool {
+	return false
+}
+func (n *NFTokenOffer) Affects(account Account) bool {
+	return n.Owner != nil && n.Owner.Equals(account)
 }
 func (s *SignerList) Affects(account Account) bool {
 	for _, entry := range s.SignerEntries {

@@ -19,7 +19,7 @@ func NodeId(h Hashable) (Hash256, error) {
 	return nodeid, err
 }
 
-func SigningHash(s Signer) (Hash256, []byte, error) {
+func SigningHash(s Signable) (Hash256, []byte, error) {
 	return raw(s, s.SigningPrefix(), true)
 }
 
@@ -56,7 +56,23 @@ func raw(value interface{}, prefix HashPrefix, ignoreSigningFields bool) (Hash25
 func writeRaw(w io.Writer, value interface{}, ignoreSigningFields bool) error {
 	switch v := value.(type) {
 	case *Ledger:
-		return write(w, v.LedgerHeader)
+		values := []interface{}{
+			v.LedgerSequence,
+			v.TotalXRP,
+			v.PreviousLedger,
+			v.TransactionHash,
+			v.StateHash,
+			v.ParentCloseTime,
+			v.CloseTime,
+			v.CloseResolution,
+			v.CloseFlags,
+		}
+		for _, value := range values {
+			if err := write(w, value); err != nil {
+				return err
+			}
+		}
+		return nil
 	case *InnerNode:
 		return write(w, v.Children)
 	case *Validation:
@@ -164,7 +180,7 @@ func getFields(v *reflect.Value, depth int) fieldSlice {
 		if f.Kind() == reflect.Ptr {
 			f = f.Elem()
 		}
-		if !f.IsValid() || !f.CanInterface() || (f.Kind() == reflect.Slice && f.Len() == 0) {
+		if !f.IsValid() || (f.Kind() == reflect.Slice && f.Len() == 0) {
 			continue
 		}
 		switch encoding.typ {

@@ -217,6 +217,23 @@ type RipplePathFindResult struct {
 	DestCurrencies []data.Currency `json:"destination_currencies"`
 }
 
+type ServerInfoCommand struct {
+	*Command
+	Result *ServerInfoResult `json:"result,omitempty"`
+}
+
+type ServerInfoResult struct {
+	Info struct {
+		LoadFactor      uint32 `json:"load_factor"`
+		ValidatedLedger struct {
+			BaseFeeHwa    float64 `json:"base_fee_xrp"`
+			Seq           uint32  `json:"seq"`
+			ReserveIncXrp float64 `json:"reserve_inc_xrp"`
+		} `json:"validated_ledger"`
+	} `json:"info"`
+	Status string `json:"status"`
+}
+
 type AccountInfoCommand struct {
 	*Command
 	Account data.Account       `json:"account"`

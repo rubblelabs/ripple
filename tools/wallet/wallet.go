@@ -19,6 +19,14 @@ func NewWallet(pk []byte) *Wallet {
 	return w
 }
 
+func NewWalletFromSeed(pk []byte) *Wallet {
+	w := &Wallet{}
+	pvk, pub := btcec.PrivKeyFromBytes(btcec.S256(), pk)
+	w.PrivateKey = pvk
+	w.PublicKey = pub
+	return w
+}
+
 func (e *Wallet) ClassicAddress() string {
 
 	hs, err := crypto.NewAccountId(crypto.Sha256RipeMD160(e.PublicKey.SerializeCompressed()))

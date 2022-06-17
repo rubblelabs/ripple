@@ -55,6 +55,13 @@ const (
 	// PaymentChannelClaim flags
 	TxRenew TransactionFlag = 0x00010000
 	TxClose TransactionFlag = 0x00020000
+
+	//NFTokenMint Flags
+	TfBurnable     TransactionFlag = 0x00000001
+	TfOnlyXRP      TransactionFlag = 0x00000002
+	TfTrustLine    TransactionFlag = 0x00000004
+	TfTransferable TransactionFlag = 0x00000008
+	TfSellToken    TransactionFlag = 0x00000001
 )
 
 // Ledger entry flags

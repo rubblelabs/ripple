@@ -49,9 +49,27 @@ func ReadPrefix(r Reader, nodeId Hash256) (Storer, error) {
 }
 
 func ReadLedger(r Reader, nodeId Hash256) (*Ledger, error) {
-	ledger := new(Ledger)
-	if err := read(r, &ledger.LedgerHeader); err != nil {
-		return nil, err
+	ledger := &Ledger{
+		LedgerHeader: LedgerHeader{
+			ParentCloseTime: NewRippleTime(0),
+			CloseTime:       NewRippleTime(0),
+		},
+	}
+	values := []interface{}{
+		&ledger.LedgerSequence,
+		&ledger.TotalXRP,
+		&ledger.PreviousLedger,
+		&ledger.TransactionHash,
+		&ledger.StateHash,
+		ledger.ParentCloseTime,
+		ledger.CloseTime,
+		&ledger.CloseResolution,
+		&ledger.CloseFlags,
+	}
+	for _, v := range values {
+		if err := read(r, v); err != nil {
+			return nil, err
+		}
 	}
 	ledger.Hash = nodeId
 	return ledger, nil
@@ -274,6 +292,12 @@ func readObject(r Reader, v *reflect.Value) error {
 				err := readObject(r, &s)
 				v.Set(s.Elem())
 				return err
+			case "Signer":
+				var signer Signer
+				s := reflect.ValueOf(&signer)
+				err := readObject(r, &s)
+				v.Set(s.Elem())
+				return err
 			case "Majority":
 				var majority Majority
 				m := reflect.ValueOf(&majority)
@@ -286,6 +310,12 @@ func readObject(r Reader, v *reflect.Value) error {
 				inner := reflect.ValueOf(&memo.Memo)
 				err := readObject(r, &inner)
 				v.Set(m.Elem())
+				return err
+			case "DisabledValidator":
+				var disabledValidator DisabledValidator
+				dv := reflect.ValueOf(&disabledValidator)
+				err := readObject(r, &dv)
+				v.Set(dv.Elem())
 				return err
 			default:
 				return fmt.Errorf("Unexpected object: %s for field: %s", v.Type(), name)

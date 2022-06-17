@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"reflect"
 	"sort"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/golang/glog"
@@ -60,7 +62,7 @@ func (r *Remote) Close() {
 
 	// Drain the Incoming channel and block until it is closed,
 	// indicating that this Remote is fully cleaned up.
-	for _ = range r.Incoming {
+	for range r.Incoming {
 	}
 }
 
@@ -81,7 +83,7 @@ func (r *Remote) run() {
 
 		// Drain the inbound channel and block until it is closed,
 		// indicating that the readPump has returned.
-		for _ = range inbound {
+		for range inbound {
 		}
 	}()
 
@@ -248,9 +250,14 @@ func (r *Remote) LedgerData(ledger interface{}, marker *data.Hash256) (*LedgerDa
 	return cmd.Result, nil
 }
 
-func (r *Remote) streamLedgerData(ledger interface{}, c chan data.LedgerEntrySlice) {
-	defer close(c)
-	cmd := newBinaryLedgerDataCommand(ledger, nil)
+func (r *Remote) streamLedgerData(ledger interface{}, start, end string, c chan data.LedgerEntrySlice, wg *sync.WaitGroup) {
+	defer wg.Done()
+	first, err := data.NewHash256(start)
+	if err != nil {
+		glog.Errorln(err.Error())
+	}
+	cmd := newBinaryLedgerDataCommand(ledger, first)
+	var br bytes.Reader
 	for ; ; cmd = newBinaryLedgerDataCommand(ledger, cmd.Result.Marker) {
 		r.outgoing <- cmd
 		<-cmd.Ready
@@ -258,23 +265,29 @@ func (r *Remote) streamLedgerData(ledger interface{}, c chan data.LedgerEntrySli
 			glog.Errorln(cmd.Error())
 			return
 		}
-		les := make(data.LedgerEntrySlice, len(cmd.Result.State))
-		for i, state := range cmd.Result.State {
+		les := make(data.LedgerEntrySlice, 0, len(cmd.Result.State))
+		var done bool
+		for _, state := range cmd.Result.State {
+			if done = state.Index > end; done {
+				break
+			}
 			b, err := hex.DecodeString(state.Data + state.Index)
 			if err != nil {
-				glog.Errorln(cmd.Error())
+				glog.Errorln(err.Error())
 				return
 			}
-			les[i], err = data.ReadLedgerEntry(bytes.NewReader(b), data.Hash256{})
+			br.Reset(b)
+			le, err := data.ReadLedgerEntry(&br, data.Hash256{})
 			if err != nil {
 				glog.Errorln(err.Error())
 				glog.Errorln(state.Data)
 				glog.Errorln(state.Index)
 				continue
 			}
+			les = append(les, le)
 		}
 		c <- les
-		if cmd.Result.Marker == nil {
+		if cmd.Result.Marker == nil || done {
 			return
 		}
 	}
@@ -282,8 +295,18 @@ func (r *Remote) streamLedgerData(ledger interface{}, c chan data.LedgerEntrySli
 
 // Asynchronously retrieve all data for a ledger using the binary form
 func (r *Remote) StreamLedgerData(ledger interface{}) chan data.LedgerEntrySlice {
-	c := make(chan data.LedgerEntrySlice)
-	go r.streamLedgerData(ledger, c)
+	c := make(chan data.LedgerEntrySlice, 100)
+	wg := &sync.WaitGroup{}
+	for i := 0; i < 16; i++ {
+		wg.Add(1)
+		start := fmt.Sprintf("%X%s", i, strings.Repeat("0", 63))
+		end := fmt.Sprintf("%X%s", i, strings.Repeat("F", 63))
+		go r.streamLedgerData(ledger, start, end, c, wg)
+	}
+	go func() {
+		wg.Wait()
+		close(c)
+	}()
 	return c
 }
 
@@ -339,6 +362,19 @@ func (r *Remote) AccountInfo(a data.Account) (*AccountInfoResult, error) {
 	cmd := &AccountInfoCommand{
 		Command: newCommand("account_info"),
 		Account: a,
+	}
+	r.outgoing <- cmd
+	<-cmd.Ready
+	if cmd.CommandError != nil {
+		return nil, cmd.CommandError
+	}
+	return cmd.Result, nil
+}
+
+// Synchronously requests account info
+func (r *Remote) ServerState() (*ServerInfoResult, error) {
+	cmd := &ServerInfoCommand{
+		Command: newCommand("server_info"),
 	}
 	r.outgoing <- cmd
 	<-cmd.Ready
@@ -510,7 +546,9 @@ func (r *Remote) readPump(inbound chan<- []byte) {
 			glog.Errorln(err)
 			return
 		}
-		glog.V(2).Infoln(dump(message))
+		if glog.V(2) {
+			glog.Infoln(dump(message))
+		}
 		r.ws.SetReadDeadline(time.Now().Add(pongWait))
 		inbound <- message
 	}
@@ -539,8 +577,9 @@ func (r *Remote) writePump(outbound <-chan interface{}) {
 				glog.Errorln(err)
 				continue
 			}
-
-			glog.V(2).Infoln(dump(b))
+			if glog.V(2) {
+				glog.Infoln(dump(b))
+			}
 			if err := r.ws.WriteMessage(websocket.TextMessage, b); err != nil {
 				glog.Errorln(err)
 				return

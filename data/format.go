@@ -49,6 +49,9 @@ const (
 	NS_TICKET          LedgerNamespace = 'T'
 	NS_SIGNER_LIST     LedgerNamespace = 'S'
 	NS_XRPU_CHANNEL    LedgerNamespace = 'x'
+	NS_CHECK           LedgerNamespace = 'C'
+	NS_DEPOSIT_PREAUTH LedgerNamespace = 'p'
+	NS_NEGATIVE_UNL    LedgerNamespace = 'N'
 )
 
 var nodeTypes = [...]string{
@@ -92,6 +95,7 @@ var encodings = map[enc]string{
 	enc{ST_UINT16, 1}: "LedgerEntryType",
 	enc{ST_UINT16, 2}: "TransactionType",
 	enc{ST_UINT16, 3}: "SignerWeight",
+	enc{ST_UINT16, 4}: "TransferFee",
 	// 16-bit unsigned integers (uncommon)
 	enc{ST_UINT16, 16}: "Version",
 	// 32-bit unsigned integers (common)
@@ -133,6 +137,11 @@ var encodings = map[enc]string{
 	enc{ST_UINT32, 37}: "FinishAfter",
 	enc{ST_UINT32, 38}: "SignerListID",
 	enc{ST_UINT32, 39}: "SettleDelay",
+	enc{ST_UINT32, 40}: "TicketCount",
+	enc{ST_UINT32, 41}: "TicketSequence",
+	enc{ST_UINT32, 42}: "NFTokenTaxon",
+	enc{ST_UINT32, 43}: "MintedNFTokens",
+	enc{ST_UINT32, 44}: "BurnedNFTokens",
 	// 64-bit unsigned integers (common)
 	enc{ST_UINT64, 1}:  "IndexNext",
 	enc{ST_UINT64, 2}:  "IndexPrevious",
@@ -144,18 +153,21 @@ var encodings = map[enc]string{
 	enc{ST_UINT64, 8}:  "HighNode",
 	enc{ST_UINT64, 9}:  "DestinationNode",
 	enc{ST_UINT64, 10}: "Cookie",
+	enc{ST_UINT64, 11}: "ServerVersion",
+	enc{ST_UINT64, 12}: "NFTokenOfferNode",
 	// 128-bit (common)
 	enc{ST_HASH128, 1}: "EmailHash",
 	// 256-bit (common)
-	enc{ST_HASH256, 1}: "LedgerHash",
-	enc{ST_HASH256, 2}: "ParentHash",
-	enc{ST_HASH256, 3}: "TransactionHash",
-	enc{ST_HASH256, 4}: "AccountHash",
-	enc{ST_HASH256, 5}: "PreviousTxnID",
-	enc{ST_HASH256, 6}: "LedgerIndex",
-	enc{ST_HASH256, 7}: "WalletLocator",
-	enc{ST_HASH256, 8}: "RootIndex",
-	enc{ST_HASH256, 9}: "AccountTxnID",
+	enc{ST_HASH256, 1}:  "LedgerHash",
+	enc{ST_HASH256, 2}:  "ParentHash",
+	enc{ST_HASH256, 3}:  "TransactionHash",
+	enc{ST_HASH256, 4}:  "AccountHash",
+	enc{ST_HASH256, 5}:  "PreviousTxnID",
+	enc{ST_HASH256, 6}:  "LedgerIndex",
+	enc{ST_HASH256, 7}:  "WalletLocator",
+	enc{ST_HASH256, 8}:  "RootIndex",
+	enc{ST_HASH256, 9}:  "AccountTxnID",
+	enc{ST_HASH256, 10}: "NFTokenID",
 	// 256-bit (uncommon)
 	enc{ST_HASH256, 16}: "BookDirectory",
 	enc{ST_HASH256, 17}: "InvoiceID",
@@ -165,6 +177,11 @@ var encodings = map[enc]string{
 	enc{ST_HASH256, 21}: "Digest",
 	enc{ST_HASH256, 22}: "Channel",
 	enc{ST_HASH256, 24}: "CheckID",
+	enc{ST_HASH256, 25}: "ValidatedHash",
+	enc{ST_HASH256, 26}: "PreviousPageMin",
+	enc{ST_HASH256, 27}: "NextPageMin",
+	enc{ST_HASH256, 28}: "NFTokenBuyOffer",
+	enc{ST_HASH256, 29}: "NFTokenSellOffer",
 	// currency amount (common)
 	enc{ST_AMOUNT, 1}:  "Amount",
 	enc{ST_AMOUNT, 2}:  "Balance",
@@ -180,12 +197,13 @@ var encodings = map[enc]string{
 	enc{ST_AMOUNT, 16}: "MinimumOffer",
 	enc{ST_AMOUNT, 17}: "RippleEscrow",
 	enc{ST_AMOUNT, 18}: "DeliveredAmount",
+	enc{ST_AMOUNT, 19}: "NFTokenBrokerFee",
 	// variable length (common)
 	enc{ST_VL, 1}:  "PublicKey",
 	enc{ST_VL, 2}:  "MessageKey",
 	enc{ST_VL, 3}:  "SigningPubKey",
 	enc{ST_VL, 4}:  "TxnSignature",
-	enc{ST_VL, 5}:  "Generator",
+	enc{ST_VL, 5}:  "URI",
 	enc{ST_VL, 6}:  "Signature",
 	enc{ST_VL, 7}:  "Domain",
 	enc{ST_VL, 8}:  "FundCode",
@@ -199,6 +217,9 @@ var encodings = map[enc]string{
 	enc{ST_VL, 16}: "Fulfillment",
 	enc{ST_VL, 17}: "Condition",
 	enc{ST_VL, 18}: "MasterSignature",
+	enc{ST_VL, 19}: "UNLModifyValidator",
+	enc{ST_VL, 20}: "ValidatorToDisable",
+	enc{ST_VL, 21}: "ValidatorToReEnable",
 	// account
 	enc{ST_ACCOUNT, 1}: "Account",
 	enc{ST_ACCOUNT, 2}: "Owner",
@@ -208,6 +229,7 @@ var encodings = map[enc]string{
 	enc{ST_ACCOUNT, 6}: "Unauthorize",
 	enc{ST_ACCOUNT, 7}: "Target",
 	enc{ST_ACCOUNT, 8}: "RegularKey",
+	enc{ST_ACCOUNT, 9}: "NFTokenMinter",
 	// inner object
 	enc{ST_OBJECT, 1}:  "EndOfObject",
 	enc{ST_OBJECT, 2}:  "TransactionMetaData",
@@ -223,24 +245,28 @@ var encodings = map[enc]string{
 	// inner object (uncommon)
 	enc{ST_OBJECT, 16}: "Signer",
 	enc{ST_OBJECT, 18}: "Majority",
+	enc{ST_OBJECT, 19}: "DisabledValidator",
 	// array of objects
-	enc{ST_ARRAY, 1}: "EndOfArray",
-	enc{ST_ARRAY, 2}: "SigningAccounts",
-	enc{ST_ARRAY, 3}: "Signers",
-	enc{ST_ARRAY, 4}: "SignerEntries",
-	enc{ST_ARRAY, 5}: "Template",
-	enc{ST_ARRAY, 6}: "Necessary",
-	enc{ST_ARRAY, 7}: "Sufficient",
-	enc{ST_ARRAY, 8}: "AffectedNodes",
-	enc{ST_ARRAY, 9}: "Memos",
+	enc{ST_ARRAY, 1}:  "EndOfArray",
+	enc{ST_ARRAY, 2}:  "SigningAccounts",
+	enc{ST_ARRAY, 3}:  "Signers",
+	enc{ST_ARRAY, 4}:  "SignerEntries",
+	enc{ST_ARRAY, 5}:  "Template",
+	enc{ST_ARRAY, 6}:  "Necessary",
+	enc{ST_ARRAY, 7}:  "Sufficient",
+	enc{ST_ARRAY, 8}:  "AffectedNodes",
+	enc{ST_ARRAY, 9}:  "Memos",
+	enc{ST_ARRAY, 10}: "NFTokens",
 	// array of objects (uncommon)
 	enc{ST_ARRAY, 16}: "Majorities",
+	enc{ST_ARRAY, 17}: "DisabledValidators",
 	// 8-bit unsigned integers (common)
 	enc{ST_UINT8, 1}: "CloseResolution",
 	enc{ST_UINT8, 2}: "Method",
 	enc{ST_UINT8, 3}: "TransactionResult",
 	// 8-bit unsigned integers (uncommon)
 	enc{ST_UINT8, 16}: "TickSize",
+	enc{ST_UINT8, 17}: "UNLModifyDisabling",
 	// 160-bit (common)
 	enc{ST_HASH160, 1}: "TakerPaysCurrency",
 	enc{ST_HASH160, 2}: "TakerPaysIssuer",
@@ -252,6 +278,7 @@ var encodings = map[enc]string{
 	enc{ST_VECTOR256, 1}: "Indexes",
 	enc{ST_VECTOR256, 2}: "Hashes",
 	enc{ST_VECTOR256, 3}: "Amendments",
+	enc{ST_VECTOR256, 4}: "NFTokenOffers",
 }
 
 var reverseEncodings map[string]enc

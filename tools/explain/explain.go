@@ -33,14 +33,13 @@ explain 955A4C0B7C66FC97EA4C72634CDCDBF50BB17AAA647EC6C8C592788E5B95173C
 explain -
 	Explain binary transactions received through stdin
 
-Options:
-`
+Options:`
 
 var argumentRegex = regexp.MustCompile(`(^[0-9a-fA-F]{64}$)|(^\d+$)|(^[r][a-km-zA-HJ-NP-Z0-9]{26,34}$)|(-)`)
 
 var (
 	flags        = flag.CommandLine
-	host         = flags.String("host", "wss://s-east.ripple.com:443", "websockets host")
+	host         = flags.String("host", "wss://s2.ripple.com:443", "websockets host")
 	trades       = flag.Bool("t", false, "hide trades")
 	balances     = flag.Bool("b", false, "hide balances")
 	paths        = flag.Bool("p", false, "hide paths")

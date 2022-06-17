@@ -1,11 +1,19 @@
 package data
 
-import "github.com/maybeTomorrow/ripple/crypto"
+import (
+	"encoding/hex"
+	"github.com/maybeTomorrow/ripple/crypto"
+	"log"
+)
 
-func Sign(s Signer, key crypto.Key, sequence *uint32) error {
+func Sign(s Signable, key crypto.Key, sequence *uint32) error {
 	s.InitialiseForSigning()
 	copy(s.GetPublicKey().Bytes(), key.Public(sequence))
 	hash, msg, err := SigningHash(s)
+
+	asd := hex.EncodeToString(msg)
+	log.Println(asd)
+
 	if err != nil {
 		return err
 	}
@@ -22,7 +30,7 @@ func Sign(s Signer, key crypto.Key, sequence *uint32) error {
 	return nil
 }
 
-func CheckSignature(s Signer) (bool, error) {
+func CheckSignature(s Signable) (bool, error) {
 	hash, msg, err := SigningHash(s)
 	if err != nil {
 		return false, err

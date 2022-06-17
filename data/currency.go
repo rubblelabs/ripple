@@ -6,7 +6,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math"
-	"strconv"
+	"strings"
+	"unicode"
 )
 
 type Currency [20]byte
@@ -80,7 +81,7 @@ func (c Currency) Type() CurrencyType {
 		return CT_XRP
 	case c[0] == 0x00:
 		for i, b := range c {
-			if i < 12 && i > 14 && b != 0 {
+			if (i < 12 || i > 15) && b != 0 {
 				return CT_UNKNOWN
 			}
 		}
@@ -124,11 +125,18 @@ func (c Currency) Machine() string {
 	case CT_STANDARD:
 		// Check for unprintable characters
 		for _, r := range string(c[12:15]) {
-			if !strconv.IsPrint(r) {
+			if !unicode.IsPrint(r) {
 				return string(b2h(c[:]))
 			}
 		}
 		return string(c[12:15])
+	case CT_UNKNOWN:
+		return strings.Map(func(r rune) rune {
+			if unicode.IsPrint(r) {
+				return r
+			}
+			return -1
+		}, string(c[:]))
 	default:
 		return string(b2h(c[:]))
 	}

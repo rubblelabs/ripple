@@ -62,6 +62,17 @@ const (
 	tecKILLED
 	tecHAS_OBLIGATIONS
 	tecTOO_SOON
+	_
+	tecMAX_SEQUENCE_REACHED
+	tecNO_SUITABLE_NFTOKEN_PAGE
+	tecNFTOKEN_BUY_SELL_MISMATCH
+	tecNFTOKEN_OFFER_TYPE_MISMATCH
+	tecCANT_ACCEPT_OWN_NFTOKEN_OFFER
+	tecINSUFFICIENT_FUNDS
+	tecOBJECT_NOT_FOUND
+	tecINSUFFICIENT_PAYMENT
+	tecINCORRECT_ASSET
+	tecTOO_MANY
 )
 
 const (
@@ -128,6 +139,8 @@ const (
 	temCANNOT_PREAUTH_SELF
 	temUNCERTAIN
 	temUNKNOWN
+	temSEQ_AND_TICKET
+	temBAD_NFTOKEN_TRANSFER_FEE
 )
 const (
 	// -199 .. -100: F Failure (sequence number previously used)
@@ -163,6 +176,8 @@ const (
 	tefBAD_AUTH_MASTER
 	tefINVARIANT_FAILED
 	tefTOO_BIG
+	tefNO_TICKET
+	tefNFTOKEN_IS_NOT_TRANSFERABLE
 )
 const (
 	// -99 .. -1: R Retry (sequence too high, no funds for txn fee, originating account non-existent)
@@ -185,51 +200,58 @@ const (
 	terLAST                          // Process after all other transactions
 	terNO_HCHAIN                     // Rippling not allowed
 	terQUEUED                        // Transaction is being held in TxQ until fee drops
+	terPRE_TICKET                    // Transaction is being held in TxQ until fee drops
 )
 
 var resultNames = map[TransactionResult]struct {
 	Token string
 	Human string
 }{
-	tesSUCCESS:               {"tesSUCCESS", "The transaction was applied."},
-	tecCLAIM:                 {"tecCLAIM", "Fee claimed. Sequence used. No action."},
-	tecDIR_FULL:              {"tecDIR_FULL", "Can not add entry to full directory."},
-	tecFAILED_PROCESSING:     {"tecFAILED_PROCESSING", "Failed to correctly process transaction."},
-	tecINSUF_RESERVE_LINE:    {"tecINSUF_RESERVE_LINE", "Insufficient reserve to add trust line."},
-	tecINSUF_RESERVE_OFFER:   {"tecINSUF_RESERVE_OFFER", "Insufficient reserve to create offer."},
-	tecNO_DST:                {"tecNO_DST", "Destination does not exist. Send HWA to create it."},
-	tecNO_DST_INSUF_HWA:      {"tecNO_DST_INSUF_HWA", "Destination does not exist. Too little HWA sent to create it."},
-	tecNO_LINE_INSUF_RESERVE: {"tecNO_LINE_INSUF_RESERVE", "No such line. Too little reserve to create it."},
-	tecNO_LINE_REDUNDANT:     {"tecNO_LINE_REDUNDANT", "Can't set non-existant line to default."},
-	tecPATH_DRY:              {"tecPATH_DRY", "Path could not send partial amount."},
-	tecPATH_PARTIAL:          {"tecPATH_PARTIAL", "Path could not send full amount."},
-	tecNO_ALTERNATIVE_KEY:    {"tecNO_ALTERNATIVE_KEY", "The operation would remove the ability to sign transactions with the account."},
-	tecNO_REGULAR_KEY:        {"tecNO_REGULAR_KEY", "Regular key is not set."},
-	tecUNFUNDED:              {"tecUNFUNDED", "One of _ADD, _OFFER, or _SEND. Deprecated."},
-	tecUNFUNDED_ADD:          {"tecUNFUNDED_ADD", "Insufficient HWA balance for WalletAdd."},
-	tecUNFUNDED_OFFER:        {"tecUNFUNDED_OFFER", "Insufficient balance to fund created offer."},
-	tecUNFUNDED_PAYMENT:      {"tecUNFUNDED_PAYMENT", "Insufficient HWA balance to send."},
-	tecOWNERS:                {"tecOWNERS", "Non-zero owner count."},
-	tecNO_ISSUER:             {"tecNO_ISSUER", "Issuer account does not exist."},
-	tecNO_AUTH:               {"tecNO_AUTH", "Not authorized to hold asset."},
-	tecNO_LINE:               {"tecNO_LINE", "No such line."},
-	tecINSUFF_FEE:            {"tecINSUFF_FEE", "Insufficient balance to pay fee."},
-	tecFROZEN:                {"tecFROZEN", "Asset is frozen."},
-	tecNO_TARGET:             {"tecNO_TARGET", "Target account does not exist."},
-	tecNO_PERMISSION:         {"tecNO_PERMISSION", "No permission to perform requested operation."},
-	tecNO_ENTRY:              {"tecNO_ENTRY", "No matching entry found."},
-	tecINSUFFICIENT_RESERVE:  {"tecINSUFFICIENT_RESERVE", "Insufficient reserve to complete requested operation."},
-	tecNEED_MASTER_KEY:       {"tecNEED_MASTER_KEY", "The operation requires the use of the Master Key."},
-	tecDST_TAG_NEEDED:        {"tecDST_TAG_NEEDED", "A destination tag is required."},
-	tecINTERNAL:              {"tecINTERNAL", "An internal error has occurred during processing."},
-	tecCRYPTOCONDITION_ERROR: {"tecCRYPTOCONDITION_ERROR", "Malformed, invalid, or mismatched conditional or fulfillment."},
-	tecINVARIANT_FAILED:      {"tecINVARIANT_FAILED", "One or more invariants for the transaction were not satisfied."},
-	tecOVERSIZE:              {"tecOVERSIZE", "Object exceeded serialization limits"},
-	tecEXPIRED:               {"tecEXPIRED", "Expiration time is passed."},
-	tecDUPLICATE:             {"tecDUPLICATE", "Ledger object already exists."},
-	tecKILLED:                {"tecKILLED", "FillOrKill offer killed."},
-	tecHAS_OBLIGATIONS:       {"tecHAS_OBLIGATIONS", "The account cannot be deleted since it has obligations."},
-	tecTOO_SOON:              {"tecTOO_SOON", "It is too early to attempt the requested operation. Please wait."},
+	tesSUCCESS:                       {"tesSUCCESS", "The transaction was applied."},
+	tecCLAIM:                         {"tecCLAIM", "Fee claimed. Sequence used. No action."},
+	tecDIR_FULL:                      {"tecDIR_FULL", "Can not add entry to full directory."},
+	tecFAILED_PROCESSING:             {"tecFAILED_PROCESSING", "Failed to correctly process transaction."},
+	tecINSUF_RESERVE_LINE:            {"tecINSUF_RESERVE_LINE", "Insufficient reserve to add trust line."},
+	tecINSUF_RESERVE_OFFER:           {"tecINSUF_RESERVE_OFFER", "Insufficient reserve to create offer."},
+	tecNO_DST:                        {"tecNO_DST", "Destination does not exist. Send HWA to create it."},
+	tecNO_DST_INSUF_HWA:              {"tecNO_DST_INSUF_HWA", "Destination does not exist. Too little HWA sent to create it."},
+	tecNO_LINE_INSUF_RESERVE:         {"tecNO_LINE_INSUF_RESERVE", "No such line. Too little reserve to create it."},
+	tecNO_LINE_REDUNDANT:             {"tecNO_LINE_REDUNDANT", "Can't set non-existant line to default."},
+	tecPATH_DRY:                      {"tecPATH_DRY", "Path could not send partial amount."},
+	tecPATH_PARTIAL:                  {"tecPATH_PARTIAL", "Path could not send full amount."},
+	tecNO_ALTERNATIVE_KEY:            {"tecNO_ALTERNATIVE_KEY", "The operation would remove the ability to sign transactions with the account."},
+	tecNO_REGULAR_KEY:                {"tecNO_REGULAR_KEY", "Regular key is not set."},
+	tecUNFUNDED:                      {"tecUNFUNDED", "One of _ADD, _OFFER, or _SEND. Deprecated."},
+	tecUNFUNDED_ADD:                  {"tecUNFUNDED_ADD", "Insufficient HWA balance for WalletAdd."},
+	tecUNFUNDED_OFFER:                {"tecUNFUNDED_OFFER", "Insufficient balance to fund created offer."},
+	tecUNFUNDED_PAYMENT:              {"tecUNFUNDED_PAYMENT", "Insufficient HWA balance to send."},
+	tecOWNERS:                        {"tecOWNERS", "Non-zero owner count."},
+	tecNO_ISSUER:                     {"tecNO_ISSUER", "Issuer account does not exist."},
+	tecNO_AUTH:                       {"tecNO_AUTH", "Not authorized to hold asset."},
+	tecNO_LINE:                       {"tecNO_LINE", "No such line."},
+	tecINSUFF_FEE:                    {"tecINSUFF_FEE", "Insufficient balance to pay fee."},
+	tecFROZEN:                        {"tecFROZEN", "Asset is frozen."},
+	tecNO_TARGET:                     {"tecNO_TARGET", "Target account does not exist."},
+	tecNO_PERMISSION:                 {"tecNO_PERMISSION", "No permission to perform requested operation."},
+	tecNO_ENTRY:                      {"tecNO_ENTRY", "No matching entry found."},
+	tecINSUFFICIENT_RESERVE:          {"tecINSUFFICIENT_RESERVE", "Insufficient reserve to complete requested operation."},
+	tecNEED_MASTER_KEY:               {"tecNEED_MASTER_KEY", "The operation requires the use of the Master Key."},
+	tecDST_TAG_NEEDED:                {"tecDST_TAG_NEEDED", "A destination tag is required."},
+	tecINTERNAL:                      {"tecINTERNAL", "An internal error has occurred during processing."},
+	tecCRYPTOCONDITION_ERROR:         {"tecCRYPTOCONDITION_ERROR", "Malformed, invalid, or mismatched conditional or fulfillment."},
+	tecINVARIANT_FAILED:              {"tecINVARIANT_FAILED", "One or more invariants for the transaction were not satisfied."},
+	tecOVERSIZE:                      {"tecOVERSIZE", "Object exceeded serialization limits"},
+	tecEXPIRED:                       {"tecEXPIRED", "Expiration time is passed."},
+	tecDUPLICATE:                     {"tecDUPLICATE", "Ledger object already exists."},
+	tecKILLED:                        {"tecKILLED", "FillOrKill offer killed."},
+	tecHAS_OBLIGATIONS:               {"tecHAS_OBLIGATIONS", "The account cannot be deleted since it has obligations."},
+	tecTOO_SOON:                      {"tecTOO_SOON", "It is too early to attempt the requested operation. Please wait."},
+	tecOBJECT_NOT_FOUND:              {"tecOBJECT_NOT_FOUND", "One of the offers specified in the transaction does not exist in the ledger."},
+	tecINSUFFICIENT_PAYMENT:          {"tecINSUFFICIENT_PAYMENT", "In brokered mode, the buy amount offered is not high enough to pay the BrokerFee and the sell cost of the NFToken."},
+	tecINSUFFICIENT_FUNDS:            {"tecINSUFFICIENT_FUNDS", "The buyer does not have the full amount they are offering. If the buy amount is specified in XRP, this could be because of the reserve requirement. If the buy amount is a token, it could be because the token is frozen."},
+	tecNFTOKEN_BUY_SELL_MISMATCH:     {"tecNFTOKEN_BUY_SELL_MISMATCH", "One of the offers specified in the transaction does not exist in the ledger."},
+	tecNFTOKEN_OFFER_TYPE_MISMATCH:   {"tecNFTOKEN_OFFER_TYPE_MISMATCH", "In brokered mode, the two offers are not a valid match. For example, the seller is asking more than the buyer is offering, the buy and sell offer are denominated in different assets, or the seller specified a destination that is not the buyer or the broker."},
+	tecCANT_ACCEPT_OWN_NFTOKEN_OFFER: {"tecCANT_ACCEPT_OWN_NFTOKEN_OFFER", "The buyer and seller are the same account."},
 
 	tefFAILURE:          {"tefFAILURE", "Failed to apply."},
 	tefALREADY:          {"tefALREADY", "The exact transaction was already in this ledger."},

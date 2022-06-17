@@ -10,11 +10,20 @@ type TxBase struct {
 	AccountTxnID       *Hash256        `json:",omitempty"`
 	SigningPubKey      *PublicKey      `json:",omitempty"`
 	TxnSignature       *VariableLength `json:",omitempty"`
+	Signers            []Signer        `json:",omitempty"`
 	Memos              Memos           `json:",omitempty"`
 	PreviousTxnID      *Hash256        `json:",omitempty"`
 	LastLedgerSequence *uint32         `json:",omitempty"`
 	Hash               Hash256         `json:"hash"`
 }
+
+type Signer struct {
+	Account       Account
+	TxnSignature  *VariableLength
+	SigningPubKey *PublicKey
+}
+
+//NFT
 
 type Payment struct {
 	TxBase
@@ -27,6 +36,40 @@ type Payment struct {
 	InvoiceID      *Hash256 `json:",omitempty"`
 }
 
+type NFTokenMint struct {
+	TxBase
+	NFTokenTaxon *uint32 `json:",omitempty"`
+	Issuer       *Account
+	TransferFee  *uint16         `json:",omitempty"`
+	URI          *VariableLength `json:",omitempty"`
+}
+
+type NFTokenCreateOffer struct {
+	TxBase
+	NFTokenID   Hash256  `json:",omitempty"`
+	Owner       *Account `json:",omitempty"`
+	Amount      Amount   `json:",omitempty"`
+	Expiration  *uint32  `json:",omitempty"`
+	Destination *Account `json:",omitempty"`
+}
+
+type NFTokenCancelOffer struct {
+	TxBase
+	TokenOffers Vector256 `json:",omitempty"`
+}
+
+type NFTokenAcceptOffer struct {
+	TxBase
+	NFTokenSellOffer *Hash256 `json:",omitempty"`
+	NFTokenBuyOffer  *Hash256 `json:",omitempty"`
+	NFTokenBrokerFee *Amount  `json:",omitempty"`
+}
+type NFTokenBurn struct {
+	TxBase
+	NFTokenID Hash256  `json:",omitempty"`
+	Owner     *Account `json:",omitempty"`
+}
+
 type AccountSet struct {
 	TxBase
 	EmailHash     *Hash128        `json:",omitempty"`
@@ -34,6 +77,7 @@ type AccountSet struct {
 	WalletSize    *uint32         `json:",omitempty"`
 	MessageKey    *VariableLength `json:",omitempty"`
 	Domain        *VariableLength `json:",omitempty"`
+	NFTokenMinter *Account        `json:",omitempty"`
 	TransferRate  *uint32         `json:",omitempty"`
 	TickSize      *uint8          `json:",omitempty"`
 	SetFlag       *uint32         `json:",omitempty"`
@@ -164,18 +208,20 @@ type CheckCancel struct {
 }
 
 type TicketCreate struct {
-	Target     *Account `json:",omitempty"`
-	Expiration *uint32  `json:",omitempty"`
-}
-
-type TicketCancel struct {
-	TicketID Hash256
+	TxBase
+	TicketCount *uint32 `json:",omitempty"`
 }
 
 type SignerListSet struct {
 	TxBase
 	SignerQuorum  uint32        `json:",omitempty"`
 	SignerEntries []SignerEntry `json:",omitempty"`
+}
+
+type UNLModify struct {
+	TxBase
+	UNLModifyDisabling uint8           `json:",omitempty"`
+	UNLModifyValidator *VariableLength `json:",omitempty"`
 }
 
 func (t *TxBase) GetBase() *TxBase                    { return t }

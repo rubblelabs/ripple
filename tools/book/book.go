@@ -17,8 +17,7 @@ Examples:
 book XRP USD/rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B
 	Show all offers for where the taker pays USD/rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B and the taker gets XRP
 
-Options:
-`
+Options:`
 
 var (
 	host = flag.String("host", "wss://s1.ripple.com:443", "websockets host")

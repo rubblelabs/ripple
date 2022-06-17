@@ -438,6 +438,9 @@ func (a Account) MarshalText() ([]byte, error) {
 
 // Expects base58-encoded account id
 func (a *Account) UnmarshalText(b []byte) error {
+	if len(b) == 0 {
+		return nil
+	}
 	account, err := NewAccountFromAddress(string(b))
 	if err != nil {
 		return err
