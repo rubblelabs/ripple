@@ -55,7 +55,7 @@ type NFTokenCreateOffer struct {
 
 type NFTokenCancelOffer struct {
 	TxBase
-	TokenOffers Vector256 `json:",omitempty"`
+	NFTokenOffers Vector256 `json:",omitempty"`
 }
 
 type NFTokenAcceptOffer struct {
