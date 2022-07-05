@@ -5,27 +5,30 @@ import (
 	"encoding/binary"
 	"math/big"
 
-	"github.com/btcsuite/btcd/btcec"
+	"github.com/decred/dcrd/dcrec/secp256k1/v4"
+)
+
+const (
+	PubKeyBytesLenCompressed = 33
 )
 
 var (
-	order = btcec.S256().N
+	order = secp256k1.S256().N
 	zero  = big.NewInt(0)
 	one   = big.NewInt(1)
 )
 
 type ecdsaKey struct {
-	*btcec.PrivateKey
+	*secp256k1.PrivateKey
 }
 
-func newKey(seed []byte) *btcec.PrivateKey {
+func newKey(seed []byte) *secp256k1.PrivateKey {
 	inc := big.NewInt(0).SetBytes(seed)
 	inc.Lsh(inc, 32)
 	for key := big.NewInt(0); ; inc.Add(inc, one) {
 		key.SetBytes(Sha512Half(inc.Bytes()))
 		if key.Cmp(zero) > 0 && key.Cmp(order) < 0 {
-			privKey, _ := btcec.PrivKeyFromBytes(btcec.S256(), key.Bytes())
-			return privKey
+			return secp256k1.PrivKeyFromBytes(key.Bytes())
 		}
 	}
 }
@@ -41,14 +44,13 @@ func NewECDSAKey(seed []byte) (*ecdsaKey, error) {
 	return &ecdsaKey{newKey(seed)}, nil
 }
 
-func (k *ecdsaKey) generateKey(sequence uint32) *btcec.PrivateKey {
-	seed := make([]byte, btcec.PubKeyBytesLenCompressed+4)
+func (k *ecdsaKey) generateKey(sequence uint32) *secp256k1.PrivateKey {
+	seed := make([]byte, PubKeyBytesLenCompressed+4)
 	copy(seed, k.PubKey().SerializeCompressed())
-	binary.BigEndian.PutUint32(seed[btcec.PubKeyBytesLenCompressed:], sequence)
-	key := newKey(seed)
-	key.D.Add(key.D, k.D).Mod(key.D, order)
-	key.X, key.Y = key.ScalarBaseMult(key.D.Bytes())
-	return key
+	binary.BigEndian.PutUint32(seed[PubKeyBytesLenCompressed:], sequence)
+	key := newKey(seed).ToECDSA()
+	key.D.Add(key.D, k.ToECDSA().D).Mod(key.D, order)
+	return secp256k1.PrivKeyFromBytes(key.D.Bytes())
 }
 
 func (k *ecdsaKey) Id(sequence *uint32) []byte {
@@ -60,9 +62,9 @@ func (k *ecdsaKey) Id(sequence *uint32) []byte {
 
 func (k *ecdsaKey) Private(sequence *uint32) []byte {
 	if sequence == nil {
-		return k.D.Bytes()
+		return k.ToECDSA().D.Bytes()
 	}
-	return k.generateKey(*sequence).D.Bytes()
+	return k.generateKey(*sequence).ToECDSA().D.Bytes()
 }
 
 func (k *ecdsaKey) Public(sequence *uint32) []byte {

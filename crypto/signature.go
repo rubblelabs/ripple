@@ -4,15 +4,16 @@ import (
 	"crypto/ed25519"
 	"fmt"
 
-	"github.com/btcsuite/btcd/btcec"
+	"github.com/decred/dcrd/dcrec/secp256k1/v4"
+	"github.com/decred/dcrd/dcrec/secp256k1/v4/ecdsa"
 )
 
 func Sign(privateKey, hash, msg []byte) ([]byte, error) {
 	switch len(privateKey) {
 	case ed25519.PrivateKeySize:
-		return signEd25519(privateKey, msg)
-	case btcec.PrivKeyBytesLen:
-		return signECDSA(privateKey, hash)
+		return signEd25519(privateKey, msg), nil
+	case secp256k1.PrivKeyBytesLen:
+		return signECDSA(privateKey, hash), nil
 	default:
 		return nil, fmt.Errorf("Unknown private key format")
 	}
@@ -29,8 +30,8 @@ func Verify(publicKey, hash, msg, signature []byte) (bool, error) {
 	}
 }
 
-func signEd25519(privateKey, msg []byte) ([]byte, error) {
-	return ed25519.Sign(privateKey, msg)[:], nil
+func signEd25519(privateKey, msg []byte) []byte {
+	return ed25519.Sign(privateKey, msg)[:]
 }
 
 func verifyEd25519(pubKey, signature, msg []byte) (bool, error) {
@@ -47,22 +48,18 @@ func verifyEd25519(pubKey, signature, msg []byte) (bool, error) {
 }
 
 // Returns DER encoded signature from input hash
-func signECDSA(privateKey, hash []byte) ([]byte, error) {
-	priv, _ := btcec.PrivKeyFromBytes(btcec.S256(), privateKey)
-	sig, err := priv.Sign(hash)
-	if err != nil {
-		return nil, err
-	}
-	return sig.Serialize(), nil
+func signECDSA(privateKey, hash []byte) []byte {
+	key := secp256k1.PrivKeyFromBytes(privateKey)
+	return ecdsa.Sign(key, hash).Serialize()
 }
 
 // Verifies a hash using DER encoded signature
 func verifyECDSA(pubKey, signature, hash []byte) (bool, error) {
-	sig, err := btcec.ParseDERSignature(signature, btcec.S256())
+	sig, err := ecdsa.ParseDERSignature(signature)
 	if err != nil {
 		return false, err
 	}
-	pk, err := btcec.ParsePubKey(pubKey, btcec.S256())
+	pk, err := secp256k1.ParsePubKey(pubKey)
 	if err != nil {
 		return false, nil
 	}
