@@ -5,7 +5,8 @@ import (
 	"encoding/binary"
 	"math/big"
 
-	"github.com/btcsuite/btcd/btcec"
+	"github.com/btcsuite/btcd/btcec/v2"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 var (
@@ -24,7 +25,7 @@ func newKey(seed []byte) *btcec.PrivateKey {
 	for key := big.NewInt(0); ; inc.Add(inc, one) {
 		key.SetBytes(Sha512Half(inc.Bytes()))
 		if key.Cmp(zero) > 0 && key.Cmp(order) < 0 {
-			privKey, _ := btcec.PrivKeyFromBytes(btcec.S256(), key.Bytes())
+			privKey, _ := btcec.PrivKeyFromBytes(key.Bytes())
 			return privKey
 		}
 	}
@@ -45,10 +46,14 @@ func (k *ecdsaKey) generateKey(sequence uint32) *btcec.PrivateKey {
 	seed := make([]byte, btcec.PubKeyBytesLenCompressed+4)
 	copy(seed, k.PubKey().SerializeCompressed())
 	binary.BigEndian.PutUint32(seed[btcec.PubKeyBytesLenCompressed:], sequence)
-	key := newKey(seed)
-	key.D.Add(key.D, k.D).Mod(key.D, order)
+	key := newKey(seed).ToECDSA()
+	key.D.Add(key.D, k.ToECDSA().D).Mod(key.D, order)
 	key.X, key.Y = key.ScalarBaseMult(key.D.Bytes())
-	return key
+
+	keyBytes := crypto.FromECDSA(key)
+	ecKey, _ := btcec.PrivKeyFromBytes(keyBytes)
+
+	return ecKey
 }
 
 func (k *ecdsaKey) Id(sequence *uint32) []byte {
@@ -60,9 +65,9 @@ func (k *ecdsaKey) Id(sequence *uint32) []byte {
 
 func (k *ecdsaKey) Private(sequence *uint32) []byte {
 	if sequence == nil {
-		return k.D.Bytes()
+		return k.ToECDSA().D.Bytes()
 	}
-	return k.generateKey(*sequence).D.Bytes()
+	return k.generateKey(*sequence).ToECDSA().D.Bytes()
 }
 
 func (k *ecdsaKey) Public(sequence *uint32) []byte {
