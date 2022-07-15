@@ -4,7 +4,8 @@ import (
 	"crypto/ed25519"
 	"fmt"
 
-	"github.com/btcsuite/btcd/btcec"
+	"github.com/btcsuite/btcd/btcec/v2"
+	"github.com/btcsuite/btcd/btcec/v2/ecdsa"
 )
 
 func Sign(privateKey, hash, msg []byte) ([]byte, error) {
@@ -48,21 +49,18 @@ func verifyEd25519(pubKey, signature, msg []byte) (bool, error) {
 
 // Returns DER encoded signature from input hash
 func signECDSA(privateKey, hash []byte) ([]byte, error) {
-	priv, _ := btcec.PrivKeyFromBytes(btcec.S256(), privateKey)
-	sig, err := priv.Sign(hash)
-	if err != nil {
-		return nil, err
-	}
+	priv, _ := btcec.PrivKeyFromBytes(privateKey)
+	sig := ecdsa.Sign(priv, hash)
 	return sig.Serialize(), nil
 }
 
 // Verifies a hash using DER encoded signature
 func verifyECDSA(pubKey, signature, hash []byte) (bool, error) {
-	sig, err := btcec.ParseDERSignature(signature, btcec.S256())
+	sig, err := ecdsa.ParseDERSignature(signature)
 	if err != nil {
 		return false, err
 	}
-	pk, err := btcec.ParsePubKey(pubKey, btcec.S256())
+	pk, err := btcec.ParsePubKey(pubKey)
 	if err != nil {
 		return false, nil
 	}
