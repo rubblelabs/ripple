@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/ysv/ripple/crypto"
@@ -30,6 +31,7 @@ func (keyType KeyType) String() string {
 type Hash128 [16]byte
 type Hash160 [20]byte
 type Hash256 [32]byte
+type ExtendedHash256 []byte
 type Vector256 []Hash256
 type VariableLength []byte
 type PublicKey [33]byte
@@ -41,6 +43,41 @@ var zero256 Hash256
 var zeroAccount Account
 var zeroPublicKey PublicKey
 var zeroSeed Seed
+
+func (h *ExtendedHash256) UnmarshalJSON(b []byte) error {
+	s := strings.ReplaceAll(string(b), "\"", "")
+	verify := strings.Split(s, ",")
+	switch len(verify) {
+	case 0:
+		*h = []byte("")
+		return nil
+	case 1:
+		// Should be a Hash256:
+		_, err := NewHash256(verify[0])
+		if err != nil {
+			return fmt.Errorf("UnmarshalJSON: Incorrect type %X", h)
+		}
+	case 2:
+		// Should be a Hash256 and an integer:
+		_, err := NewHash256(verify[0])
+		if err != nil {
+			return fmt.Errorf("UnmarshalJSON: Incorrect type %X", h)
+		}
+		_, err = strconv.Atoi(verify[1])
+		if err != nil {
+			return fmt.Errorf("UnmarshalJSON: Incorrect type %X", h)
+		}
+	}
+	*h = []byte(s)
+	return nil
+}
+
+func (h *ExtendedHash256) MarshalJSON() ([]byte, error) {
+	b := []byte(`"`)
+	b = append(b, *h...)
+	b = append(b, []byte(`"`)...)
+	return b, nil
+}
 
 func (h *Hash128) Bytes() []byte {
 	if h == nil {

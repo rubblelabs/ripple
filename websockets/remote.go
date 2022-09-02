@@ -385,7 +385,7 @@ func (r *Remote) AccountInfo(a data.Account) (*AccountInfoResult, error) {
 func (r *Remote) AccountLines(account data.Account, ledgerIndex interface{}) (*AccountLinesResult, error) {
 	var (
 		lines  data.AccountLineSlice
-		marker *data.Hash256
+		marker *data.ExtendedHash256
 	)
 	for {
 		cmd := &AccountLinesCommand{

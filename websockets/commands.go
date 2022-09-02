@@ -230,17 +230,17 @@ type AccountInfoResult struct {
 
 type AccountLinesCommand struct {
 	*Command
-	Account     data.Account        `json:"account"`
-	Limit       uint32              `json:"limit"`
-	LedgerIndex interface{}         `json:"ledger_index,omitempty"`
-	Marker      *data.Hash256       `json:"marker,omitempty"`
-	Result      *AccountLinesResult `json:"result,omitempty"`
+	Account     data.Account          `json:"account"`
+	Limit       uint32                `json:"limit"`
+	LedgerIndex interface{}           `json:"ledger_index,omitempty"`
+	Marker      *data.ExtendedHash256 `json:"marker,omitempty"`
+	Result      *AccountLinesResult   `json:"result,omitempty"`
 }
 
 type AccountLinesResult struct {
 	LedgerSequence *uint32               `json:"ledger_index"`
 	Account        data.Account          `json:"account"`
-	Marker         *data.Hash256         `json:"marker"`
+	Marker         *data.ExtendedHash256 `json:"marker"`
 	Lines          data.AccountLineSlice `json:"lines"`
 }
 
