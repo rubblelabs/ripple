@@ -183,7 +183,7 @@ type Check struct {
 	InvoiceID       *Hash256         `json:",omitempty"`
 }
 
-type DepositPreAuth struct {
+type DepositPreauth struct {
 	leBase
 	Account   *Account         `json:",omitempty"`
 	Authorize *Account         `json:",omitempty"`
@@ -222,7 +222,7 @@ func (p *Check) Affects(account Account) bool {
 	return (p.Account != nil && p.Account.Equals(account)) || (p.Destination != nil && p.Destination.Equals(account))
 }
 
-func (d *DepositPreAuth) Affects(account Account) bool {
+func (d *DepositPreauth) Affects(account Account) bool {
 	return (d.Account != nil && d.Account.Equals(account)) || (d.Authorize != nil && d.Authorize.Equals(account))
 }
 

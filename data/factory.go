@@ -8,20 +8,20 @@ type TransactionType uint16
 
 const (
 	// LedgerEntryType values come from rippled's "LedgerFormats.h"
-	SIGNER_LIST      LedgerEntryType = 0x53 // 'S'
-	TICKET           LedgerEntryType = 0x54 // 'T'
-	ACCOUNT_ROOT     LedgerEntryType = 0x61 // 'a'
-	DIRECTORY        LedgerEntryType = 0x64 // 'd'
-	AMENDMENTS       LedgerEntryType = 0x66 // 'f'
-	LEDGER_HASHES    LedgerEntryType = 0x68 // 'h'
-	OFFER            LedgerEntryType = 0x6f // 'o'
-	RIPPLE_STATE     LedgerEntryType = 0x72 // 'r'
-	FEE_SETTINGS     LedgerEntryType = 0x73 // 's'
-	ESCROW           LedgerEntryType = 0x75 // 'u'
-	PAY_CHANNEL      LedgerEntryType = 0x78 // 'x'
-	CHECK            LedgerEntryType = 0x43 // 'C'
-	DEPOSIT_PRE_AUTH LedgerEntryType = 0x70 // 'p'
-	NEGATIVE_UNL     LedgerEntryType = 0x4e //'N'
+	SIGNER_LIST     LedgerEntryType = 0x53 // 'S'
+	TICKET          LedgerEntryType = 0x54 // 'T'
+	ACCOUNT_ROOT    LedgerEntryType = 0x61 // 'a'
+	DIRECTORY       LedgerEntryType = 0x64 // 'd'
+	AMENDMENTS      LedgerEntryType = 0x66 // 'f'
+	LEDGER_HASHES   LedgerEntryType = 0x68 // 'h'
+	OFFER           LedgerEntryType = 0x6f // 'o'
+	RIPPLE_STATE    LedgerEntryType = 0x72 // 'r'
+	FEE_SETTINGS    LedgerEntryType = 0x73 // 's'
+	ESCROW          LedgerEntryType = 0x75 // 'u'
+	PAY_CHANNEL     LedgerEntryType = 0x78 // 'x'
+	CHECK           LedgerEntryType = 0x43 // 'C'
+	DEPOSIT_PREAUTH LedgerEntryType = 0x70 // 'p'
+	NEGATIVE_UNL    LedgerEntryType = 0x4e //'N'
 
 	// TransactionType values come from rippled's "TxFormats.h"
 	PAYMENT         TransactionType = 0
@@ -53,20 +53,20 @@ var LedgerFactory = [...]func() Hashable{
 }
 
 var LedgerEntryFactory = [...]func() LedgerEntry{
-	ACCOUNT_ROOT:     func() LedgerEntry { return &AccountRoot{leBase: leBase{LedgerEntryType: ACCOUNT_ROOT}} },
-	DIRECTORY:        func() LedgerEntry { return &Directory{leBase: leBase{LedgerEntryType: DIRECTORY}} },
-	AMENDMENTS:       func() LedgerEntry { return &Amendments{leBase: leBase{LedgerEntryType: AMENDMENTS}} },
-	LEDGER_HASHES:    func() LedgerEntry { return &LedgerHashes{leBase: leBase{LedgerEntryType: LEDGER_HASHES}} },
-	OFFER:            func() LedgerEntry { return &Offer{leBase: leBase{LedgerEntryType: OFFER}} },
-	RIPPLE_STATE:     func() LedgerEntry { return &RippleState{leBase: leBase{LedgerEntryType: RIPPLE_STATE}} },
-	FEE_SETTINGS:     func() LedgerEntry { return &FeeSettings{leBase: leBase{LedgerEntryType: FEE_SETTINGS}} },
-	ESCROW:           func() LedgerEntry { return &Escrow{leBase: leBase{LedgerEntryType: ESCROW}} },
-	SIGNER_LIST:      func() LedgerEntry { return &SignerList{leBase: leBase{LedgerEntryType: SIGNER_LIST}} },
-	TICKET:           func() LedgerEntry { return &Ticket{leBase: leBase{LedgerEntryType: TICKET}} },
-	PAY_CHANNEL:      func() LedgerEntry { return &PayChannel{leBase: leBase{LedgerEntryType: PAY_CHANNEL}} },
-	CHECK:            func() LedgerEntry { return &Check{leBase: leBase{LedgerEntryType: CHECK}} },
-	DEPOSIT_PRE_AUTH: func() LedgerEntry { return &DepositPreAuth{leBase: leBase{LedgerEntryType: DEPOSIT_PRE_AUTH}} },
-	NEGATIVE_UNL:     func() LedgerEntry { return &NegativeUNL{leBase: leBase{LedgerEntryType: NEGATIVE_UNL}} },
+	ACCOUNT_ROOT:    func() LedgerEntry { return &AccountRoot{leBase: leBase{LedgerEntryType: ACCOUNT_ROOT}} },
+	DIRECTORY:       func() LedgerEntry { return &Directory{leBase: leBase{LedgerEntryType: DIRECTORY}} },
+	AMENDMENTS:      func() LedgerEntry { return &Amendments{leBase: leBase{LedgerEntryType: AMENDMENTS}} },
+	LEDGER_HASHES:   func() LedgerEntry { return &LedgerHashes{leBase: leBase{LedgerEntryType: LEDGER_HASHES}} },
+	OFFER:           func() LedgerEntry { return &Offer{leBase: leBase{LedgerEntryType: OFFER}} },
+	RIPPLE_STATE:    func() LedgerEntry { return &RippleState{leBase: leBase{LedgerEntryType: RIPPLE_STATE}} },
+	FEE_SETTINGS:    func() LedgerEntry { return &FeeSettings{leBase: leBase{LedgerEntryType: FEE_SETTINGS}} },
+	ESCROW:          func() LedgerEntry { return &Escrow{leBase: leBase{LedgerEntryType: ESCROW}} },
+	SIGNER_LIST:     func() LedgerEntry { return &SignerList{leBase: leBase{LedgerEntryType: SIGNER_LIST}} },
+	TICKET:          func() LedgerEntry { return &Ticket{leBase: leBase{LedgerEntryType: TICKET}} },
+	PAY_CHANNEL:     func() LedgerEntry { return &PayChannel{leBase: leBase{LedgerEntryType: PAY_CHANNEL}} },
+	CHECK:           func() LedgerEntry { return &Check{leBase: leBase{LedgerEntryType: CHECK}} },
+	DEPOSIT_PREAUTH: func() LedgerEntry { return &DepositPreauth{leBase: leBase{LedgerEntryType: DEPOSIT_PREAUTH}} },
+	NEGATIVE_UNL:    func() LedgerEntry { return &NegativeUNL{leBase: leBase{LedgerEntryType: NEGATIVE_UNL}} },
 }
 
 var TxFactory = [...]func() Transaction{
@@ -94,20 +94,20 @@ var TxFactory = [...]func() Transaction{
 }
 
 var ledgerEntryNames = [...]string{
-	ACCOUNT_ROOT:     "AccountRoot",
-	DIRECTORY:        "DirectoryNode",
-	AMENDMENTS:       "Amendments",
-	LEDGER_HASHES:    "LedgerHashes",
-	OFFER:            "Offer",
-	RIPPLE_STATE:     "RippleState",
-	FEE_SETTINGS:     "FeeSettings",
-	ESCROW:           "Escrow",
-	SIGNER_LIST:      "SignerList",
-	TICKET:           "Ticket",
-	PAY_CHANNEL:      "PayChannel",
-	CHECK:            "Check",
-	DEPOSIT_PRE_AUTH: "DepositPreAuth",
-	NEGATIVE_UNL:     "NegativeUNL",
+	ACCOUNT_ROOT:    "AccountRoot",
+	DIRECTORY:       "DirectoryNode",
+	AMENDMENTS:      "Amendments",
+	LEDGER_HASHES:   "LedgerHashes",
+	OFFER:           "Offer",
+	RIPPLE_STATE:    "RippleState",
+	FEE_SETTINGS:    "FeeSettings",
+	ESCROW:          "Escrow",
+	SIGNER_LIST:     "SignerList",
+	TICKET:          "Ticket",
+	PAY_CHANNEL:     "PayChannel",
+	CHECK:           "Check",
+	DEPOSIT_PREAUTH: "DepositPreauth",
+	NEGATIVE_UNL:    "NegativeUNL",
 }
 
 var ledgerEntryTypes = map[string]LedgerEntryType{
@@ -123,7 +123,7 @@ var ledgerEntryTypes = map[string]LedgerEntryType{
 	"Ticket":         TICKET,
 	"PayChannel":     PAY_CHANNEL,
 	"Check":          CHECK,
-	"DepositPreAuth": DEPOSIT_PRE_AUTH,
+	"DepositPreauth": DEPOSIT_PREAUTH,
 	"NegativeUNL":    NEGATIVE_UNL,
 }
 
