@@ -165,6 +165,14 @@ func (l *AccountLine) Asset() *Asset {
 	}
 }
 
+func (l *AccountLine) BalanceAmount() *Amount {
+	return &Amount{
+		Value:    &l.Balance.Value,
+		Currency: l.Currency,
+		Issuer:   l.Account,
+	}
+}
+
 func (l *AccountLine) CompareByCurrencyAccount(other *AccountLine) int {
 	if cmp := l.Currency.Compare(other.Currency); cmp != 0 {
 		return cmp
