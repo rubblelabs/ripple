@@ -189,6 +189,7 @@ type Check struct {
 
 type DepositPreAuth struct {
 	leBase
+	Flags     *LedgerEntryFlag `json:",omitempty"`
 	Account   *Account         `json:",omitempty"`
 	Authorize *Account         `json:",omitempty"`
 	Flags     *LedgerEntryFlag `json:",omitempty"`
@@ -197,20 +198,22 @@ type DepositPreAuth struct {
 
 type NFTokenPage struct {
 	leBase
-	PreviousPageMin *Hash256  `json:",omitempty"`
-	NextPageMin     *Hash256  `json:",omitempty"`
-	NFTokens        []NFToken `json:",omitempty"`
+	Flags           *LedgerEntryFlag `json:",omitempty"`
+	PreviousPageMin *Hash256         `json:",omitempty"`
+	NextPageMin     *Hash256         `json:",omitempty"`
+	NFTokens        []NFToken        `json:",omitempty"`
 }
 
 type NFTokenOffer struct {
 	leBase
-	Owner          *Account   `json:",omitempty"`
-	NFTokenID      *Hash256   `json:",omitempty"`
-	Amount         *Amount    `json:",omitempty"`
-	OwnerNode      *NodeIndex `json:",omitempty"`
-	TokenOfferNode *NodeIndex `json:",omitempty"`
-	Destination    *Account   `json:",omitempty"`
-	Expiration     *uint32    `json:",omitempty"`
+	Flags          *LedgerEntryFlag `json:",omitempty"`
+	Owner          *Account         `json:",omitempty"`
+	NFTokenID      *Hash256         `json:",omitempty"`
+	Amount         *Amount          `json:",omitempty"`
+	OwnerNode      *NodeIndex       `json:",omitempty"`
+	TokenOfferNode *NodeIndex       `json:",omitempty"`
+	Destination    *Account         `json:",omitempty"`
+	Expiration     *uint32          `json:",omitempty"`
 }
 
 func (a *AccountRoot) Affects(account Account) bool {
