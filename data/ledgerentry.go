@@ -192,7 +192,6 @@ type DepositPreAuth struct {
 	Flags     *LedgerEntryFlag `json:",omitempty"`
 	Account   *Account         `json:",omitempty"`
 	Authorize *Account         `json:",omitempty"`
-	Flags     *LedgerEntryFlag `json:",omitempty"`
 	OwnerNode *NodeIndex       `json:",omitempty"`
 }
 
