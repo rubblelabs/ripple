@@ -246,6 +246,7 @@ var encodings = map[enc]string{
 	{ST_OBJECT, 9}:  "TemplateEntry",
 	{ST_OBJECT, 10}: "Memo",
 	{ST_OBJECT, 11}: "SignerEntry",
+	{ST_OBJECT, 12}: "NFToken",
 	// inner object (uncommon)
 	{ST_OBJECT, 16}: "Signer",
 	{ST_OBJECT, 18}: "Majority",
