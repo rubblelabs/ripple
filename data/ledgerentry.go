@@ -205,14 +205,14 @@ type NFTokenPage struct {
 
 type NFTokenOffer struct {
 	leBase
-	Flags          *LedgerEntryFlag `json:",omitempty"`
-	Owner          *Account         `json:",omitempty"`
-	NFTokenID      *Hash256         `json:",omitempty"`
-	Amount         *Amount          `json:",omitempty"`
-	OwnerNode      *NodeIndex       `json:",omitempty"`
-	TokenOfferNode *NodeIndex       `json:",omitempty"`
-	Destination    *Account         `json:",omitempty"`
-	Expiration     *uint32          `json:",omitempty"`
+	Flags            *LedgerEntryFlag `json:",omitempty"`
+	Owner            *Account         `json:",omitempty"`
+	NFTokenID        *Hash256         `json:",omitempty"`
+	Amount           *Amount          `json:",omitempty"`
+	OwnerNode        *NodeIndex       `json:",omitempty"`
+	NFTokenOfferNode *NodeIndex       `json:",omitempty"`
+	Destination      *Account         `json:",omitempty"`
+	Expiration       *uint32          `json:",omitempty"`
 }
 
 func (a *AccountRoot) Affects(account Account) bool {
