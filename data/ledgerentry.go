@@ -13,21 +13,24 @@ type leBase struct {
 
 type AccountRoot struct {
 	leBase
-	Flags         *LedgerEntryFlag `json:",omitempty"`
-	Account       *Account         `json:",omitempty"`
-	Sequence      *uint32          `json:",omitempty"`
-	Balance       *Value           `json:",omitempty"`
-	OwnerCount    *uint32          `json:",omitempty"`
-	AccountTxnID  *Hash256         `json:",omitempty"`
-	RegularKey    *RegularKey      `json:",omitempty"`
-	EmailHash     *Hash128         `json:",omitempty"`
-	WalletLocator *Hash256         `json:",omitempty"`
-	WalletSize    *uint32          `json:",omitempty"`
-	MessageKey    *VariableLength  `json:",omitempty"`
-	TransferRate  *uint32          `json:",omitempty"`
-	Domain        *VariableLength  `json:",omitempty"`
-	TickSize      *uint8           `json:",omitempty"`
-	TicketCount   *uint32          `json:",omitempty"`
+	Flags          *LedgerEntryFlag `json:",omitempty"`
+	Account        *Account         `json:",omitempty"`
+	Sequence       *uint32          `json:",omitempty"`
+	Balance        *Value           `json:",omitempty"`
+	OwnerCount     *uint32          `json:",omitempty"`
+	AccountTxnID   *Hash256         `json:",omitempty"`
+	RegularKey     *RegularKey      `json:",omitempty"`
+	EmailHash      *Hash128         `json:",omitempty"`
+	WalletLocator  *Hash256         `json:",omitempty"`
+	WalletSize     *uint32          `json:",omitempty"`
+	MessageKey     *VariableLength  `json:",omitempty"`
+	TransferRate   *uint32          `json:",omitempty"`
+	Domain         *VariableLength  `json:",omitempty"`
+	TickSize       *uint8           `json:",omitempty"`
+	TicketCount    *uint32          `json:",omitempty"`
+	NFTokenMinter  *Account         `json:",omitempty"`
+	MintedNFTokens *uint32          `json:",omitempty"`
+	BurnedNFTokens *uint32          `json:",omitempty"`
 }
 
 type RippleState struct {
@@ -70,6 +73,7 @@ type Directory struct {
 	ExchangeRate      *ExchangeRate    `json:",omitempty"`
 	IndexNext         *NodeIndex       `json:",omitempty"`
 	IndexPrevious     *NodeIndex       `json:",omitempty"`
+	NFTokenID         *Hash256         `json:",omitempty"`
 }
 
 type LedgerHashes struct {
@@ -191,6 +195,24 @@ type DepositPreAuth struct {
 	OwnerNode *NodeIndex       `json:",omitempty"`
 }
 
+type NFTokenPage struct {
+	leBase
+	PreviousPageMin *Hash256  `json:",omitempty"`
+	NextPageMin     *Hash256  `json:",omitempty"`
+	NFTokens        []NFToken `json:",omitempty"`
+}
+
+type NFTokenOffer struct {
+	leBase
+	Owner          *Account   `json:",omitempty"`
+	NFTokenID      *Hash256   `json:",omitempty"`
+	Amount         *Amount    `json:",omitempty"`
+	OwnerNode      *NodeIndex `json:",omitempty"`
+	TokenOfferNode *NodeIndex `json:",omitempty"`
+	Destination    *Account   `json:",omitempty"`
+	Expiration     *uint32    `json:",omitempty"`
+}
+
 func (a *AccountRoot) Affects(account Account) bool {
 	return a.Account != nil && a.Account.Equals(account)
 }
@@ -224,6 +246,14 @@ func (p *Check) Affects(account Account) bool {
 
 func (d *DepositPreAuth) Affects(account Account) bool {
 	return (d.Account != nil && d.Account.Equals(account)) || (d.Authorize != nil && d.Authorize.Equals(account))
+}
+
+func (tp *NFTokenPage) Affects(account Account) bool {
+	return false
+}
+
+func (to *NFTokenOffer) Affects(account Account) bool {
+	return (to.Owner != nil && to.Owner.Equals(account)) || (to.Destination != nil && to.Destination.Equals(account))
 }
 
 func (le *leBase) GetType() string                     { return ledgerEntryNames[le.LedgerEntryType] }

@@ -186,7 +186,7 @@ func getFields(v *reflect.Value, depth int) fieldSlice {
 		switch encoding.typ {
 		case ST_UINT8, ST_UINT16, ST_UINT32, ST_UINT64:
 			fields.Append(encoding, f.Addr().Interface(), nil)
-		case ST_HASH128, ST_HASH256, ST_AMOUNT, ST_VL, ST_ACCOUNT, ST_HASH160, ST_PATHSET, ST_VECTOR256:
+		case ST_HASH96, ST_HASH128, ST_HASH160, ST_HASH192, ST_HASH256, ST_HASH384, ST_HASH512, ST_AMOUNT, ST_VL, ST_ACCOUNT, ST_PATHSET, ST_VECTOR256:
 			fields.Append(encoding, f.Addr().Interface(), nil)
 		case ST_ARRAY:
 			var children fieldSlice

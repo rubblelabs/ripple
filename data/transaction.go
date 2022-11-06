@@ -18,9 +18,10 @@ type TxBase struct {
 }
 
 type Signer struct {
-	Account       Account
-	TxnSignature  *VariableLength
-	SigningPubKey *PublicKey
+	Account        Account
+	TxnSignature   *VariableLength
+	SigningPubKey  *PublicKey
+	TicketSequence *uint32 `json:",omitempty"`
 }
 
 type Payment struct {
@@ -32,50 +33,57 @@ type Payment struct {
 	Paths          *PathSet `json:",omitempty"`
 	DestinationTag *uint32  `json:",omitempty"`
 	InvoiceID      *Hash256 `json:",omitempty"`
+	TicketSequence *uint32  `json:",omitempty"`
 }
 
 type AccountSet struct {
 	TxBase
-	EmailHash     *Hash128        `json:",omitempty"`
-	WalletLocator *Hash256        `json:",omitempty"`
-	WalletSize    *uint32         `json:",omitempty"`
-	MessageKey    *VariableLength `json:",omitempty"`
-	Domain        *VariableLength `json:",omitempty"`
-	TransferRate  *uint32         `json:",omitempty"`
-	TickSize      *uint8          `json:",omitempty"`
-	SetFlag       *uint32         `json:",omitempty"`
-	ClearFlag     *uint32         `json:",omitempty"`
+	EmailHash      *Hash128        `json:",omitempty"`
+	WalletLocator  *Hash256        `json:",omitempty"`
+	WalletSize     *uint32         `json:",omitempty"`
+	MessageKey     *VariableLength `json:",omitempty"`
+	Domain         *VariableLength `json:",omitempty"`
+	TransferRate   *uint32         `json:",omitempty"`
+	TickSize       *uint8          `json:",omitempty"`
+	SetFlag        *uint32         `json:",omitempty"`
+	ClearFlag      *uint32         `json:",omitempty"`
+	TicketSequence *uint32         `json:",omitempty"`
 }
 
 type AccountDelete struct {
 	TxBase
 	Destination    Account
 	DestinationTag *uint32 `json:",omitempty"`
+	TicketSequence *uint32 `json:",omitempty"`
 }
 
 type SetRegularKey struct {
 	TxBase
-	RegularKey *RegularKey `json:",omitempty"`
+	RegularKey     *RegularKey `json:",omitempty"`
+	TicketSequence *uint32     `json:",omitempty"`
 }
 
 type OfferCreate struct {
 	TxBase
-	OfferSequence *uint32 `json:",omitempty"`
-	TakerPays     Amount
-	TakerGets     Amount
-	Expiration    *uint32 `json:",omitempty"`
+	OfferSequence  *uint32 `json:",omitempty"`
+	TakerPays      Amount
+	TakerGets      Amount
+	Expiration     *uint32 `json:",omitempty"`
+	TicketSequence *uint32 `json:",omitempty"`
 }
 
 type OfferCancel struct {
 	TxBase
-	OfferSequence uint32
+	OfferSequence  uint32
+	TicketSequence *uint32 `json:",omitempty"`
 }
 
 type TrustSet struct {
 	TxBase
-	LimitAmount Amount
-	QualityIn   *uint32 `json:",omitempty"`
-	QualityOut  *uint32 `json:",omitempty"`
+	LimitAmount    Amount
+	QualityIn      *uint32 `json:",omitempty"`
+	QualityOut     *uint32 `json:",omitempty"`
+	TicketSequence *uint32 `json:",omitempty"`
 }
 
 type SetFee struct {
@@ -99,21 +107,24 @@ type EscrowCreate struct {
 	CancelAfter    *uint32  `json:",omitempty"`
 	FinishAfter    *uint32  `json:",omitempty"`
 	DestinationTag *uint32  `json:",omitempty"`
+	TicketSequence *uint32  `json:",omitempty"`
 }
 
 type EscrowFinish struct {
 	TxBase
-	Owner         Account
-	OfferSequence uint32
-	Method        *uint8   `json:",omitempty"`
-	Digest        *Hash256 `json:",omitempty"`
-	Proof         *Hash256 `json:",omitempty"`
+	Owner          Account
+	OfferSequence  uint32
+	Method         *uint8   `json:",omitempty"`
+	Digest         *Hash256 `json:",omitempty"`
+	Proof          *Hash256 `json:",omitempty"`
+	TicketSequence *uint32  `json:",omitempty"`
 }
 
 type EscrowCancel struct {
 	TxBase
-	Owner         Account
-	OfferSequence uint32
+	Owner          Account
+	OfferSequence  uint32
+	TicketSequence *uint32 `json:",omitempty"`
 }
 
 type PaymentChannelCreate struct {
@@ -125,22 +136,25 @@ type PaymentChannelCreate struct {
 	CancelAfter    *uint32 `json:",omitempty"`
 	DestinationTag *uint32 `json:",omitempty"`
 	SourceTag      *uint32 `json:",omitempty"`
+	TicketSequence *uint32 `json:",omitempty"`
 }
 
 type PaymentChannelFund struct {
 	TxBase
-	Channel    Hash256
-	Amount     Amount
-	Expiration *uint32 `json:",omitempty"`
+	Channel        Hash256
+	Amount         Amount
+	Expiration     *uint32 `json:",omitempty"`
+	TicketSequence *uint32 `json:",omitempty"`
 }
 
 type PaymentChannelClaim struct {
 	TxBase
-	Channel   Hash256
-	Balance   *Amount         `json:",omitempty"`
-	Amount    *Amount         `json:",omitempty"`
-	Signature *VariableLength `json:",omitempty"`
-	PublicKey *PublicKey      `json:",omitempty"`
+	Channel        Hash256
+	Balance        *Amount         `json:",omitempty"`
+	Amount         *Amount         `json:",omitempty"`
+	Signature      *VariableLength `json:",omitempty"`
+	PublicKey      *PublicKey      `json:",omitempty"`
+	TicketSequence *uint32         `json:",omitempty"`
 }
 
 // CheckCreate, CheckCash, CheckCancel enabled by amendment 157D2D480E006395B76F948E3E07A45A05FE10230D88A7993C71F97AE4B1F2D1
@@ -153,38 +167,89 @@ type CheckCreate struct {
 	DestinationTag *uint32  `json:",omitempty"`
 	Expiration     *uint32  `json:",omitempty"`
 	InvoiceID      *Hash256 `json:",omitempty"`
+	TicketSequence *uint32  `json:",omitempty"`
 }
 
 // https://ripple.com/build/transactions/#checkcash
 // Must include one of Amount or DeliverMin
 type CheckCash struct {
 	TxBase
-	CheckID    Hash256
-	Amount     *Amount `json:",omitempty"`
-	DeliverMin *Amount `json:",omitempty"`
+	CheckID        Hash256
+	Amount         *Amount `json:",omitempty"`
+	DeliverMin     *Amount `json:",omitempty"`
+	TicketSequence *uint32 `json:",omitempty"`
 }
 
 // https://ripple.com/build/transactions/#checkcancel
 type CheckCancel struct {
 	TxBase
-	CheckID Hash256
+	CheckID        Hash256
+	TicketSequence *uint32 `json:",omitempty"`
 }
 
 type TicketCreate struct {
 	TxBase
-	TicketCount *uint32 `json:",omitempty"`
+	TicketCount    *uint32 `json:",omitempty"`
+	TicketSequence *uint32 `json:",omitempty"`
 }
 
 type SignerListSet struct {
 	TxBase
-	SignerQuorum  uint32        `json:",omitempty"`
-	SignerEntries []SignerEntry `json:",omitempty"`
+	SignerQuorum   uint32        `json:",omitempty"`
+	SignerEntries  []SignerEntry `json:",omitempty"`
+	TicketSequence *uint32       `json:",omitempty"`
 }
 
 type UNLModify struct {
 	TxBase
 	UNLModifyDisabling uint8           `json:",omitempty"`
 	UNLModifyValidator *VariableLength `json:",omitempty"`
+}
+
+type SetDepositPreAuth struct {
+	TxBase
+	Authorize      *Account `json:",omitempty"`
+	Unauthorize    *Account `json:",omitempty"`
+	TicketSequence *uint32  `json:",omitempty"`
+}
+
+type NFTokenMint struct {
+	TxBase
+	NFTokenTaxon   *uint32         `json:",omitempty"`
+	TransferFee    *uint16         `json:",omitempty"`
+	Issuer         *Account        `json:",omitempty"`
+	URI            *VariableLength `json:",omitempty"`
+	TicketSequence *uint32         `json:",omitempty"`
+}
+
+type NFTokenBurn struct {
+	TxBase
+	Owner          *Account `json:",omitempty"`
+	TicketSequence *uint32  `json:",omitempty"`
+}
+
+type NFTokenCreateOffer struct {
+	TxBase
+	NFTokenID      *Hash256 `json:",omitempty"`
+	Amount         *Amount  `json:",omitempty"`
+	Destination    *Account `json:",omitempty"`
+	Owner          *Account `json:",omitempty"`
+	Expiration     *uint32  `json:",omitempty"`
+	TicketSequence *uint32  `json:",omitempty"`
+}
+
+type NFTCancelOffer struct {
+	TxBase
+	NFTokenOffers  *Vector256 `json:",omitempty"`
+	TicketSequence *uint32    `json:",omitempty"`
+}
+
+type NFTAcceptOffer struct {
+	TxBase
+	NFTokenBuyOffer  *Hash256 `json:",omitempty"`
+	NFTokenSellOffer *Hash256 `json:",omitempty"`
+	NFTokenBrokerFee *Amount  `json:",omitempty"`
+	TicketSequence   *uint32  `json:",omitempty"`
 }
 
 func (t *TxBase) GetBase() *TxBase                    { return t }
