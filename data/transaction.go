@@ -18,10 +18,9 @@ type TxBase struct {
 }
 
 type Signer struct {
-	Account        Account
-	TxnSignature   *VariableLength
-	SigningPubKey  *PublicKey
-	TicketSequence *uint32 `json:",omitempty"`
+	Account       Account
+	TxnSignature  *VariableLength
+	SigningPubKey *PublicKey
 }
 
 type Payment struct {

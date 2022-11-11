@@ -134,8 +134,9 @@ type Escrow struct {
 }
 
 type SignerEntry struct {
-	Account      *Account `json:",omitempty"`
-	SignerWeight *uint16  `json:",omitempty"`
+	Account       *Account `json:",omitempty"`
+	SignerWeight  *uint16  `json:",omitempty"`
+	WalletLocator *Hash256 `json:",omitempty"`
 }
 
 type SignerList struct {
