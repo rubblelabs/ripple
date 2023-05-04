@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/ed25519"
 	"crypto/rand"
+	"encoding/hex"
 )
 
 type ed25519key struct {
@@ -41,4 +42,13 @@ func NewEd25519Key(seed []byte) (*ed25519key, error) {
 		return nil, err
 	}
 	return &ed25519key{priv: priv}, nil
+}
+
+func NewEd25519Key2(key ed25519.PrivateKey) (*ed25519key, error) {
+	return &ed25519key{priv: key}, nil
+}
+
+func NewEd25519KeyFromString(pk string) (*ed25519key, error) {
+	b, err := hex.DecodeString(pk)
+	return &ed25519key{priv: ed25519.PrivateKey(b)}, err
 }

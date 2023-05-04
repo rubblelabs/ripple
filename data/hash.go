@@ -14,6 +14,7 @@ type KeyType int
 const (
 	ECDSA   KeyType = 0
 	Ed25519 KeyType = 1
+	Sm2     KeyType = 2
 )
 
 func (keyType KeyType) String() string {
@@ -22,6 +23,8 @@ func (keyType KeyType) String() string {
 		return "ECDSA"
 	case Ed25519:
 		return "Ed25519"
+	case Sm2:
+		return "Sm2"
 	default:
 		return "unknown key type"
 	}

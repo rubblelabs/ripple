@@ -206,7 +206,7 @@ func (a Amount) String() string {
 	}
 	switch {
 	case a.IsNative():
-		return factored.Value.String() + "/XRP"
+		return factored.Value.String() + "/HWA"
 	case a.Issuer.IsZero():
 		return factored.Value.String() + "/" + a.Currency.String()
 	default:
@@ -218,7 +218,7 @@ func (a Amount) String() string {
 func (a Amount) Machine() string {
 	switch {
 	case a.IsNative():
-		return a.Value.String() + "/XRP"
+		return a.Value.String() + "/HWA"
 	case a.Issuer.IsZero():
 		return a.Value.String() + "/" + a.Currency.Machine()
 	default:

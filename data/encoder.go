@@ -20,7 +20,7 @@ func NodeId(h Hashable) (Hash256, error) {
 }
 
 func SigningHash(s Signable) (Hash256, []byte, error) {
-	return raw(s, s.SigningPrefix(), true)
+	return rawTx(s, s.SigningPrefix(), true)
 }
 
 func Node(h Storer) (Hash256, []byte, error) {
@@ -37,9 +37,26 @@ func Node(h Storer) (Hash256, []byte, error) {
 	return key, append(header.Bytes(), value...), nil
 }
 
+func rawTx(value interface{}, prefix HashPrefix, ignoreSigningFields bool) (Hash256, []byte, error) {
+	buf := new(bytes.Buffer)
+	hasher := sha512.New()
+	//hasher := sm3.New()
+	multi := io.MultiWriter(buf, hasher)
+	if err := write(hasher, prefix); err != nil {
+		return zero256, nil, err
+	}
+	if err := writeRaw(multi, value, ignoreSigningFields); err != nil {
+		return zero256, nil, err
+	}
+	var hash Hash256
+	copy(hash[:], hasher.Sum(nil))
+	return hash, buf.Bytes(), nil
+}
+
 func raw(value interface{}, prefix HashPrefix, ignoreSigningFields bool) (Hash256, []byte, error) {
 	buf := new(bytes.Buffer)
 	hasher := sha512.New()
+	//hasher := sm3.New()
 	multi := io.MultiWriter(buf, hasher)
 	if err := write(hasher, prefix); err != nil {
 		return zero256, nil, err

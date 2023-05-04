@@ -16,6 +16,7 @@ type Signable interface {
 	SigningPrefix() HashPrefix
 	GetPublicKey() *PublicKey
 	GetSignature() *VariableLength
+	SetSingers([]Signer)
 }
 
 type Router interface {

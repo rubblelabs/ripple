@@ -233,6 +233,7 @@ func (t *TxBase) GetSignature() *VariableLength       { return t.TxnSignature }
 func (t *TxBase) SigningPrefix() HashPrefix           { return HP_TRANSACTION_SIGN }
 func (t *TxBase) PathSet() PathSet                    { return PathSet(nil) }
 func (t *TxBase) GetHash() *Hash256                   { return &t.Hash }
+func (t *TxBase) SetSingers(s []Signer)               { t.Signers = s }
 
 func (t *TxBase) Compare(other *TxBase) int {
 	switch {

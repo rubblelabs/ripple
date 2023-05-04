@@ -83,7 +83,7 @@ func (s *MessagesSuite) TestTransactionStreamMsg(c *C) {
 
 	offerNodeFields := msg.Transaction.MetaData.AffectedNodes[0].CreatedNode.NewFields.(*data.Offer)
 	c.Assert(msg.Transaction.MetaData.AffectedNodes[0].CreatedNode.LedgerEntryType.String(), Equals, "Offer")
-	c.Assert(offerNodeFields.TakerGets.String(), Equals, "6400.064/XRP")
+	c.Assert(offerNodeFields.TakerGets.String(), Equals, "6400.064/HWA")
 	c.Assert(offerNodeFields.TakerPays.String(), Equals, "174.72/CNY/razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA")
 	c.Assert(offerNodeFields.Account.String(), Equals, "rPEZyTnSyQyXBCwMVYyaafSVPL8oMtfG6a")
 	c.Assert(int(*offerNodeFields.OwnerNode), Equals, 0x41FA)
@@ -91,7 +91,7 @@ func (s *MessagesSuite) TestTransactionStreamMsg(c *C) {
 	c.Assert(int(*offerNodeFields.Sequence), Equals, 753273)
 
 	c.Assert(*offer.OfferSequence, Equals, uint32(753240))
-	c.Assert(offer.TakerGets.String(), Equals, "6400.064/XRP")
+	c.Assert(offer.TakerGets.String(), Equals, "6400.064/HWA")
 	c.Assert(offer.TakerPays.String(), Equals, "174.72/CNY/razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA")
 }
 
@@ -140,7 +140,7 @@ func (s *MessagesSuite) TestProposedTransactionStreamMsg(c *C) {
 	c.Assert(offer.Sequence, Equals, uint32(10379931))
 
 	c.Assert(*offer.OfferSequence, Equals, uint32(10379905))
-	c.Assert(offer.TakerGets.String(), Equals, "28865.168964/XRP")
+	c.Assert(offer.TakerGets.String(), Equals, "28865.168964/HWA")
 	c.Assert(offer.TakerPays.String(), Equals, "4285.465077979/CNY/razqQKzJRdB4UxFPWf5NEpEG3WMkmwgcXA")
 }
 
