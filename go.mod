@@ -13,7 +13,6 @@ require (
 )
 
 require (
-	github.com/decred/dcrd/dcrec/secp256k1 v1.0.3
 	github.com/kr/text v0.2.0 // indirect
 	github.com/tjfoc/gmsm v1.4.1
 )

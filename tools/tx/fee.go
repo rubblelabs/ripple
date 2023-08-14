@@ -20,15 +20,15 @@ func UnixTimeToRippleTime(t int64) *uint32 {
 func CalFee(tx data.Transaction, remote *websockets.Remote, cushion float64) data.Value {
 
 	rs, _ := remote.ServerState()
-	baseFee := rs.Info.ValidatedLedger.BaseFeeHwa
+	baseFee := rs.State.ValidatedLedger.BaseFee
 
-	baseFee = baseFee * float64(rs.Info.LoadFactor)
+	baseFee = baseFee * rs.State.LoadFactor / rs.State.LoadBase
 	if cushion == 0 {
 		cushion = 1.2
 	}
-	fee := uint32(math.Round(baseFee * cushion * 1e6))
+	fee := uint32(math.Round(baseFee * cushion))
 
-	lls := uint32(rs.Info.ValidatedLedger.Seq + LEDGER_OFFSET)
+	lls := uint32(rs.State.ValidatedLedger.Seq + LEDGER_OFFSET)
 	tx.GetBase().LastLedgerSequence = &lls
 
 	if tx.GetTransactionType() == data.ESCROW_FINISH {
@@ -45,7 +45,7 @@ func CalFee(tx data.Transaction, remote *websockets.Remote, cushion float64) dat
 func fetchAccountDeleteFee(remote *websockets.Remote) uint32 {
 	rs, _ := remote.ServerState()
 	if rs.Status == "success" {
-		return uint32(math.Round(rs.Info.ValidatedLedger.ReserveIncXrp * 1e6))
+		return uint32(math.Round(rs.State.ValidatedLedger.ReserveInc * 1e6))
 	}
 	return 0
 }

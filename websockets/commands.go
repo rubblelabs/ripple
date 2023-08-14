@@ -221,10 +221,28 @@ type ServerInfoCommand struct {
 	*Command
 	Result *ServerInfoResult `json:"result,omitempty"`
 }
+type ServerStateCommand struct {
+	*Command
+	Result *ServerStateResult `json:"result,omitempty"`
+}
+
+type ServerStateResult struct {
+	State struct {
+		LoadBase        float64 `json:"load_base"`
+		LoadFactor      float64 `json:"load_factor"`
+		ValidatedLedger struct {
+			BaseFee    float64 `json:"base_fee"`
+			Seq        uint32  `json:"seq"`
+			ReserveInc float64 `json:"reserve_inc"`
+		} `json:"validated_ledger"`
+	} `json:"state"`
+	Status string `json:"status"`
+}
 
 type ServerInfoResult struct {
 	Info struct {
-		LoadFactor      uint32 `json:"load_factor"`
+		LoadBase        float64 `json:"load_base"`
+		LoadFactor      float64 `json:"load_factor"`
 		ValidatedLedger struct {
 			BaseFeeHwa    float64 `json:"base_fee_hwa"`
 			Seq           uint32  `json:"seq"`

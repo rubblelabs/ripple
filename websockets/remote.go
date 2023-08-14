@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"sort"
@@ -30,10 +31,13 @@ const (
 	dialTimeout = 5 * time.Second
 )
 
+var CloseError = errors.New("socket is closed")
+
 type Remote struct {
 	Incoming chan interface{}
 	outgoing chan Syncer
 	ws       *websocket.Conn
+	close    bool
 }
 
 // NewRemote returns a new remote session connected to the specified
@@ -58,12 +62,17 @@ func NewRemote(endpoint string) (*Remote, error) {
 // goroutines have been cleaned up.
 // Any commands that are pending a response will return with an error.
 func (r *Remote) Close() {
+	r.close = true
 	close(r.outgoing)
 
 	// Drain the Incoming channel and block until it is closed,
 	// indicating that this Remote is fully cleaned up.
 	for range r.Incoming {
 	}
+}
+
+func (r *Remote) IsClose() bool {
+	return r.close
 }
 
 // run spawns the read/write pumps and then runs until Close() is called.
@@ -149,6 +158,9 @@ func (r *Remote) run() {
 
 // Synchronously get a single transaction
 func (r *Remote) Tx(hash data.Hash256) (*TxResult, error) {
+	if r.close {
+		return nil, CloseError
+	}
 	cmd := &TxCommand{
 		Command:     newCommand("tx"),
 		Transaction: hash,
@@ -196,6 +208,9 @@ func (r *Remote) AccountTx(account data.Account, pageSize int, minLedger, maxLed
 
 // Synchronously submit a single transaction
 func (r *Remote) Submit(tx data.Transaction) (*SubmitResult, error) {
+	if r.close {
+		return nil, CloseError
+	}
 	_, raw, err := data.Raw(tx)
 	if err != nil {
 		return nil, err
@@ -312,6 +327,9 @@ func (r *Remote) StreamLedgerData(ledger interface{}) chan data.LedgerEntrySlice
 
 // Synchronously gets a single ledger
 func (r *Remote) Ledger(ledger interface{}, transactions bool) (*LedgerResult, error) {
+	if r.close {
+		return nil, CloseError
+	}
 	cmd := &LedgerCommand{
 		Command:      newCommand("ledger"),
 		LedgerIndex:  ledger,
@@ -328,6 +346,9 @@ func (r *Remote) Ledger(ledger interface{}, transactions bool) (*LedgerResult, e
 }
 
 func (r *Remote) LedgerHeader(ledger interface{}) (*LedgerHeaderResult, error) {
+	if r.close {
+		return nil, CloseError
+	}
 	cmd := &LedgerHeaderCommand{
 		Command: newCommand("ledger_header"),
 		Ledger:  ledger,
@@ -342,6 +363,9 @@ func (r *Remote) LedgerHeader(ledger interface{}) (*LedgerHeaderResult, error) {
 
 // Synchronously requests paths
 func (r *Remote) RipplePathFind(src, dest data.Account, amount data.Amount, srcCurr *[]data.Currency) (*RipplePathFindResult, error) {
+	if r.close {
+		return nil, CloseError
+	}
 	cmd := &RipplePathFindCommand{
 		Command:       newCommand("hchain_path_find"),
 		SrcAccount:    src,
@@ -359,6 +383,9 @@ func (r *Remote) RipplePathFind(src, dest data.Account, amount data.Amount, srcC
 
 // Synchronously requests account info
 func (r *Remote) AccountInfo(a data.Account) (*AccountInfoResult, error) {
+	if r.close {
+		return nil, CloseError
+	}
 	cmd := &AccountInfoCommand{
 		Command: newCommand("account_info"),
 		Account: a,
@@ -372,7 +399,20 @@ func (r *Remote) AccountInfo(a data.Account) (*AccountInfoResult, error) {
 }
 
 // Synchronously requests account info
-func (r *Remote) ServerState() (*ServerInfoResult, error) {
+func (r *Remote) ServerState() (*ServerStateResult, error) {
+	cmd := &ServerStateCommand{
+		Command: newCommand("server_state"),
+	}
+	r.outgoing <- cmd
+	<-cmd.Ready
+	if cmd.CommandError != nil {
+		return nil, cmd.CommandError
+	}
+	return cmd.Result, nil
+}
+
+// Synchronously requests account info
+func (r *Remote) ServerInfo() (*ServerInfoResult, error) {
 	cmd := &ServerInfoCommand{
 		Command: newCommand("server_info"),
 	}
@@ -469,7 +509,7 @@ func (r *Remote) BookOffers(taker data.Account, ledgerIndex interface{}, pays, g
 
 // Synchronously subscribe to streams and receive a confirmation message
 // Streams are recived asynchronously over the Incoming channel
-func (r *Remote) Subscribe(ledger, transactions, transactionsProposed, server bool) (*SubscribeResult, error) {
+func (r *Remote) Subscribe(ledger, transactions, transactionsProposed, server bool, accounts []string) (*SubscribeResult, error) {
 	streams := []string{}
 	if ledger {
 		streams = append(streams, "ledger")
@@ -484,8 +524,9 @@ func (r *Remote) Subscribe(ledger, transactions, transactionsProposed, server bo
 		streams = append(streams, "server")
 	}
 	cmd := &SubscribeCommand{
-		Command: newCommand("subscribe"),
-		Streams: streams,
+		Command:  newCommand("subscribe"),
+		Streams:  streams,
+		Accounts: accounts,
 	}
 	r.outgoing <- cmd
 	<-cmd.Ready
@@ -499,6 +540,23 @@ func (r *Remote) Subscribe(ledger, transactions, transactionsProposed, server bo
 	if server && cmd.Result.ServerStreamMsg == nil {
 		return nil, fmt.Errorf("Missing server subscribe response")
 	}
+	return cmd.Result, nil
+}
+
+// Synchronously subscribe to streams and receive a confirmation message
+// Streams are recived asynchronously over the Incoming channel
+func (r *Remote) SubscribeSteams(streams, accounts []string) (*SubscribeResult, error) {
+	cmd := &SubscribeCommand{
+		Command:  newCommand("subscribe"),
+		Streams:  streams,
+		Accounts: accounts,
+	}
+	r.outgoing <- cmd
+	<-cmd.Ready
+	if cmd.CommandError != nil {
+		return nil, cmd.CommandError
+	}
+
 	return cmd.Result, nil
 }
 
@@ -543,6 +601,9 @@ func (r *Remote) readPump(inbound chan<- []byte) {
 	for {
 		_, message, err := r.ws.ReadMessage()
 		if err != nil {
+			if r.IsClose() {
+				return
+			}
 			glog.Errorln(err)
 			return
 		}
