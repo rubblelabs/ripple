@@ -27,3 +27,7 @@ _testmain.go
 *.coverprofile
 
 .DS_Store
+
+# IDE specific
+.idea
+*.iml

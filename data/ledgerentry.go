@@ -133,10 +133,14 @@ type Escrow struct {
 	DestinationNode *NodeIndex       `json:",omitempty"`
 }
 
-type SignerEntry struct {
+type SignerEntryItem struct {
 	Account       *Account `json:",omitempty"`
 	SignerWeight  *uint16  `json:",omitempty"`
 	WalletLocator *Hash256 `json:",omitempty"`
+}
+
+type SignerEntry struct {
+	SignerEntry SignerEntryItem
 }
 
 type SignerList struct {
@@ -233,7 +237,7 @@ func (s *Escrow) Affects(account Account) bool {
 }
 func (s *SignerList) Affects(account Account) bool {
 	for _, entry := range s.SignerEntries {
-		if entry.Account != nil && entry.Account.Equals(account) {
+		if entry.SignerEntry.Account != nil && entry.SignerEntry.Account.Equals(account) {
 			return true
 		}
 	}
