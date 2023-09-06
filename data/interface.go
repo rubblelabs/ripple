@@ -18,6 +18,15 @@ type Signable interface {
 	GetSignature() *VariableLength
 }
 
+type MultiSignable interface {
+	Hashable
+	InitialiseForSigning()
+	MultiSigningPrefix() HashPrefix
+	GetPublicKey() *PublicKey
+	GetSignature() *VariableLength
+	SetSigners([]Signer)
+}
+
 type Router interface {
 	Hashable
 	SuppressionId() Hash256

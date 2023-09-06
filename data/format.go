@@ -14,14 +14,15 @@ type LedgerNamespace uint16
 
 const (
 	// Hash Prefixes
-	HP_TRANSACTION_ID   HashPrefix = 0x54584E00 // 'TXN' transaction
-	HP_TRANSACTION_NODE HashPrefix = 0x534E4400 // 'SND' transaction plus metadata (probably should have been TND!)
-	HP_LEAF_NODE        HashPrefix = 0x4D4C4E00 // 'MLN' account state
-	HP_INNER_NODE       HashPrefix = 0x4D494E00 // 'MIN' inner node in tree
-	HP_LEDGER_MASTER    HashPrefix = 0x4C575200 // 'LWR' ledger master data for signing (probably should have been LGR!)
-	HP_TRANSACTION_SIGN HashPrefix = 0x53545800 // 'STX' inner transaction to sign
-	HP_VALIDATION       HashPrefix = 0x56414C00 // 'VAL' validation for signing
-	HP_PROPOSAL         HashPrefix = 0x50525000 // 'PRP' proposal for signing
+	HP_TRANSACTION_ID        HashPrefix = 0x54584E00 // 'TXN' transaction
+	HP_TRANSACTION_NODE      HashPrefix = 0x534E4400 // 'SND' transaction plus metadata (probably should have been TND!)
+	HP_LEAF_NODE             HashPrefix = 0x4D4C4E00 // 'MLN' account state
+	HP_INNER_NODE            HashPrefix = 0x4D494E00 // 'MIN' inner node in tree
+	HP_LEDGER_MASTER         HashPrefix = 0x4C575200 // 'LWR' ledger master data for signing (probably should have been LGR!)
+	HP_TRANSACTION_SIGN      HashPrefix = 0x53545800 // 'STX' inner transaction to sign
+	HP_TRANSACTION_MULTISIGN HashPrefix = 0x534D5400 // 'SMT' inner transaction to multi-sign
+	HP_VALIDATION            HashPrefix = 0x56414C00 // 'VAL' validation for signing
+	HP_PROPOSAL              HashPrefix = 0x50525000 // 'PRP' proposal for signing
 
 	// Node Types
 	NT_UNKNOWN          NodeType = 0

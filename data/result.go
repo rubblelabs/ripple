@@ -323,6 +323,7 @@ var resultNames = map[TransactionResult]struct {
 	temCANNOT_PREAUTH_SELF:      {"temCANNOT_PREAUTH_SELF", "Malformed: An account may not preauthorize itself."},
 	temSEQ_AND_TICKET:           {"temSEQ_AND_TICKET", "Transaction contains a TicketSequence and a non-zero Sequence"},
 	temBAD_NFTOKEN_TRANSFER_FEE: {"temBAD_NFTOKEN_TRANSFER_FEE", "Malformed: The NFToken transfer fee must be between 1 and 5000, inclusive."},
+	temBAD_WEIGHT:               {"temBAD_WEIGHT", "The SignerListSet transaction includes a SignerWeight that is invalid, for example a zero or negative value."},
 
 	terRETRY:       {"terRETRY", "Retry transaction."},
 	terFUNDS_SPENT: {"terFUNDS_SPENT", "Can't set password, password set funds already spent."},
