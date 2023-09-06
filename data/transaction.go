@@ -262,7 +262,7 @@ func (t *TxBase) Prefix() HashPrefix                  { return HP_TRANSACTION_ID
 func (t *TxBase) GetPublicKey() *PublicKey            { return t.SigningPubKey }
 func (t *TxBase) GetSignature() *VariableLength       { return t.TxnSignature }
 func (t *TxBase) SigningPrefix() HashPrefix           { return HP_TRANSACTION_SIGN }
-func (t *TxBase) MultiSigningPrefix() HashPrefix      { return HP_TRANSACTION_MILTISIGN }
+func (t *TxBase) MultiSigningPrefix() HashPrefix      { return HP_TRANSACTION_MULTISIGN }
 func (t *TxBase) SetSigners(signers []Signer)         { t.Signers = signers }
 func (t *TxBase) PathSet() PathSet                    { return PathSet(nil) }
 func (t *TxBase) GetHash() *Hash256                   { return &t.Hash }

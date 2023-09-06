@@ -20,7 +20,7 @@ const (
 	HP_INNER_NODE            HashPrefix = 0x4D494E00 // 'MIN' inner node in tree
 	HP_LEDGER_MASTER         HashPrefix = 0x4C575200 // 'LWR' ledger master data for signing (probably should have been LGR!)
 	HP_TRANSACTION_SIGN      HashPrefix = 0x53545800 // 'STX' inner transaction to sign
-	HP_TRANSACTION_MILTISIGN HashPrefix = 0x534D5400 // 'SMT' inner transaction to multi-sign
+	HP_TRANSACTION_MULTISIGN HashPrefix = 0x534D5400 // 'SMT' inner transaction to multi-sign
 	HP_VALIDATION            HashPrefix = 0x56414C00 // 'VAL' validation for signing
 	HP_PROPOSAL              HashPrefix = 0x50525000 // 'PRP' proposal for signing
 
