@@ -16,10 +16,9 @@ type Syncer interface {
 }
 
 type CommandError struct {
-	Name      string `json:"error"`
-	Code      int    `json:"error_code"`
-	Message   string `json:"error_message"`
-	Exception string `json:"error_exception"`
+	Name    string `json:"error"`
+	Code    int    `json:"error_code"`
+	Message string `json:"error_message"`
 }
 
 type Command struct {
@@ -49,7 +48,7 @@ func (c *Command) IncrementId() {
 }
 
 func (e *CommandError) Error() string {
-	return fmt.Sprintf("%s %d %s %s", e.Name, e.Code, e.Message, e.Exception)
+	return fmt.Sprintf("%s %d %s", e.Name, e.Code, e.Message)
 }
 
 func newCommand(command string) *Command {

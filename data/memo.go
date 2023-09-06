@@ -1,13 +1,11 @@
 package data
 
-type MemoItem struct {
-	MemoType   VariableLength
-	MemoData   VariableLength
-	MemoFormat VariableLength
-}
-
 type Memo struct {
-	Memo MemoItem
+	Memo struct {
+		MemoType   VariableLength
+		MemoData   VariableLength
+		MemoFormat VariableLength
+	}
 }
 
 type Memos []Memo
