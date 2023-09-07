@@ -1,6 +1,10 @@
 package data
 
-import "github.com/rubblelabs/ripple/crypto"
+import (
+	"sort"
+
+	"github.com/rubblelabs/ripple/crypto"
+)
 
 func Sign(s Signable, key crypto.Key, sequence *uint32) error {
 	s.InitialiseForSigning()
@@ -52,6 +56,9 @@ func MultiSign(s MultiSignable, key crypto.Key, sequence *uint32, account Accoun
 }
 
 func SetSigners(s MultiSignable, signers ...Signer) error {
+	sort.Slice(signers, func(i, j int) bool {
+		return signers[i].Signer.Account.Less(signers[j].Signer.Account)
+	})
 	s.SetSigners(signers)
 
 	hash, _, err := Raw(s)
