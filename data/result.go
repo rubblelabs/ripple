@@ -270,6 +270,7 @@ var resultNames = map[TransactionResult]struct {
 	tefWRONG_PRIOR:                 {"tefWRONG_PRIOR", "This previous transaction does not match."},
 	tefMASTER_DISABLED:             {"tefMASTER_DISABLED", "Master key is disabled."},
 	tefMAX_LEDGER:                  {"tefMAX_LEDGER", "Ledger sequence too high."},
+	tefBAD_SIGNATURE:               {"tefBAD_SIGNATURE", "The transaction was multi-signed, but contained a signature for an address not part of a SignerList associated with the sending account."},
 	tefBAD_AUTH_MASTER:             {"tefBAD_AUTH_MASTER", "Auth for unclaimed account needs correct master key."},
 	tefINVARIANT_FAILED:            {"tefINVARIANT_FAILED", "Fee claim violated invariants for the transaction."},
 	tefTOO_BIG:                     {"tefTOO_BIG", "Transaction affects too many items."},
