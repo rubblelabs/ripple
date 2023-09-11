@@ -24,6 +24,7 @@ const (
 	NEGATIVE_UNL     LedgerEntryType = 0x4e // 'N'
 	NFTOKEN_PAGE     LedgerEntryType = 0x50 // 'P'
 	NFTOKEN_OFFER    LedgerEntryType = 0x37 // '7'
+	AMMROOT          LedgerEntryType = 0x41 // 'A'
 
 	// TransactionType values come from rippled's "TxFormats.h"
 	PAYMENT              TransactionType = 0
@@ -50,6 +51,11 @@ const (
 	NFTOKEN_CREATE_OFFER TransactionType = 27
 	NFTOKEN_CANCEL_OFFER TransactionType = 28
 	NFTOKEN_ACCEPT_OFFER TransactionType = 29
+	AMM_CREATE           TransactionType = 35
+	AMM_DEPOSIT          TransactionType = 36
+	AMM_WITHDRAW         TransactionType = 37
+	AMM_VOTE             TransactionType = 38
+	AMM_BID              TransactionType = 39
 
 	AMENDMENT  TransactionType = 100
 	SET_FEE    TransactionType = 101
@@ -77,6 +83,7 @@ var LedgerEntryFactory = [...]func() LedgerEntry{
 	NEGATIVE_UNL:     func() LedgerEntry { return &NegativeUNL{leBase: leBase{LedgerEntryType: NEGATIVE_UNL}} },
 	NFTOKEN_PAGE:     func() LedgerEntry { return &NFTokenPage{leBase: leBase{LedgerEntryType: NFTOKEN_PAGE}} },
 	NFTOKEN_OFFER:    func() LedgerEntry { return &NFTokenOffer{leBase: leBase{LedgerEntryType: NFTOKEN_OFFER}} },
+	AMMROOT:          func() LedgerEntry { return &AMM{leBase: leBase{LedgerEntryType: AMMROOT}} },
 }
 
 var TxFactory = [...]func() Transaction{
@@ -107,6 +114,11 @@ var TxFactory = [...]func() Transaction{
 	NFTOKEN_CREATE_OFFER: func() Transaction { return &NFTokenCreateOffer{TxBase: TxBase{TransactionType: NFTOKEN_CREATE_OFFER}} },
 	NFTOKEN_CANCEL_OFFER: func() Transaction { return &NFTCancelOffer{TxBase: TxBase{TransactionType: NFTOKEN_CANCEL_OFFER}} },
 	NFTOKEN_ACCEPT_OFFER: func() Transaction { return &NFTAcceptOffer{TxBase: TxBase{TransactionType: NFTOKEN_ACCEPT_OFFER}} },
+	AMM_CREATE:           func() Transaction { return &AMMCreate{TxBase: TxBase{TransactionType: AMM_CREATE}} },
+	AMM_DEPOSIT:          func() Transaction { return &AMMDeposit{TxBase: TxBase{TransactionType: AMM_DEPOSIT}} },
+	AMM_WITHDRAW:         func() Transaction { return &AMMWithdraw{TxBase: TxBase{TransactionType: AMM_WITHDRAW}} },
+	AMM_VOTE:             func() Transaction { return &AMMVote{TxBase: TxBase{TransactionType: AMM_VOTE}} },
+	AMM_BID:              func() Transaction { return &AMMBid{TxBase: TxBase{TransactionType: AMM_BID}} },
 }
 
 var ledgerEntryNames = [...]string{
@@ -126,6 +138,7 @@ var ledgerEntryNames = [...]string{
 	NEGATIVE_UNL:     "NegativeUNL",
 	NFTOKEN_PAGE:     "NFTokenPage",
 	NFTOKEN_OFFER:    "NFTokenOffer",
+	AMMROOT:          "AMM",
 }
 
 var ledgerEntryTypes = map[string]LedgerEntryType{
@@ -145,6 +158,7 @@ var ledgerEntryTypes = map[string]LedgerEntryType{
 	"NegativeUNL":    NEGATIVE_UNL,
 	"NFTokenPage":    NFTOKEN_PAGE,
 	"NFTokenOffer":   NFTOKEN_OFFER,
+	"AMM":            AMMROOT,
 }
 
 var txNames = [...]string{
@@ -175,6 +189,11 @@ var txNames = [...]string{
 	NFTOKEN_CREATE_OFFER: "NFTokenCreateOffer",
 	NFTOKEN_CANCEL_OFFER: "NFTokenCancelOffer",
 	NFTOKEN_ACCEPT_OFFER: "NFTokenAcceptOffer",
+	AMM_CREATE:           "AMMCreate",
+	AMM_DEPOSIT:          "AMMDeposit",
+	AMM_WITHDRAW:         "AMMWithdraw",
+	AMM_VOTE:             "AMMVote",
+	AMM_BID:              "AMMBid",
 }
 
 var txTypes = map[string]TransactionType{
@@ -205,6 +224,11 @@ var txTypes = map[string]TransactionType{
 	"NFTokenCreateOffer":   NFTOKEN_CREATE_OFFER,
 	"NFTokenCancelOffer":   NFTOKEN_CANCEL_OFFER,
 	"NFTokenAcceptOffer":   NFTOKEN_ACCEPT_OFFER,
+	"AMMCreate":            AMM_CREATE,
+	"AMMDeposit":           AMM_DEPOSIT,
+	"AMMWithdraw":          AMM_WITHDRAW,
+	"AMMVote":              AMM_VOTE,
+	"AMMBid":               AMM_BID,
 }
 
 var HashableTypes []string

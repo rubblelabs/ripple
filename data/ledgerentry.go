@@ -31,6 +31,7 @@ type AccountRoot struct {
 	NFTokenMinter  *Account         `json:",omitempty"`
 	MintedNFTokens *uint32          `json:",omitempty"`
 	BurnedNFTokens *uint32          `json:",omitempty"`
+	AMMID          *Hash256         `json:",omitempty"`
 }
 
 type RippleState struct {
@@ -219,6 +220,31 @@ type NFTokenOffer struct {
 	Destination      *Account         `json:",omitempty"`
 	Expiration       *uint32          `json:",omitempty"`
 }
+type VoteEntry struct {
+	Account    Account `json:",omitempty"`
+	TradingFee uint32  `json:",omitempty"`
+	VoteWeight uint32  `json:",omitempty"`
+}
+
+type AuctionSlot struct {
+	Account       Account `json:",omitempty"`
+	DiscountedFee uint32  `json:",omitempty"`
+	Expiration    *uint32 `json:",omitempty"`
+	Price         Amount  `json:",omitempty"`
+}
+
+type AMM struct {
+	leBase
+	Flags          *LedgerEntryFlag `json:",omitempty"`
+	Asset          Asset            `json:",omitempty"`
+	Asset2         Asset            `json:",omitempty"`
+	Account        *Account         `json:",omitempty"`
+	LPTokenBalance *Amount          `json:",omitempty"`
+	TradingFee     uint32           `json:",omitempty"`
+	VoteSlots      []VoteEntry      `json:",omitempty"`
+	AuctionSlot    *AuctionSlot     `json:",omitempty"`
+	LedgerIndex    *Hash256         `json:",omitempty"`
+}
 
 func (a *AccountRoot) Affects(account Account) bool {
 	return a.Account != nil && a.Account.Equals(account)
@@ -263,6 +289,8 @@ func (to *NFTokenOffer) Affects(account Account) bool {
 	return (to.Owner != nil && to.Owner.Equals(account)) || (to.Destination != nil && to.Destination.Equals(account))
 }
 
+func (p *AMM) Affects(account Account) bool { return p.Account != nil }
+
 func (le *leBase) GetType() string                     { return ledgerEntryNames[le.LedgerEntryType] }
 func (le *leBase) GetLedgerEntryType() LedgerEntryType { return le.LedgerEntryType }
 func (le *leBase) Prefix() HashPrefix                  { return HP_LEAF_NODE }
@@ -275,4 +303,8 @@ func (le *leBase) GetPreviousTxnId() *Hash256          { return le.PreviousTxnID
 
 func (o *Offer) Ratio() *Value {
 	return o.TakerPays.Ratio(*o.TakerGets)
+}
+
+func (a *AMM) AMMID() *Hash256 {
+	return a.LedgerIndex
 }

@@ -255,6 +255,53 @@ type NFTAcceptOffer struct {
 	TicketSequence   *uint32  `json:",omitempty"`
 }
 
+type AMMCreate struct {
+	TxBase
+	Amount     Amount `json:",omitempty"`
+	Amount2    Amount `json:",omitempty"`
+	TradingFee uint16 `json:",omitempty"` // Between 0 and 1000 (0 and 1%)
+}
+
+type AMMDeposit struct {
+	TxBase
+	Amount     *Amount `json:",omitempty"`
+	Amount2    *Amount `json:",omitempty"`
+	Asset      Asset   `json:",omitempty"`
+	Asset2     Asset   `json:",omitempty"`
+	EPrice     *Amount `json:",omitempty"`
+	LPTokenOut *Amount `json:",omitempty"`
+}
+
+type AMMWithdraw struct {
+	TxBase
+	Amount    *Amount `json:",omitempty"`
+	Amount2   *Amount `json:",omitempty"`
+	Asset     Asset   `json:",omitempty"`
+	Asset2    Asset   `json:",omitempty"`
+	EPrice    *Amount `json:",omitempty"`
+	LPTokenIn *Amount `json:",omitempty"`
+}
+
+type AMMVote struct {
+	TxBase
+	Asset      Asset  `json:",omitempty"`
+	Asset2     Asset  `json:",omitempty"`
+	TradingFee uint16 `json:",omitempty"` // Between 0 and 1000 (0 and 1%)
+}
+
+type AuthAccounts struct {
+	Account Account `json:",omitempty"`
+}
+
+type AMMBid struct {
+	TxBase
+	Asset        Asset          `json:",omitempty"`
+	Asset2       Asset          `json:",omitempty"`
+	BidMin       *Amount        `json:",omitempty"`
+	BidMax       *Amount        `json:",omitempty"`
+	AuthAccounts []AuthAccounts `json:",omitempty"`
+}
+
 func (t *TxBase) GetBase() *TxBase                    { return t }
 func (t *TxBase) GetType() string                     { return txNames[t.TransactionType] }
 func (t *TxBase) GetTransactionType() TransactionType { return t.TransactionType }
