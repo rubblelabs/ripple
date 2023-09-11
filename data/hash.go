@@ -82,6 +82,31 @@ func (h *Hash160) Currency() *Currency {
 	return &c
 }
 
+// NewAccountFromHext transforms a hex string into an Account
+// e.g. C35B55AA096BA6D87A6E6C965A6534150DC56E5E to rJoxBSzpXhPtAuqFmqxQtGKjA13jUJWthE
+// Input has to by a string of length 40
+// Typical usage is for the nft token id decode: https://xrpl.org/nftoken.html#nftokenid
+func NewAccountFromHex(s string) (*Account, error) {
+	if len(s) != 40 {
+		return nil, fmt.Errorf("NewAccountFromHex: Wrong length %s (expecting len of 40)", s)
+	}
+	var a Account
+	_, err := hex.Decode(a[:], []byte(s))
+	if err != nil {
+		return nil, err
+	}
+	return &a, nil
+}
+
+func NewAccountFromHash256(h Hash256) (*Account, error) {
+	if len(h) != 20 {
+		return nil, fmt.Errorf("NewAccountFromHash256: Wrong length %X (expecting len of 20)", h)
+	}
+	var a Account
+	copy(a[:], h[:])
+	return &a, nil
+}
+
 // Accepts either a hex string or a byte slice of length 32
 func NewHash256(value interface{}) (*Hash256, error) {
 	var h Hash256
