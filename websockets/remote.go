@@ -598,3 +598,20 @@ func dump(b []byte) string {
 	out, _ := json.MarshalIndent(v, "", "  ")
 	return string(out)
 }
+
+func (r *Remote) AMMInfo(asset data.Asset, asset2 data.Asset) (*AMMInfoResult, error) {
+	cmd := &AMMInfoCommand{
+		Command: newCommand("amm_info"),
+		Asset:   asset,
+		Asset2:  asset2,
+	}
+	r.outgoing <- cmd
+	<-cmd.Ready
+	if cmd.CommandError != nil {
+		return nil, cmd.CommandError
+	}
+	if cmd.Result == nil {
+		return nil, fmt.Errorf("missing AMM info")
+	}
+	return cmd.Result, nil
+}
