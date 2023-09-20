@@ -300,3 +300,17 @@ type FeeResult struct {
 	MaxQueueSize uint32 `json:"max_queue_size,string"`
 	Status       string `json:"status"`
 }
+
+type ServerInfoCommand struct {
+	*Command
+	Result *ServerInfoResult `json:"result,omitempty"`
+}
+
+type ServerInfoResult struct {
+	Info ServerInfo `json:"info"`
+}
+
+type ServerInfo struct {
+	BuildVersion string `json:"build_version"`
+	HostID       string `json:"hostid"`
+}

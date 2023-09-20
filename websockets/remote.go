@@ -598,3 +598,16 @@ func dump(b []byte) string {
 	out, _ := json.MarshalIndent(v, "", "  ")
 	return string(out)
 }
+
+// Synchronously requests server info
+func (r *Remote) ServerInfo() (*ServerInfoResult, error) {
+	cmd := &ServerInfoCommand{
+		Command: newCommand("server_info"),
+	}
+	r.outgoing <- cmd
+	<-cmd.Ready
+	if cmd.CommandError != nil {
+		return nil, cmd.CommandError
+	}
+	return cmd.Result, nil
+}
