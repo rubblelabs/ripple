@@ -300,3 +300,21 @@ type FeeResult struct {
 	MaxQueueSize uint32 `json:"max_queue_size,string"`
 	Status       string `json:"status"`
 }
+
+// The ledger index in gateway balances is a string with the term "validated" as opposed to the ledger index in other places which is a uint32 with an actual ledger index
+type GatewayBalances struct {
+	*Command
+	Account     data.Account           `json:"account"`
+	Strict      bool                   `json:"strict"`
+	Result      *GatewayBalancesResult `json:"result,omitempty"`
+	LedgerIndex string                 `json:"ledger_index"`
+	HotWallet   []data.Account         `json:"hotwallet,omitempty"`
+}
+
+type GatewayBalancesResult struct {
+	Obligations *map[string]string `json:"obligations"`
+	Account     string             `json:"account"`
+	LedgerIndex uint32             `json:"ledger_index"`
+	LedgerHash  string             `json:"ledger_hash"`
+	Validated   bool               `json:"validated"`
+}

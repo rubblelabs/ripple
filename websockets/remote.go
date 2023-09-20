@@ -598,3 +598,22 @@ func dump(b []byte) string {
 	out, _ := json.MarshalIndent(v, "", "  ")
 	return string(out)
 }
+
+// Load Gateway Balances for the given account
+// IMPORTANT: Check if the endpoint supports the command since not all endpoints support this command!
+// (last check xrplcluster.com supported the command)
+func (r *Remote) GatewayBalances(a data.Account) (*GatewayBalancesResult, error) {
+	cmd := &GatewayBalances{
+		Command:     newCommand("gateway_balances"),
+		Account:     a,
+		Strict:      true,
+		LedgerIndex: "validated",
+		HotWallet:   []data.Account{},
+	}
+	r.outgoing <- cmd
+	<-cmd.Ready
+	if cmd.CommandError != nil {
+		return nil, cmd.CommandError
+	}
+	return cmd.Result, nil
+}
