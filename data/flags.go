@@ -54,6 +54,17 @@ const (
 	// PaymentChannelClaim flags
 	TxRenew TransactionFlag = 0x00010000
 	TxClose TransactionFlag = 0x00020000
+
+	// AMM flags
+	// Deposit & withdraw
+	TfLPToken             TransactionFlag = 0x00010000
+	TfSingleAsset         TransactionFlag = 0x00080000
+	TfTwoAsset            TransactionFlag = 0x00100000
+	TfOneAssetLPToken     TransactionFlag = 0x00200000
+	TfLimitLPToken        TransactionFlag = 0x00400000
+	TfTwoAssetIfEmpty     TransactionFlag = 0x00800000
+	TfWithdrawAll         TransactionFlag = 0x00020000
+	TfOneAssetWithdrawAll TransactionFlag = 0x00040000
 )
 
 // Ledger entry flags
@@ -118,6 +129,23 @@ var txFlagNames = map[TransactionType][]struct {
 		{TxClearNoRipple, "ClearNoRipple"},
 		{TxSetFreeze, "SetFreeze"},
 		{TxClearFreeze, "ClearFreeze"},
+	},
+	AMM_DEPOSIT: {
+		{TfLPToken, "LPToken"},
+		{TfSingleAsset, "SingleAsset"},
+		{TfTwoAsset, "TwoAsset"},
+		{TfOneAssetLPToken, "OneAssetLPToken"},
+		{TfLimitLPToken, "LimitLPToken"},
+		{TfTwoAssetIfEmpty, "TwoAssetIfEmpty"},
+	},
+	AMM_WITHDRAW: {
+		{TfLPToken, "LPToken"},
+		{TfWithdrawAll, "WithdrawAll"},
+		{TfOneAssetWithdrawAll, "OneAssetWithdrawAll"},
+		{TfSingleAsset, "SingleAsset"},
+		{TfTwoAsset, "TwoAsset"},
+		{TfOneAssetLPToken, "OneAssetLPToken"},
+		{TfLimitLPToken, "LimitLPToken"},
 	},
 }
 

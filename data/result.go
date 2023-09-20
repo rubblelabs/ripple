@@ -11,6 +11,7 @@ const (
 	// - Forwarded
 	tesSUCCESS TransactionResult = 0
 )
+
 const (
 	// 100 .. 159 C Claim fee only (ripple transaction with no good paths, pay to non-existent account, no path)
 	// Causes:
@@ -29,6 +30,7 @@ const (
 	tecUNFUNDED_PAYMENT
 	tecFAILED_PROCESSING
 )
+
 const (
 	tecDIR_FULL TransactionResult = iota + 121
 	tecINSUF_RESERVE_LINE
@@ -71,6 +73,13 @@ const (
 	tecINSUFFICIENT_FUNDS
 	tecOBJECT_NOT_FOUND
 	tecINSUFFICIENT_PAYMENT
+	tecAMM_UNFUNDED
+	tecAMM_BALANCE
+	tecAMM_FAILED                           // Questionable: ripple-binary-codec/dist/enums/src/enums/definitions.json has 2 tecAMM_FAILED codes
+	tecAMM_INVALID_TOKENS TransactionResult = iota + 164
+	tecAMM_EMPTY                            // ripple-binary-codec/dist/enums/src/enums/definitions.json does not have this code
+	tecAMM_NOT_EMPTY                        // ripple-binary-codec/dist/enums/src/enums/definitions.json does not have this code
+	tecAMM_ACCOUNT                          // ripple-binary-codec/dist/enums/src/enums/definitions.json does not have this code
 )
 
 const (
@@ -94,6 +103,7 @@ const (
 	telCAN_NOT_QUEUE_FEE
 	telCAN_NOT_QUEUE_FULL
 )
+
 const (
 	// -299 .. -200: M Malformed (bad signature)
 	// Causes:
@@ -139,7 +149,9 @@ const (
 	temUNKNOWN
 	temSEQ_AND_TICKET
 	temBAD_NFTOKEN_TRANSFER_FEE
+	temBAD_AMM_TOKENS // ripple-binary-codec/dist/enums/src/enums/definitions.json has this as temAMM_BAD_TOKENS
 )
+
 const (
 	// -199 .. -100: F Failure (sequence number previously used)
 	// Causes:
@@ -177,6 +189,7 @@ const (
 	tefNO_TICKET
 	tefNFTOKEN_IS_NOT_TRANSFERABLE
 )
+
 const (
 	// -99 .. -1: R Retry (sequence too high, no funds for txn fee, originating account non-existent)
 	// Causes:
@@ -198,6 +211,10 @@ const (
 	terLAST                          // Process after all other transactions
 	terNO_RIPPLE                     // Rippling not allowed
 	terQUEUED                        // Transaction is being held in TxQ until fee drops
+)
+
+const (
+	terNO_AMM TransactionResult = iota - 87 // No AMM for this asset pair
 )
 
 var resultNames = map[TransactionResult]struct {
@@ -251,6 +268,14 @@ var resultNames = map[TransactionResult]struct {
 	tecINSUFFICIENT_FUNDS:            {"tecINSUFFICIENT_FUNDS", "Not enough funds available to complete requested transaction."},
 	tecOBJECT_NOT_FOUND:              {"tecOBJECT_NOT_FOUND", "A requested object could not be located."},
 	tecINSUFFICIENT_PAYMENT:          {"tecINSUFFICIENT_PAYMENT", "The payment is not sufficient."},
+
+	tecAMM_UNFUNDED:       {"tecAMM_UNFUNDED", "AMM creation failed: User has insufficient funds."},
+	tecAMM_BALANCE:        {"tecAMM_BALANCE", "The AMM or the user has insufficient balance."},
+	tecAMM_FAILED:         {"tecAMM_FAILED", "The AMM failed to execute the trade."},
+	tecAMM_INVALID_TOKENS: {"tecAMM_INVALID_TOKENS", "Insufficient LPTokens or problem with rounding."},
+	tecAMM_EMPTY:          {"tecAMM_EMPTY", "AMM has no assets in its pool."},
+	tecAMM_NOT_EMPTY:      {"tecAMM_NOT_EMPTY", "The AMM has assets in its pool."},
+	tecAMM_ACCOUNT:        {"tecAMM_ACCOUNT", "The operation is not allowed on AMM accounts."},
 
 	tefFAILURE:                     {"tefFAILURE", "Failed to apply."},
 	tefALREADY:                     {"tefALREADY", "The exact transaction was already in this ledger."},
@@ -325,6 +350,7 @@ var resultNames = map[TransactionResult]struct {
 	temSEQ_AND_TICKET:           {"temSEQ_AND_TICKET", "Transaction contains a TicketSequence and a non-zero Sequence"},
 	temBAD_NFTOKEN_TRANSFER_FEE: {"temBAD_NFTOKEN_TRANSFER_FEE", "Malformed: The NFToken transfer fee must be between 1 and 5000, inclusive."},
 	temBAD_WEIGHT:               {"temBAD_WEIGHT", "The SignerListSet transaction includes a SignerWeight that is invalid, for example a zero or negative value."},
+	temBAD_AMM_TOKENS:           {"temBAD_AMM_TOKENS", "Incorrect assets specified"},
 
 	terRETRY:       {"terRETRY", "Retry transaction."},
 	terFUNDS_SPENT: {"terFUNDS_SPENT", "Can't set password, password set funds already spent."},
@@ -337,6 +363,7 @@ var resultNames = map[TransactionResult]struct {
 	terPRE_SEQ:     {"terPRE_SEQ", "Missing/inapplicable prior transaction."},
 	terOWNERS:      {"terOWNERS", "Non-zero owner count."},
 	terQUEUED:      {"terQUEUED", "Held until escalated fee drops."},
+	terNO_AMM:      {"terNO_AMM", "No AMM for this asset pair."},
 }
 
 var reverseResults map[string]TransactionResult
