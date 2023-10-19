@@ -295,7 +295,7 @@ func init() {
 	signingFields = make(map[enc]struct{})
 	for e, name := range encodings {
 		reverseEncodings[name] = e
-		if strings.Contains(name, "Signature") {
+		if strings.Contains(name, "Signature") || name == "Signers" {
 			signingFields[e] = struct{}{}
 		}
 	}

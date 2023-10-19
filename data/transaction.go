@@ -264,6 +264,7 @@ func (t *TxBase) GetSignature() *VariableLength       { return t.TxnSignature }
 func (t *TxBase) SigningPrefix() HashPrefix           { return HP_TRANSACTION_SIGN }
 func (t *TxBase) MultiSigningPrefix() HashPrefix      { return HP_TRANSACTION_MULTISIGN }
 func (t *TxBase) SetSigners(signers []Signer)         { t.Signers = signers }
+func (t *TxBase) GetSigners() []Signer                { return t.Signers }
 func (t *TxBase) PathSet() PathSet                    { return PathSet(nil) }
 func (t *TxBase) GetHash() *Hash256                   { return &t.Hash }
 

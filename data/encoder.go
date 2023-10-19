@@ -124,12 +124,9 @@ func writeRaw(w io.Writer, value interface{}, ignoreSigningFields bool) error {
 
 func encode(w io.Writer, value interface{}, ignoreSigningFields bool) error {
 	v := reflect.Indirect(reflect.ValueOf(value))
-	fields := getFields(&v, 0)
+	fields := getFields(&v, 0, ignoreSigningFields)
 	// fmt.Println(fields.String())
 	return fields.Each(func(e enc, v interface{}) error {
-		if ignoreSigningFields && e.SigningField() {
-			return nil
-		}
 		if err := writeEncoding(w, e); err != nil {
 			return err
 		}
@@ -164,7 +161,7 @@ func (s *fieldSlice) Append(e enc, v interface{}, children fieldSlice) {
 	*s = append(*s, field{e, v, children})
 }
 
-func getFields(v *reflect.Value, depth int) fieldSlice {
+func getFields(v *reflect.Value, depth int, ignoreSigningFields bool) fieldSlice {
 	// fmt.Println(v, v.Kind(), v.Type().Name())
 	length := v.NumField()
 	fields := make(fieldSlice, 0, length)
@@ -179,6 +176,9 @@ func getFields(v *reflect.Value, depth int) fieldSlice {
 			continue
 		}
 		encoding := reverseEncodings[fieldName]
+		if ignoreSigningFields && encoding.SigningField() {
+			continue
+		}
 		f := v.Field(i)
 		// fmt.Println(fieldName, encoding, f, f.Kind())
 		if f.Kind() == reflect.Interface {
@@ -199,16 +199,16 @@ func getFields(v *reflect.Value, depth int) fieldSlice {
 			var children fieldSlice
 			for i := 0; i < f.Len(); i++ {
 				f2 := f.Index(i)
-				children = append(children, getFields(&f2, depth+1)...)
+				children = append(children, getFields(&f2, depth+1, ignoreSigningFields)...)
 			}
 			children.Append(reverseEncodings["EndOfArray"], nil, nil)
 			fields.Append(encoding, nil, children)
 		case ST_OBJECT:
-			children := getFields(&f, depth+1)
+			children := getFields(&f, depth+1, ignoreSigningFields)
 			children.Append(reverseEncodings["EndOfObject"], nil, nil)
 			fields.Append(encoding, nil, children)
 		default:
-			fields = append(fields, getFields(&f, depth+1)...)
+			fields = append(fields, getFields(&f, depth+1, ignoreSigningFields)...)
 		}
 	}
 	fields.Sort()

@@ -1,6 +1,7 @@
 package data
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/rubblelabs/ripple/crypto"
@@ -40,7 +41,6 @@ func MultiSign(s MultiSignable, key crypto.Key, sequence *uint32, account Accoun
 	if err != nil {
 		return err
 	}
-	//
 	msg = append(s.MultiSigningPrefix().Bytes(), msg...)
 	msg = append(msg, account.Bytes()...)
 
@@ -67,4 +67,34 @@ func SetSigners(s MultiSignable, signers ...Signer) error {
 	}
 	copy(s.GetHash().Bytes(), hash.Bytes())
 	return nil
+}
+
+func CheckMultiSignature(s MultiSignable) (bool, []Signer, error) {
+	if len(s.GetSigners()) == 0 {
+		return false, nil, fmt.Errorf("no signers in the multi-signable transaction")
+	}
+	signers := s.GetSigners()
+	invalidSigners := make([]Signer, 0)
+	for _, signer := range signers {
+		account := signer.Signer.Account
+		pubKey := signer.Signer.SigningPubKey
+		signature := signer.Signer.TxnSignature
+
+		hash, msg, err := MultiSigningHash(s, account)
+		if err != nil {
+			return false, nil, err
+		}
+		msg = append(s.MultiSigningPrefix().Bytes(), msg...)
+		msg = append(msg, account.Bytes()...)
+
+		valid, err := crypto.Verify(pubKey.Bytes(), hash.Bytes(), msg, signature.Bytes())
+		if err != nil {
+			return false, nil, err
+		}
+		if !valid {
+			invalidSigners = append(invalidSigners, signer)
+		}
+	}
+
+	return len(invalidSigners) == 0, invalidSigners, nil
 }

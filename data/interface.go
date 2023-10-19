@@ -25,6 +25,7 @@ type MultiSignable interface {
 	GetPublicKey() *PublicKey
 	GetSignature() *VariableLength
 	SetSigners([]Signer)
+	GetSigners() []Signer
 }
 
 type Router interface {
