@@ -56,33 +56,6 @@ const (
 	TxClose TransactionFlag = 0x00020000
 )
 
-// Ledger entry flags
-const (
-	// AccountRoot flags
-	LsPasswordSpent  LedgerEntryFlag = 0x00010000
-	LsRequireDestTag LedgerEntryFlag = 0x00020000
-	LsRequireAuth    LedgerEntryFlag = 0x00040000
-	LsDisallowXRP    LedgerEntryFlag = 0x00080000
-	LsDisableMaster  LedgerEntryFlag = 0x00100000
-	LsNoFreeze       LedgerEntryFlag = 0x00200000
-	LsGlobalFreeze   LedgerEntryFlag = 0x00400000
-	LsDefaultRipple  LedgerEntryFlag = 0x00800000
-
-	// Offer flags
-	LsPassive LedgerEntryFlag = 0x00010000
-	LsSell    LedgerEntryFlag = 0x00020000
-
-	// RippleState flags
-	LsLowReserve   LedgerEntryFlag = 0x00010000
-	LsHighReserve  LedgerEntryFlag = 0x00020000
-	LsLowAuth      LedgerEntryFlag = 0x00040000
-	LsHighAuth     LedgerEntryFlag = 0x00080000
-	LsLowNoRipple  LedgerEntryFlag = 0x00100000
-	LsHighNoRipple LedgerEntryFlag = 0x00200000
-	LsLowFreeze    LedgerEntryFlag = 0x00400000
-	LsHighFreeze   LedgerEntryFlag = 0x00800000
-)
-
 var txFlagNames = map[TransactionType][]struct {
 	Flag TransactionFlag
 	Name string
@@ -121,6 +94,43 @@ var txFlagNames = map[TransactionType][]struct {
 	},
 }
 
+// Ledger entry flags
+const (
+	// AccountRoot flags
+	LsPasswordSpent  LedgerEntryFlag = 0x00010000
+	LsRequireDestTag LedgerEntryFlag = 0x00020000
+	LsRequireAuth    LedgerEntryFlag = 0x00040000
+	LsDisallowXRP    LedgerEntryFlag = 0x00080000
+	LsDisableMaster  LedgerEntryFlag = 0x00100000
+	LsNoFreeze       LedgerEntryFlag = 0x00200000
+	LsGlobalFreeze   LedgerEntryFlag = 0x00400000
+	LsDefaultRipple  LedgerEntryFlag = 0x00800000
+
+	// Offer flags
+	LsPassive LedgerEntryFlag = 0x00010000
+	LsSell    LedgerEntryFlag = 0x00020000
+
+	// RippleState flags
+	LsLowReserve   LedgerEntryFlag = 0x00010000
+	LsHighReserve  LedgerEntryFlag = 0x00020000
+	LsLowAuth      LedgerEntryFlag = 0x00040000
+	LsHighAuth     LedgerEntryFlag = 0x00080000
+	LsLowNoRipple  LedgerEntryFlag = 0x00100000
+	LsHighNoRipple LedgerEntryFlag = 0x00200000
+	LsLowFreeze    LedgerEntryFlag = 0x00400000
+	LsHighFreeze   LedgerEntryFlag = 0x00800000
+
+	// SignerList flags
+	LsOneOwnerCount LedgerEntryFlag = 0x00010000
+
+	// DirNode flags
+	LsNFTokenBuyOffers  LedgerEntryFlag = 0x00000001
+	LsNFTokenSellOffers LedgerEntryFlag = 0x00000002
+
+	// TokenOffer flags
+	LsSellNFToken LedgerEntryFlag = 0x00000001
+)
+
 var leFlagNames = map[LedgerEntryType][]struct {
 	Flag LedgerEntryFlag
 	Name string
@@ -146,6 +156,16 @@ var leFlagNames = map[LedgerEntryType][]struct {
 		{LsHighNoRipple, "HighNoRipple"},
 		{LsLowFreeze, "LowFreeze"},
 		{LsHighFreeze, "HighFreeze"},
+	},
+	SIGNER_LIST: {
+		{LsOneOwnerCount, "OneOwnerCount"},
+	},
+	DIRECTORY: {
+		{LsNFTokenBuyOffers, "NFTokenBuyOffers"},
+		{LsNFTokenSellOffers, "NFTokenSellOffers"},
+	},
+	NFTOKEN_OFFER: {
+		{LsSellNFToken, "SellNFToken"},
 	},
 }
 

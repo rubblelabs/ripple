@@ -81,6 +81,56 @@ type OfferCancel struct {
 	TicketSequence *uint32 `json:",omitempty"`
 }
 
+type AMMCreate struct {
+	TxBase
+	Amount     Amount
+	Amount2    Amount
+	TradingFee uint16
+}
+
+type AMMDeposit struct {
+	TxBase
+	Asset      Hash160
+	Asset2     Hash160
+	Amount     *Amount `json:",omitempty"`
+	Amount2    *Amount `json:",omitempty"`
+	EPrice     *Amount `json:",omitempty"`
+	LPTokenOut *Amount `json:",omitempty"`
+	TradingFee *uint16 `json:",omitempty"`
+}
+
+type AMMWithdraw struct {
+	TxBase
+	Asset     Hash160
+	Asset2    Hash160
+	Amount    *Amount `json:",omitempty"`
+	Amount2   *Amount `json:",omitempty"`
+	EPrice    *Amount `json:",omitempty"`
+	LPTokenIn *Amount `json:",omitempty"`
+}
+
+type AMMVote struct {
+	TxBase
+	Asset      Hash160
+	Asset2     Hash160
+	TradingFee uint16
+}
+
+type AMMBid struct {
+	TxBase
+	Asset        Hash160
+	Asset2       Hash160
+	BidMin       *Amount   `json:",omitempty"`
+	BidMax       *Amount   `json:",omitempty"`
+	AuthAccounts []Account `json:",omitempty"`
+}
+
+type AMMDelete struct {
+	TxBase
+	Asset  Hash160
+	Asset2 Hash160
+}
+
 type TrustSet struct {
 	TxBase
 	LimitAmount    Amount
@@ -91,10 +141,13 @@ type TrustSet struct {
 
 type SetFee struct {
 	TxBase
-	BaseFee           Uint64Hex
-	ReferenceFeeUnits uint32
-	ReserveBase       uint32
-	ReserveIncrement  uint32
+	BaseFee               Uint64Hex
+	ReferenceFeeUnits     uint32
+	ReserveBase           uint32
+	ReserveIncrement      uint32
+	BaseFeeDrops          *Amount `json:",omitempty"`
+	ReserveBaseDrops      *Amount `json:",omitempty"`
+	ReserveIncrementDrops *Amount `json:",omitempty"`
 }
 
 type Amendment struct {

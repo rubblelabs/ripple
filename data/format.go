@@ -53,6 +53,7 @@ const (
 	NS_CHECK           LedgerNamespace = 'C'
 	NS_DEPOSIT_PREAUTH LedgerNamespace = 'p'
 	NS_NEGATIVE_UNL    LedgerNamespace = 'N'
+	NS_AMM             LedgerNamespace = 'A'
 )
 
 var nodeTypes = [...]string{
@@ -74,36 +75,53 @@ type enc struct {
 }
 
 const (
-	ST_UINT16    uint8 = 1
-	ST_UINT32    uint8 = 2
-	ST_UINT64    uint8 = 3
-	ST_HASH128   uint8 = 4
-	ST_HASH256   uint8 = 5
-	ST_AMOUNT    uint8 = 6
-	ST_VL        uint8 = 7
-	ST_ACCOUNT   uint8 = 8
-	ST_OBJECT    uint8 = 14
-	ST_ARRAY     uint8 = 15
-	ST_UINT8     uint8 = 16
-	ST_HASH160   uint8 = 17
-	ST_PATHSET   uint8 = 18
-	ST_VECTOR256 uint8 = 19
-	ST_HASH96    uint8 = 20
-	ST_HASH192   uint8 = 21
-	ST_HASH384   uint8 = 22
-	ST_HASH512   uint8 = 23
+	ST_UINT16        uint8 = 1
+	ST_UINT32        uint8 = 2
+	ST_UINT64        uint8 = 3
+	ST_HASH128       uint8 = 4
+	ST_HASH256       uint8 = 5
+	ST_AMOUNT        uint8 = 6
+	ST_VL            uint8 = 7
+	ST_ACCOUNT       uint8 = 8
+	ST_OBJECT        uint8 = 14
+	ST_ARRAY         uint8 = 15
+	ST_UINT8         uint8 = 16
+	ST_HASH160       uint8 = 17
+	ST_PATHSET       uint8 = 18
+	ST_VECTOR256     uint8 = 19
+	ST_HASH96        uint8 = 20
+	ST_HASH192       uint8 = 21
+	ST_HASH384       uint8 = 22
+	ST_HASH512       uint8 = 23
+	ST_ISSUE         uint8 = 24
+	ST_XCHAIN_BRIDGE uint8 = 25
 )
 
 // See rippled's SField.cpp for the strings and corresponding encoding values.
 var encodings = map[enc]string{
+	// 8-bit unsigned integers (common)
+	{ST_UINT8, 1}: "CloseResolution",
+	{ST_UINT8, 2}: "Method",
+	{ST_UINT8, 3}: "TransactionResult",
+	// 8-bit unsigned integers (uncommon)
+	{ST_UINT8, 16}: "TickSize",
+	{ST_UINT8, 17}: "UNLModifyDisabling",
+	{ST_UINT8, 18}: "HookResult",
 	// 16-bit unsigned integers (common)
 	{ST_UINT16, 1}: "LedgerEntryType",
 	{ST_UINT16, 2}: "TransactionType",
 	{ST_UINT16, 3}: "SignerWeight",
 	{ST_UINT16, 4}: "TransferFee",
+	{ST_UINT16, 5}: "TradingFee",
+	{ST_UINT16, 6}: "DiscountedFee",
 	// 16-bit unsigned integers (uncommon)
 	{ST_UINT16, 16}: "Version",
+	{ST_UINT16, 17}: "HookStateChangeCount",
+	{ST_UINT16, 18}: "HookEmitCount",
+	{ST_UINT16, 19}: "HookExecutionIndex",
+	{ST_UINT16, 20}: "HookApiVersion",
 	// 32-bit unsigned integers (common)
+	{ST_UINT32, 1}:  "NetworkID",
 	{ST_UINT32, 2}:  "Flags",
 	{ST_UINT32, 3}:  "SourceTag",
 	{ST_UINT32, 4}:  "Sequence",
@@ -147,6 +165,10 @@ var encodings = map[enc]string{
 	{ST_UINT32, 42}: "NFTokenTaxon",
 	{ST_UINT32, 43}: "MintedNFTokens",
 	{ST_UINT32, 44}: "BurnedNFTokens",
+	{ST_UINT32, 45}: "HookStateCount",
+	{ST_UINT32, 46}: "EmitGeneration",
+	{ST_UINT32, 48}: "VoteWeight",
+	{ST_UINT32, 50}: "FirstNFTokenSequence",
 	// 64-bit unsigned integers (common)
 	{ST_UINT64, 1}:  "IndexNext",
 	{ST_UINT64, 2}:  "IndexPrevious",
@@ -160,8 +182,21 @@ var encodings = map[enc]string{
 	{ST_UINT64, 10}: "Cookie",
 	{ST_UINT64, 11}: "ServerVersion",
 	{ST_UINT64, 12}: "NFTokenOfferNode",
+	{ST_UINT64, 13}: "EmitBurden",
+	// 64-bit unsigned integers (uncommon)
+	{ST_UINT64, 16}: "HookOn",
+	{ST_UINT64, 17}: "HookInstructionCount",
+	{ST_UINT64, 18}: "HookReturnCode",
+	{ST_UINT64, 19}: "ReferenceCount",
 	// 128-bit (common)
 	{ST_HASH128, 1}: "EmailHash",
+
+	// 160-bit (common)
+	{ST_HASH160, 1}: "TakerPaysCurrency",
+	{ST_HASH160, 2}: "TakerPaysIssuer",
+	{ST_HASH160, 3}: "TakerGetsCurrency",
+	{ST_HASH160, 4}: "TakerGetsIssuer",
+
 	// 256-bit (common)
 	{ST_HASH256, 1}:  "LedgerHash",
 	{ST_HASH256, 2}:  "ParentHash",
@@ -173,20 +208,30 @@ var encodings = map[enc]string{
 	{ST_HASH256, 8}:  "RootIndex",
 	{ST_HASH256, 9}:  "AccountTxnID",
 	{ST_HASH256, 10}: "NFTokenID",
+	{ST_HASH256, 11}: "EmitParentTxnID",
+	{ST_HASH256, 12}: "EmitNonce",
+	{ST_HASH256, 13}: "EmitHookHash",
+	{ST_HASH256, 14}: "AMMID",
+
 	// 256-bit (uncommon)
 	{ST_HASH256, 16}: "BookDirectory",
 	{ST_HASH256, 17}: "InvoiceID",
 	{ST_HASH256, 18}: "Nickname",
 	{ST_HASH256, 19}: "Amendment",
-	{ST_HASH256, 20}: "TicketID",
+	// {ST_HASH256, 20}: "TicketID",
 	{ST_HASH256, 21}: "Digest",
 	{ST_HASH256, 22}: "Channel",
+	{ST_HASH256, 22}: "ConsensusHash",
 	{ST_HASH256, 24}: "CheckID",
 	{ST_HASH256, 25}: "ValidatedHash",
 	{ST_HASH256, 26}: "PreviousPageMin",
 	{ST_HASH256, 27}: "NextPageMin",
 	{ST_HASH256, 28}: "NFTokenBuyOffer",
 	{ST_HASH256, 29}: "NFTokenSellOffer",
+	{ST_HASH256, 30}: "HookStateKey",
+	{ST_HASH256, 31}: "HookHash",
+	{ST_HASH256, 32}: "HookNamespace",
+	{ST_HASH256, 33}: "HookSetTxnID",
 	// currency amount (common)
 	{ST_AMOUNT, 1}:  "Amount",
 	{ST_AMOUNT, 2}:  "Balance",
@@ -198,11 +243,23 @@ var encodings = map[enc]string{
 	{ST_AMOUNT, 8}:  "Fee",
 	{ST_AMOUNT, 9}:  "SendMax",
 	{ST_AMOUNT, 10}: "DeliverMin",
+	{ST_AMOUNT, 11}: "Amount2",
+	{ST_AMOUNT, 12}: "BidMin",
+	{ST_AMOUNT, 13}: "BidMax",
 	// currency amount (uncommon)
 	{ST_AMOUNT, 16}: "MinimumOffer",
 	{ST_AMOUNT, 17}: "RippleEscrow",
 	{ST_AMOUNT, 18}: "DeliveredAmount",
 	{ST_AMOUNT, 19}: "NFTokenBrokerFee",
+	{ST_AMOUNT, 22}: "BaseFeeDrops",
+	{ST_AMOUNT, 23}: "ReserveBaseDrops",
+	{ST_AMOUNT, 24}: "ReserveIncrementDrops",
+	{ST_AMOUNT, 25}: "LPTokenOut",
+	{ST_AMOUNT, 26}: "LPTokenIn",
+	{ST_AMOUNT, 27}: "EPrice",
+	{ST_AMOUNT, 28}: "Price",
+	{ST_AMOUNT, 31}: "LPTokenBalance",
+
 	// variable length (common)
 	{ST_VL, 1}:  "PublicKey",
 	{ST_VL, 2}:  "MessageKey",
@@ -225,16 +282,33 @@ var encodings = map[enc]string{
 	{ST_VL, 19}: "UNLModifyValidator",
 	{ST_VL, 20}: "ValidatorToDisable",
 	{ST_VL, 21}: "ValidatorToReEnable",
-	// account
-	{ST_ACCOUNT, 1}: "Account",
-	{ST_ACCOUNT, 2}: "Owner",
-	{ST_ACCOUNT, 3}: "Destination",
-	{ST_ACCOUNT, 4}: "Issuer",
-	{ST_ACCOUNT, 5}: "Authorize",
-	{ST_ACCOUNT, 6}: "Unauthorize",
-	{ST_ACCOUNT, 7}: "Target",
-	{ST_ACCOUNT, 8}: "RegularKey",
-	{ST_ACCOUNT, 9}: "NFTokenMinter",
+	{ST_VL, 22}: "HookStateData",
+	{ST_VL, 23}: "HookReturnString",
+	{ST_VL, 24}: "HookParameterName",
+	{ST_VL, 25}: "HookParameterValue",
+	// account (common)
+	{ST_ACCOUNT, 1}:  "Account",
+	{ST_ACCOUNT, 2}:  "Owner",
+	{ST_ACCOUNT, 3}:  "Destination",
+	{ST_ACCOUNT, 4}:  "Issuer",
+	{ST_ACCOUNT, 5}:  "Authorize",
+	{ST_ACCOUNT, 6}:  "Unauthorize",
+	{ST_ACCOUNT, 7}:  "Target",
+	{ST_ACCOUNT, 8}:  "RegularKey",
+	{ST_ACCOUNT, 9}:  "NFTokenMinter",
+	{ST_ACCOUNT, 10}: "EmitCallback",
+	// account (uncommon)
+	{ST_ACCOUNT, 16}: "HookAccount",
+	// vector of 256-bit
+	{ST_VECTOR256, 1}: "Indexes",
+	{ST_VECTOR256, 2}: "Hashes",
+	{ST_VECTOR256, 3}: "Amendments",
+	{ST_VECTOR256, 4}: "NFTokenOffers",
+	// path set
+	{ST_PATHSET, 1}: "Paths",
+	// issue
+	{ST_ISSUE, 3}: "Asset",
+	{ST_ISSUE, 4}: "Asset2",
 	// inner object
 	{ST_OBJECT, 1}:  "EndOfObject",
 	{ST_OBJECT, 2}:  "TransactionMetaData",
@@ -248,10 +322,20 @@ var encodings = map[enc]string{
 	{ST_OBJECT, 10}: "Memo",
 	{ST_OBJECT, 11}: "SignerEntry",
 	{ST_OBJECT, 12}: "NFToken",
+	{ST_OBJECT, 13}: "EmitDetails",
+	{ST_OBJECT, 14}: "Hook",
 	// inner object (uncommon)
 	{ST_OBJECT, 16}: "Signer",
 	{ST_OBJECT, 18}: "Majority",
 	{ST_OBJECT, 19}: "DisabledValidator",
+	{ST_OBJECT, 20}: "EmittedTxn",
+	{ST_OBJECT, 21}: "HookExecution",
+	{ST_OBJECT, 22}: "HookDefinition",
+	{ST_OBJECT, 23}: "HookParameter",
+	{ST_OBJECT, 24}: "HookGrant",
+	{ST_OBJECT, 25}: "VoteEntry",
+	{ST_OBJECT, 26}: "AuctionSlot",
+	{ST_OBJECT, 27}: "AuthAccount",
 	// array of objects
 	{ST_ARRAY, 1}:  "EndOfArray",
 	{ST_ARRAY, 2}:  "SigningAccounts",
@@ -263,28 +347,15 @@ var encodings = map[enc]string{
 	{ST_ARRAY, 8}:  "AffectedNodes",
 	{ST_ARRAY, 9}:  "Memos",
 	{ST_ARRAY, 10}: "NFTokens",
+	{ST_ARRAY, 11}: "Hooks",
+	{ST_ARRAY, 12}: "VoteSlots",
 	// array of objects (uncommon)
 	{ST_ARRAY, 16}: "Majorities",
 	{ST_ARRAY, 17}: "DisabledValidators",
-	// 8-bit unsigned integers (common)
-	{ST_UINT8, 1}: "CloseResolution",
-	{ST_UINT8, 2}: "Method",
-	{ST_UINT8, 3}: "TransactionResult",
-	// 8-bit unsigned integers (uncommon)
-	{ST_UINT8, 16}: "TickSize",
-	{ST_UINT8, 17}: "UNLModifyDisabling",
-	// 160-bit (common)
-	{ST_HASH160, 1}: "TakerPaysCurrency",
-	{ST_HASH160, 2}: "TakerPaysIssuer",
-	{ST_HASH160, 3}: "TakerGetsCurrency",
-	{ST_HASH160, 4}: "TakerGetsIssuer",
-	// path set
-	{ST_PATHSET, 1}: "Paths",
-	// vector of 256-bit
-	{ST_VECTOR256, 1}: "Indexes",
-	{ST_VECTOR256, 2}: "Hashes",
-	{ST_VECTOR256, 3}: "Amendments",
-	{ST_VECTOR256, 4}: "NFTokenOffers",
+	{ST_ARRAY, 18}: "HookExecutions",
+	{ST_ARRAY, 19}: "HookParameters",
+	{ST_ARRAY, 20}: "HookGrants",
+	{ST_ARRAY, 25}: "AuthAccounts",
 }
 
 var reverseEncodings map[string]enc
