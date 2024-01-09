@@ -287,10 +287,10 @@ func readObject(r Reader, v *reflect.Value) error {
 				v.Set(e.Elem())
 				return readObject(r, &n)
 			case "SignerEntry":
-				var signerEntry SignerEntry
+				var signerEntry SignerEntryItem
 				s := reflect.ValueOf(&signerEntry)
 				err := readObject(r, &s)
-				v.Set(s.Elem())
+				v.FieldByName("SignerEntry").Set(s.Elem())
 				return err
 			case "NFToken":
 				var nft NFToken
