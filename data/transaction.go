@@ -308,6 +308,11 @@ type NFTAcceptOffer struct {
 	TicketSequence   *uint32  `json:",omitempty"`
 }
 
+type Clawback struct {
+	TxBase
+	Amount Amount
+}
+
 func (t *TxBase) GetBase() *TxBase                    { return t }
 func (t *TxBase) GetType() string                     { return txNames[t.TransactionType] }
 func (t *TxBase) GetTransactionType() TransactionType { return t.TransactionType }

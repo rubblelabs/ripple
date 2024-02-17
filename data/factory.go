@@ -52,6 +52,7 @@ const (
 	NFTOKEN_CREATE_OFFER TransactionType = 27
 	NFTOKEN_CANCEL_OFFER TransactionType = 28
 	NFTOKEN_ACCEPT_OFFER TransactionType = 29
+	CLAWBACK             TransactionType = 30
 	AMM_CREATE           TransactionType = 35
 	AMM_DEPOSIT          TransactionType = 36
 	AMM_WITHDRAW         TransactionType = 37
@@ -116,6 +117,7 @@ var TxFactory = [...]func() Transaction{
 	NFTOKEN_CREATE_OFFER: func() Transaction { return &NFTokenCreateOffer{TxBase: TxBase{TransactionType: NFTOKEN_CREATE_OFFER}} },
 	NFTOKEN_CANCEL_OFFER: func() Transaction { return &NFTCancelOffer{TxBase: TxBase{TransactionType: NFTOKEN_CANCEL_OFFER}} },
 	NFTOKEN_ACCEPT_OFFER: func() Transaction { return &NFTAcceptOffer{TxBase: TxBase{TransactionType: NFTOKEN_ACCEPT_OFFER}} },
+	CLAWBACK:             func() Transaction { return &Clawback{TxBase: TxBase{TransactionType: CLAWBACK}} },
 	AMM_CREATE:           func() Transaction { return &AMMCreate{TxBase: TxBase{TransactionType: AMM_CREATE}} },
 	AMM_DEPOSIT:          func() Transaction { return &AMMDeposit{TxBase: TxBase{TransactionType: AMM_DEPOSIT}} },
 	AMM_WITHDRAW:         func() Transaction { return &AMMWithdraw{TxBase: TxBase{TransactionType: AMM_WITHDRAW}} },
@@ -192,6 +194,7 @@ var txNames = [...]string{
 	NFTOKEN_CREATE_OFFER: "NFTokenCreateOffer",
 	NFTOKEN_CANCEL_OFFER: "NFTokenCancelOffer",
 	NFTOKEN_ACCEPT_OFFER: "NFTokenAcceptOffer",
+	CLAWBACK:             "Clawback",
 	AMM_CREATE:           "AMMCreate",
 	AMM_DEPOSIT:          "AMMDeposit",
 	AMM_WITHDRAW:         "AMMWithdraw",
@@ -228,6 +231,7 @@ var txTypes = map[string]TransactionType{
 	"NFTokenCreateOffer":   NFTOKEN_CREATE_OFFER,
 	"NFTokenCancelOffer":   NFTOKEN_CANCEL_OFFER,
 	"NFTokenAcceptOffer":   NFTOKEN_ACCEPT_OFFER,
+	"Clawback":             CLAWBACK,
 	"AMMCreate":            AMM_CREATE,
 	"AMMDeposit":           AMM_DEPOSIT,
 	"AMMWithdraw":          AMM_WITHDRAW,
