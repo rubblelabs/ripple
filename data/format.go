@@ -103,10 +103,12 @@ var encodings = map[enc]string{
 	{ST_UINT8, 1}: "CloseResolution",
 	{ST_UINT8, 2}: "Method",
 	{ST_UINT8, 3}: "TransactionResult",
+	{ST_UINT8, 4}: "Scale",
 	// 8-bit unsigned integers (uncommon)
 	{ST_UINT8, 16}: "TickSize",
 	{ST_UINT8, 17}: "UNLModifyDisabling",
 	{ST_UINT8, 18}: "HookResult",
+	{ST_UINT8, 19}: "WasLockingChainSend",
 	// 16-bit unsigned integers (common)
 	{ST_UINT16, 1}: "LedgerEntryType",
 	{ST_UINT16, 2}: "TransactionType",
@@ -221,7 +223,7 @@ var encodings = map[enc]string{
 	// {ST_HASH256, 20}: "TicketID",
 	{ST_HASH256, 21}: "Digest",
 	{ST_HASH256, 22}: "Channel",
-	{ST_HASH256, 22}: "ConsensusHash",
+	{ST_HASH256, 23}: "ConsensusHash",
 	{ST_HASH256, 24}: "CheckID",
 	{ST_HASH256, 25}: "ValidatedHash",
 	{ST_HASH256, 26}: "PreviousPageMin",
@@ -246,6 +248,7 @@ var encodings = map[enc]string{
 	{ST_AMOUNT, 11}: "Amount2",
 	{ST_AMOUNT, 12}: "BidMin",
 	{ST_AMOUNT, 13}: "BidMax",
+
 	// currency amount (uncommon)
 	{ST_AMOUNT, 16}: "MinimumOffer",
 	{ST_AMOUNT, 17}: "RippleEscrow",
@@ -258,6 +261,8 @@ var encodings = map[enc]string{
 	{ST_AMOUNT, 26}: "LPTokenIn",
 	{ST_AMOUNT, 27}: "EPrice",
 	{ST_AMOUNT, 28}: "Price",
+	{ST_AMOUNT, 29}: "SignatureReward",
+	{ST_AMOUNT, 30}: "MinAccountCreateAmount",
 	{ST_AMOUNT, 31}: "LPTokenBalance",
 
 	// variable length (common)

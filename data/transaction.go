@@ -90,8 +90,8 @@ type AMMCreate struct {
 
 type AMMDeposit struct {
 	TxBase
-	Asset      Hash160
-	Asset2     Hash160
+	Asset      Asset
+	Asset2     Asset
 	Amount     *Amount `json:",omitempty"`
 	Amount2    *Amount `json:",omitempty"`
 	EPrice     *Amount `json:",omitempty"`
@@ -101,8 +101,8 @@ type AMMDeposit struct {
 
 type AMMWithdraw struct {
 	TxBase
-	Asset     Hash160
-	Asset2    Hash160
+	Asset     Asset
+	Asset2    Asset
 	Amount    *Amount `json:",omitempty"`
 	Amount2   *Amount `json:",omitempty"`
 	EPrice    *Amount `json:",omitempty"`
@@ -111,15 +111,15 @@ type AMMWithdraw struct {
 
 type AMMVote struct {
 	TxBase
-	Asset      Hash160
-	Asset2     Hash160
+	Asset      Asset
+	Asset2     Asset
 	TradingFee uint16
 }
 
 type AMMBid struct {
 	TxBase
-	Asset        Hash160
-	Asset2       Hash160
+	Asset        Asset
+	Asset2       Asset
 	BidMin       *Amount   `json:",omitempty"`
 	BidMax       *Amount   `json:",omitempty"`
 	AuthAccounts []Account `json:",omitempty"`
@@ -127,8 +127,8 @@ type AMMBid struct {
 
 type AMMDelete struct {
 	TxBase
-	Asset  Hash160
-	Asset2 Hash160
+	Asset  Asset
+	Asset2 Asset
 }
 
 type TrustSet struct {

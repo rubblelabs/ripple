@@ -310,6 +310,17 @@ func readObject(r Reader, v *reflect.Value) error {
 				err := readObject(r, &m)
 				v.Set(m.Elem())
 				return err
+			case "AuctionSlot":
+				var slot AuctionSlot
+				s := reflect.ValueOf(&slot)
+				err := readObject(r, &s)
+				v.Elem().FieldByName("AuctionSlot").Set(s)
+				if err == errorEndOfObject {
+					return nil
+				}
+				return err
+			case "VoteEntry":
+				return fmt.Errorf("VoteEntry not yet implemented...")
 			case "Memo":
 				var memo Memo
 				m := reflect.ValueOf(&memo)
