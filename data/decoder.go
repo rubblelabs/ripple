@@ -315,10 +315,9 @@ func readObject(r Reader, v *reflect.Value) error {
 				s := reflect.ValueOf(&slot)
 				err := readObject(r, &s)
 				v.Elem().FieldByName("AuctionSlot").Set(s)
-				if err == errorEndOfObject {
-					return nil
+				if err != errorEndOfObject {
+					return err
 				}
-				return err
 			case "AuthAccount":
 				var authAccount AuthAccountItem
 				aa := reflect.ValueOf(&authAccount)

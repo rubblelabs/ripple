@@ -259,8 +259,8 @@ type AMM struct {
 	VoteSlots      []VoteEntry      `json:",omitempty"`
 	AuctionSlot    *AuctionSlot     `json:",omitempty"`
 	LPTokenBalance *Amount          `json:",omitempty"`
-	Asset          *Asset           `json:",omitempty"`
-	Asset2         *Asset           `json:",omitempty"`
+	Asset          *Issue           `json:",omitempty"`
+	Asset2         *Issue           `json:",omitempty"`
 	OwnerNode      *NodeIndex       `json:",omitempty"`
 }
 

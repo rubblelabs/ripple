@@ -7,6 +7,26 @@ import (
 	"math"
 )
 
+func (i *Issue) Marshal(w io.Writer) error {
+	if err := i.Currency.Marshal(w); err != nil {
+		return err
+	}
+	if i.Currency.IsNative() {
+		return nil
+	}
+	return i.Issuer.Marshal(w)
+}
+
+func (i *Issue) Unmarshal(r Reader) error {
+	if err := unmarshalSlice(i.Currency[:], r, "Currency"); err != nil {
+		return err
+	}
+	if i.Currency.IsNative() {
+		return nil
+	}
+	return unmarshalSlice(i.Issuer[:], r, "Issuer")
+}
+
 func (v *Value) Unmarshal(r Reader) error {
 	var u uint64
 	if err := binary.Read(r, binary.BigEndian, &u); err != nil {
