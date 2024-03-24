@@ -319,8 +319,18 @@ func readObject(r Reader, v *reflect.Value) error {
 					return nil
 				}
 				return err
+			case "AuthAccount":
+				var authAccount AuthAccountItem
+				aa := reflect.ValueOf(&authAccount)
+				err := readObject(r, &aa)
+				v.FieldByName("AuthAccount").Set(aa.Elem())
+				return err
 			case "VoteEntry":
-				return fmt.Errorf("VoteEntry not yet implemented...")
+				var VoteEntry VoteEntryItem
+				ve := reflect.ValueOf(&VoteEntry)
+				err := readObject(r, &ve)
+				v.FieldByName("VoteEntry").Set(ve.Elem())
+				return err
 			case "Memo":
 				var memo Memo
 				m := reflect.ValueOf(&memo)
