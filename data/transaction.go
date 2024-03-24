@@ -120,9 +120,9 @@ type AMMBid struct {
 	TxBase
 	Asset        Asset
 	Asset2       Asset
-	BidMin       *Amount   `json:",omitempty"`
-	BidMax       *Amount   `json:",omitempty"`
-	AuthAccounts []Account `json:",omitempty"`
+	BidMin       *Amount       `json:",omitempty"`
+	BidMax       *Amount       `json:",omitempty"`
+	AuthAccounts []AuthAccount `json:",omitempty"`
 }
 
 type AMMDelete struct {

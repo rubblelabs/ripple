@@ -235,12 +235,20 @@ type VoteEntry struct {
 	VoteEntry VoteEntryItem `json:",omitempty"`
 }
 
+type AuthAccountItem struct {
+	Account Account `json:",omitempty"`
+}
+
+type AuthAccount struct {
+	AuthAccount AuthAccountItem `json:",omitempty"`
+}
+
 type AuctionSlot struct {
-	Account       *Account  `json:",omitempty"`
-	AuthAccounts  []Account `json:",omitempty"`
-	DiscountedFee *uint16   `json:",omitempty"`
-	Price         *Amount   `json:",omitempty"`
-	Expiration    *uint32   `json:",omitempty"`
+	Account       *Account      `json:",omitempty"`
+	AuthAccounts  []AuthAccount `json:",omitempty"`
+	DiscountedFee *uint16       `json:",omitempty"`
+	Price         *Amount       `json:",omitempty"`
+	Expiration    *uint32       `json:",omitempty"`
 }
 
 type AMM struct {
